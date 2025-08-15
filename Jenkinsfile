@@ -19,6 +19,10 @@ pipeline {
       steps { 
         sh '''
           cd ${DEPLOY_DIR}
+          
+          # 기존 컨테이너 강제 중지 및 삭제
+          docker rm -f linbook-be linbook-fe || true
+          
           ${COMPOSE} up -d --no-deps be fe
           docker image prune -f
         '''
