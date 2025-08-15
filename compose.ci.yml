@@ -1,0 +1,13 @@
+# CI/CD 전용 Docker Compose 오버라이드 파일
+services:
+  be:
+    build:
+      context: ./linbook_be
+      dockerfile: Dockerfile
+    image: ${BE_IMAGE:-linbook/be:dev}
+
+  fe:
+    build:
+      context: ./linbook_fe
+      dockerfile: Dockerfile
+    image: ${FE_IMAGE:-linbook/fe:dev}

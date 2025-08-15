@@ -21,8 +21,8 @@ pipeline {
       steps { 
         sh '''
           sleep 30
-          curl -f http://localhost/ || exit 1
-          curl -f http://localhost:8082/actuator/health || exit 1
+          curl -f http://localhost:8080 || exit 1
+          curl -f http://localhost:3000 || exit 1
         '''
       }
     }
