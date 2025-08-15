@@ -4,7 +4,7 @@ pipeline {
   environment {
     DEPLOY_DIR = "/opt/linbook"
     DOCKER_HOST = "unix:///var/run/docker.sock"
-    COMPOSE = "docker compose -p linbookapp -f compose.yml -f compose.ci.yml"
+    COMPOSE = "docker compose -p linbookapp -f compose.yml -f compose.ci.yml -f compose.ports.yml"
   }
   stages {
     stage('Checkout'){ steps { checkout scm } }

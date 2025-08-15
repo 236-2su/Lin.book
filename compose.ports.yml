@@ -1,0 +1,7 @@
+services:
+  be:
+    ports:
+      - "8080:8080"
+  fe:
+    ports:
+      - "3001:3000"
