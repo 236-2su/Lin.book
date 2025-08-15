@@ -4,6 +4,7 @@ pipeline {
   environment {
     DEPLOY_DIR = "/opt/linbook"
     DOCKER_HOST = "unix:///var/run/docker.sock"
+    COMPOSE = "docker compose -p linbookapp -f compose.yml -f compose.ci.yml"
   }
   stages {
     stage('Checkout'){ steps { checkout scm } }
@@ -12,13 +13,13 @@ pipeline {
       steps { sh 'rsync -av --delete --exclude compose.yml ./ ${DEPLOY_DIR}/' }
     }
     stage('Build'){
-      steps { sh 'cd ${DEPLOY_DIR} && docker compose -f compose.yml -f compose.ci.yml build --pull be fe' }
+      steps { sh "cd ${DEPLOY_DIR} && ${COMPOSE} build --pull be fe" }
     }
     stage('Deploy'){
       steps { 
         sh '''
           cd ${DEPLOY_DIR}
-          docker compose -f compose.yml -f compose.ci.yml up -d --no-deps --remove-orphans be fe
+          ${COMPOSE} up -d --no-deps be fe
           docker image prune -f
         '''
       }
@@ -35,7 +36,7 @@ pipeline {
   }
   post { 
     always { 
-      sh 'cd ${DEPLOY_DIR} && docker compose -f compose.yml -f compose.ci.yml ps || true'
+      sh "cd ${DEPLOY_DIR} && ${COMPOSE} ps || true"
       sh 'docker system prune -f'
     } 
   }
