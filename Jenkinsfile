@@ -1,123 +1,76 @@
 pipeline {
   agent any
-  options { timestamps(); disableConcurrentBuilds() }
 
   environment {
-    DEPLOY_DIR = "/opt/linbook"
-    DOCKER_HOST = "unix:///var/run/docker.sock"
+    REGISTRY = "ghcr.io"
+    ORG      = "236-2su"             // TODO: set
+    EC2_IP   = "54.252.41.133" // TODO: set
 
-    // compose 호출 통일 (프로젝트 분리 + 오버라이드 포함)
-    COMPOSE = "docker compose -p linbookapp -f compose.yml -f compose.ci.yml -f compose.ports.yml"
+    BE_IMAGE = "${REGISTRY}/${ORG}/linbook-be"
+    FE_IMAGE = "${REGISTRY}/${ORG}/linbook-fe"
 
-    // 헬스체크 포트
-    BE_PORT = "8080"
-    FE_PORT = "3001"
-
-    // (경고 억제용) compose.yml에 남아있는 변수 경고를 잠재움
-    BE_IMAGE = "linbook/be:dev"
-    FE_IMAGE = "linbook/fe:dev"
+    COMMIT_TAG = "${env.BRANCH_NAME}-${env.GIT_COMMIT.take(7)}"
+    LIVE_TAG   = "live"
+    DOCKER_BUILDKIT = '1'
   }
 
+  options { timestamps(); ansiColor('xterm') }
+
   stages {
-    stage('Checkout') {
-      steps { checkout scm }
-    }
+    stage('Checkout') { steps { checkout scm } }
 
-    stage('Prepare ports override (ensure 3001:3000)') {
+    stage('Docker Login (GHCR)') {
       steps {
-        sh '''
-          # 워크스페이스에 compose.ports.yml 없으면 생성
-          if [ ! -f compose.ports.yml ]; then
-            cat > compose.ports.yml <<'YAML'
-services:
-  be:
-    ports:
-      - "8080:8080"
-  fe:
-    ports:
-      - "3001:3000"
-YAML
-          fi
-
-          # 안전을 위해 유효성만 확인
-          grep -q '3001:3000' compose.ports.yml || { echo "compose.ports.yml FE 포트 미설정"; exit 1; }
-        '''
+        withCredentials([string(credentialsId: 'GHCR_PAT', variable: 'REGISTRY_TOKEN')]) {
+          sh '''
+            set -e
+            echo "$REGISTRY_TOKEN" | docker login ${REGISTRY} -u ${ORG} --password-stdin
+          '''
+        }
       }
     }
 
-    stage('Sync to server') {
-      steps {
-        sh '''
-          mkdir -p "${DEPLOY_DIR}"
-
-          # 서버의 compose.yml은 운영 값 보호 위해 유지(레포 값으로 덮지 않음)
-          rsync -av --delete \
-            --exclude compose.yml \
-            --exclude .git/ \
-            ./ "${DEPLOY_DIR}/"
-        '''
-      }
-    }
-
-    stage('Build images') {
+    stage('Build & Push Images') {
       steps {
         sh '''
           set -e
-          cd "${DEPLOY_DIR}"
-          ${COMPOSE} config >/tmp/effective.yml || true
-          echo "----- fe effective config -----"
-          sed -n '/^  fe:/,/^  [a-z]/p' /tmp/effective.yml || true
+          docker buildx create --use || true
 
-          ${COMPOSE} build --pull be fe
+          docker buildx build -f ./linbook_be/Dockerfile \
+            -t ${BE_IMAGE}:${COMMIT_TAG} -t ${BE_IMAGE}:${LIVE_TAG} \
+            --push ./linbook_be
+
+          docker buildx build -f ./linbook_fe/Dockerfile \
+            -t ${FE_IMAGE}:${COMMIT_TAG} -t ${FE_IMAGE}:${LIVE_TAG} \
+            --push ./linbook_fe
         '''
       }
     }
 
-    stage('Deploy') {
+    stage('Deploy to EC2') {
       steps {
-        sh '''
-          set -e
-          cd "${DEPLOY_DIR}"
-
-          # 기존 컨테이너 강제 제거(이름 충돌 방지)
-          docker rm -f linbook-fe linbook-be || true
-
-          # 분리된 프로젝트명으로 올림 (Jenkins 스택과 간섭 없음)
-          ${COMPOSE} up -d --no-deps be fe
-
-          docker image prune -f || true
-        '''
-      }
-    }
-
-    stage('Health Check') {
-      steps {
-        sh '''
-          set +e
-
-          echo "== BE health =="
-          for i in $(seq 1 20); do
-            if curl -sf "http://localhost:${BE_PORT}" >/dev/null; then
-              echo "BE OK"; break
-            fi
-            sleep 1
-          done
-
-          echo "== FE health =="
-          for i in $(seq 1 20); do
-            if curl -sf "http://localhost:${FE_PORT}" >/dev/null; then
-              echo "FE OK"; break
-            fi
-            sleep 1
-          done
-        '''
+        withCredentials([string(credentialsId: 'GHCR_PAT', variable: 'REGISTRY_TOKEN')]) {
+          sshagent(credentials: ['EC2_SSH']) {
+            sh '''
+              set -e
+              ssh -o StrictHostKeyChecking=no ubuntu@${EC2_IP} "
+                set -e
+                cd /opt/linbook
+                echo '${REGISTRY_TOKEN}' | docker login ${REGISTRY} -u ${ORG} --password-stdin
+                docker compose pull
+                docker compose up -d
+                docker image prune -f
+              "
+            '''
+          }
+        }
       }
     }
   }
 
   post {
-    always {
-      sh 'cd ${DEPLOY_DIR} && ${COMPOSE} ps || true'
-    }
+    success { echo "Deployed ${BRANCH_NAME}@${GIT_COMMIT.take(7)} to ${EC2_IP}" }
+    failure { echo "❌ Pipeline failed. Check logs." }
+    always  { sh 'docker logout ${REGISTRY} || true' }
   }
 }
