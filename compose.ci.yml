@@ -5,9 +5,13 @@ services:
       context: ./linbook_be
       dockerfile: Dockerfile
     image: ${BE_IMAGE:-linbook/be:dev}
+    ports:
+      - "8080:8080"     # BE 내부 8080에 맞춤
 
   fe:
     build:
       context: ./linbook_fe
       dockerfile: Dockerfile
     image: ${FE_IMAGE:-linbook/fe:dev}
+    ports:
+      - "3001:3000"     # 호스트 3001 -> 컨테이너 3000 (80 충돌 회피)

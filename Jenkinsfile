@@ -15,21 +15,27 @@ pipeline {
       steps { sh 'cd ${DEPLOY_DIR} && docker compose -f compose.yml -f compose.ci.yml build --pull be fe' }
     }
     stage('Deploy'){
-      steps { sh 'cd ${DEPLOY_DIR} && docker compose -f compose.yml -f compose.ci.yml up -d --no-deps be fe && docker image prune -f' }
+      steps { 
+        sh '''
+          cd ${DEPLOY_DIR}
+          docker compose -f compose.yml -f compose.ci.yml up -d --no-deps --remove-orphans be fe
+          docker image prune -f
+        '''
+      }
     }
     stage('Health Check'){
       steps { 
         sh '''
           sleep 30
           curl -f http://localhost:8080 || exit 1
-          curl -f http://localhost:3000 || exit 1
+          curl -f http://localhost:3001 || exit 1
         '''
       }
     }
   }
   post { 
     always { 
-      sh 'cd ${DEPLOY_DIR} && docker compose ps || true'
+      sh 'cd ${DEPLOY_DIR} && docker compose -f compose.yml -f compose.ci.yml ps || true'
       sh 'docker system prune -f'
     } 
   }
