@@ -12,11 +12,25 @@ pipeline {
       steps { sh 'rsync -av --delete --exclude compose.yml ./ ${DEPLOY_DIR}/' }
     }
     stage('Build'){
-      steps { sh 'cd ${DEPLOY_DIR} && docker compose build --pull be fe' }
+      steps { sh 'cd ${DEPLOY_DIR} && docker compose -f compose.yml -f compose.ci.yml build --pull be fe' }
     }
     stage('Deploy'){
-      steps { sh 'cd ${DEPLOY_DIR} && docker compose up -d --no-deps be fe && docker image prune -f' }
+      steps { sh 'cd ${DEPLOY_DIR} && docker compose -f compose.yml -f compose.ci.yml up -d --no-deps be fe && docker image prune -f' }
+    }
+    stage('Health Check'){
+      steps { 
+        sh '''
+          sleep 30
+          curl -f http://localhost/ || exit 1
+          curl -f http://localhost:8082/actuator/health || exit 1
+        '''
+      }
     }
   }
-  post { always { sh 'cd ${DEPLOY_DIR} && docker compose ps || true' } }
+  post { 
+    always { 
+      sh 'cd ${DEPLOY_DIR} && docker compose ps || true'
+      sh 'docker system prune -f'
+    } 
+  }
 }
