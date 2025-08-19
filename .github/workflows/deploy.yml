@@ -3,7 +3,7 @@ name: Deploy to EC2
 on:
   push:
     branches:
-      - main   # 배포할 브랜치
+      - master   # 배포할 브랜치
 
 jobs:
   deploy:
