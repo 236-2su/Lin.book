@@ -4,7 +4,7 @@ from rest_framework.routers import DefaultRouter
 from .views import BoardViewSet, CommentsViewSet
 
 router = DefaultRouter()
-router.register(r"boards", BoardViewSet)
+router.register(r"", BoardViewSet)
 router.register(r"comments", CommentsViewSet)
 
 urlpatterns = [
