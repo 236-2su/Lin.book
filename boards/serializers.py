@@ -16,9 +16,14 @@ class AttachedFilesSerializer(serializers.ModelSerializer):
 
 
 class BoardLikesSerializer(serializers.ModelSerializer):
+    likes_total = serializers.SerializerMethodField()
+
     class Meta:
         model = BoardLikes
         fields = "__all__"
+
+    def get_likes_total(self, obj):
+        return len(obj.content.split())
 
 
 class CommentsSerializer(serializers.ModelSerializer):
@@ -28,6 +33,11 @@ class CommentsSerializer(serializers.ModelSerializer):
 
 
 class CommentLikesSerializer(serializers.ModelSerializer):
+    likes_total = serializers.SerializerMethodField()
+
     class Meta:
         model = CommentLikes
         fields = "__all__"
+
+    def get_likes_total(self, obj):
+        return len(obj.content.split())
