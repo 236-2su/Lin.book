@@ -9,11 +9,14 @@
 
   // 저장 시 import 정리(= isort)
   "editor.codeActionsOnSave": {
-    "source.organizeImports": true
+    "source.organizeImports": "explicit"
   },
 
   // (선택) 들여쓰기/개행 통일
   "files.eol": "\n",
   "editor.tabSize": 4,
-  "editor.insertSpaces": true
+  "editor.insertSpaces": true,
+  "cSpell.words": [
+    "viewsets"
+  ]
 }

@@ -19,9 +19,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
+import os
+
 # SECURITY WARNING: keep the secret key used in production secret!
 from dotenv import load_dotenv
-import os
 
 load_dotenv()
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "your-default-secret-key")
@@ -35,8 +36,15 @@ ALLOWED_HOSTS = ["127.0.0.1", "localhost", "54.206.122.170"]
 # Application definition
 
 INSTALLED_APPS = [
+    "boards",
+    "accounts",
+    "ledger_report",
+    "user",
+    "club",
+    "ledger",
     "initial_test",
     "rest_framework",
+    "drf_spectacular",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -127,3 +135,21 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+import os
+
+MEDIA_URL = "/media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+
+REST_FRAMEWORK = {
+    # YOUR SETTINGS
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Your Project API",
+    "DESCRIPTION": "Your project description",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+    # OTHER SETTINGS
+}
