@@ -1,0 +1,411 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="CategoryButton">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:minHeight">35dp</item>
+        <item name="android:paddingLeft">16dp</item>
+        <item name="android:paddingRight">16dp</item>
+        <item name="android:paddingTop">1dp</item>
+        <item name="android:paddingBottom">1dp</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">#111111</item>
+        <item name="android:background">@drawable/btn_category_new</item>
+        <item name="android:backgroundTint">@null</item>
+        <item name="backgroundTint">@null</item>
+        <item name="android:gravity">center</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textStyle">normal</item>
+    </style>
+
+    <style name="CategoryButtonWrap">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:minHeight">35dp</item>
+        <item name="android:minWidth">0dp</item>
+        <item name="android:paddingLeft">4dp</item>
+        <item name="android:paddingRight">4dp</item>
+        <item name="android:paddingTop">1dp</item>
+        <item name="android:paddingBottom">1dp</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">#111111</item>
+        <item name="android:background">@drawable/btn_category_new</item>
+        <item name="android:backgroundTint">@null</item>
+        <item name="backgroundTint">@null</item>
+        <item name="android:gravity">center</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textStyle">normal</item>
+    </style>
+
+    <style name="CategoryButton.Selected">
+        <item name="android:background">@drawable/btn_selected</item>
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:backgroundTint">@null</item>
+        <item name="backgroundTint">@null</item>
+    </style>
+
+    <style name="CardBoxStyle">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:background">@drawable/card_box</item>
+        <item name="android:padding">16dp</item>
+    </style>
+
+    <style name="InfoBoxStyle">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:background">@drawable/info_box</item>
+        <item name="android:padding">16dp</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">#333333</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:fontFamily">sans-serif-black</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="InfoBoxRegisterButtonStyle" parent="InfoBoxStyle">
+        <item name="android:layout_height">56dp</item>
+        <item name="android:background">@drawable/btn_register_blue</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:gravity">center</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+        <item name="android:foreground">?android:attr/selectableItemBackground</item>
+    </style>
+
+    <style name="CommentInputStyle">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">44dp</item>
+        <item name="android:background">@drawable/comment_input_background</item>
+        <item name="android:paddingStart">20dp</item>
+        <item name="android:paddingEnd">20dp</item>
+        <item name="android:paddingTop">3dp</item>
+        <item name="android:paddingBottom">3dp</item>
+        <item name="android:hint">댓글을 입력해주세요</item>
+        <item name="android:textColorHint">#CCCCCC</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:gravity">start|center_vertical</item>
+        <item name="android:inputType">textMultiLine</item>
+        <item name="android:maxLines">3</item>
+        <item name="android:fontFamily">sans-serif-black</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="InfoLabelStyle">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">#000000</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:fontFamily">sans-serif-black</item>
+        <item name="android:layout_marginBottom">8dp</item>
+    </style>
+
+    <style name="SmallCardBoxStyle">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:background">@drawable/small_card_box</item>
+        <item name="android:padding">16dp</item>
+    </style>
+
+
+
+    <style name="MeButtonStyle">
+        <item name="android:layout_width">70dp</item>
+        <item name="android:layout_height">28dp</item>
+        <item name="android:paddingLeft">8dp</item>
+        <item name="android:paddingRight">8dp</item>
+        <item name="android:paddingTop">1dp</item>
+        <item name="android:paddingBottom">1dp</item>
+        <item name="android:textSize">11sp</item>
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:background">@drawable/btn_selected</item>
+        <item name="android:backgroundTint">@null</item>
+        <item name="backgroundTint">@null</item>
+        <item name="android:gravity">center</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+
+    <style name="HoejangButtonStyle">
+        <item name="android:layout_width">70dp</item>
+        <item name="android:layout_height">28dp</item>
+        <item name="android:paddingLeft">8dp</item>
+        <item name="android:paddingRight">8dp</item>
+        <item name="android:paddingTop">1dp</item>
+        <item name="android:paddingBottom">1dp</item>
+        <item name="android:textSize">11sp</item>
+        <item name="android:textColor">#333333</item>
+        <item name="android:background">@drawable/btn_gray</item>
+        <item name="android:backgroundTint">@null</item>
+        <item name="backgroundTint">@null</item>
+        <item name="android:gravity">center</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+
+
+
+    <style name="OnOffToggleStyle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:thumb">@drawable/switch_thumb_selector</item>
+        <item name="android:track">@drawable/switch_track_selector</item>
+        <item name="android:layout_marginTop">8dp</item>
+        <item name="android:minWidth">56dp</item>
+        <item name="android:minHeight">32dp</item>
+    </style>
+
+
+
+
+
+    <style name="ExpenseButtonStyle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">28dp</item>
+        <item name="android:minWidth">0dp</item>
+        <item name="android:paddingLeft">18dp</item>
+        <item name="android:paddingRight">18dp</item>
+        <item name="android:paddingTop">1dp</item>
+        <item name="android:paddingBottom">1dp</item>
+        <item name="android:textSize">11sp</item>
+        <item name="android:textColor">#B70000</item>
+        <item name="android:background">@drawable/btn_expense_background</item>
+        <item name="android:backgroundTint">@null</item>
+        <item name="backgroundTint">@null</item>
+        <item name="android:gravity">center</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+
+
+
+    <style name="CategoryButtonStyle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">28dp</item>
+        <item name="android:minWidth">0dp</item>
+        <item name="android:paddingLeft">18dp</item>
+        <item name="android:paddingRight">18dp</item>
+        <item name="android:paddingTop">1dp</item>
+        <item name="android:paddingBottom">1dp</item>
+        <item name="android:textSize">11sp</item>
+        <item name="android:textColor">#666666</item>
+        <item name="android:background">@drawable/btn_general_background</item>
+        <item name="android:backgroundTint">@null</item>
+        <item name="backgroundTint">@null</item>
+        <item name="android:gravity">center</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+
+    <style name="IncomeSelectedButtonStyle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">28dp</item>
+        <item name="android:minWidth">0dp</item>
+        <item name="android:paddingLeft">18dp</item>
+        <item name="android:paddingRight">18dp</item>
+        <item name="android:paddingTop">1dp</item>
+        <item name="android:paddingBottom">1dp</item>
+        <item name="android:textSize">11sp</item>
+        <item name="android:textColor">#2457C5</item>
+        <item name="android:background">@drawable/btn_income_selected_background</item>
+        <item name="android:backgroundTint">@null</item>
+        <item name="backgroundTint">@null</item>
+        <item name="android:gravity">center</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+
+    <style name="FeeButtonStyle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">28dp</item>
+        <item name="android:minWidth">0dp</item>
+        <item name="android:paddingLeft">18dp</item>
+        <item name="android:paddingRight">18dp</item>
+        <item name="android:paddingTop">1dp</item>
+        <item name="android:paddingBottom">1dp</item>
+        <item name="android:textSize">11sp</item>
+        <item name="android:textColor">#666666</item>
+        <item name="android:background">@drawable/btn_general_background</item>
+        <item name="android:backgroundTint">@null</item>
+        <item name="backgroundTint">@null</item>
+        <item name="android:gravity">center</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+
+    <!-- 텍스트 크기 스타일들 -->
+    <style name="MainTitleTextStyle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:textColor">#000000</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:fontFamily">sans-serif</item>
+    </style>
+
+    <style name="SectionTitleTextStyle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">#000000</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:fontFamily">sans-serif</item>
+    </style>
+
+    <style name="LabelTextStyle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">#666666</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:fontFamily">sans-serif</item>
+    </style>
+
+    <style name="InputTextStyle">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">#000000</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:padding">12dp</item>
+    </style>
+
+    <!-- 상자 스타일들 (ME/회장 버튼과 동일한 양식) -->
+
+    <style name="ApproveButtonStyle">
+        <item name="android:layout_width">70dp</item>
+        <item name="android:layout_height">28dp</item>
+        <item name="android:paddingLeft">8dp</item>
+        <item name="android:paddingRight">8dp</item>
+        <item name="android:paddingTop">1dp</item>
+        <item name="android:paddingBottom">1dp</item>
+        <item name="android:textSize">11sp</item>
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:background">@drawable/btn_approve_background</item>
+        <item name="android:backgroundTint">@null</item>
+        <item name="backgroundTint">@null</item>
+        <item name="android:gravity">center</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+
+    <style name="RejectButtonStyle">
+        <item name="android:layout_width">70dp</item>
+        <item name="android:layout_height">28dp</item>
+        <item name="android:paddingLeft">8dp</item>
+        <item name="android:paddingRight">8dp</item>
+        <item name="android:paddingTop">1dp</item>
+        <item name="android:paddingBottom">1dp</item>
+        <item name="android:textSize">11sp</item>
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:background">@drawable/btn_reject_background</item>
+        <item name="android:backgroundTint">@null</item>
+        <item name="backgroundTint">@null</item>
+        <item name="android:gravity">center</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+
+    <style name="AllButtonStyle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">32dp</item>
+        <item name="android:paddingLeft">16dp</item>
+        <item name="android:paddingRight">16dp</item>
+        <item name="android:paddingTop">1dp</item>
+        <item name="android:paddingBottom">1dp</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:background">@drawable/btn_selected</item>
+        <item name="android:backgroundTint">@null</item>
+        <item name="backgroundTint">@null</item>
+        <item name="android:gravity">center</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+
+    <style name="JoinRequestButtonStyle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">32dp</item>
+        <item name="android:paddingLeft">16dp</item>
+        <item name="android:paddingRight">16dp</item>
+        <item name="android:paddingTop">1dp</item>
+        <item name="android:paddingBottom">1dp</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:textColor">#000000</item>
+        <item name="android:background">@drawable/btn_join_request_background</item>
+        <item name="android:backgroundTint">@null</item>
+        <item name="backgroundTint">@null</item>
+        <item name="android:gravity">center</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+
+    <style name="VicePresidentButtonStyle">
+        <item name="android:layout_width">70dp</item>
+        <item name="android:layout_height">28dp</item>
+        <item name="android:paddingLeft">8dp</item>
+        <item name="android:paddingRight">8dp</item>
+        <item name="android:paddingTop">1dp</item>
+        <item name="android:paddingBottom">1dp</item>
+        <item name="android:textSize">11sp</item>
+        <item name="android:textColor">#666666</item>
+        <item name="android:background">@drawable/btn_general_background</item>
+        <item name="android:backgroundTint">@null</item>
+        <item name="backgroundTint">@null</item>
+        <item name="android:gravity">center</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+
+    <style name="GeneralButtonStyle">
+        <item name="android:layout_width">70dp</item>
+        <item name="android:layout_height">28dp</item>
+        <item name="android:paddingLeft">8dp</item>
+        <item name="android:paddingRight">8dp</item>
+        <item name="android:paddingTop">1dp</item>
+        <item name="android:paddingBottom">1dp</item>
+        <item name="android:textSize">11sp</item>
+        <item name="android:textColor">#666666</item>
+        <item name="android:background">@drawable/btn_general_background</item>
+        <item name="android:backgroundTint">@null</item>
+        <item name="backgroundTint">@null</item>
+        <item name="android:gravity">center</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+
+    <style name="ModifyButtonStyle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">32dp</item>
+        <item name="android:paddingLeft">16dp</item>
+        <item name="android:paddingRight">16dp</item>
+        <item name="android:paddingTop">1dp</item>
+        <item name="android:paddingBottom">1dp</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:background">@drawable/btn_modify_background</item>
+        <item name="android:backgroundTint">@null</item>
+        <item name="backgroundTint">@null</item>
+        <item name="android:gravity">center</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+
+    <style name="DeleteButtonStyle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">32dp</item>
+        <item name="android:paddingLeft">16dp</item>
+        <item name="android:paddingRight">16dp</item>
+        <item name="android:paddingTop">1dp</item>
+        <item name="android:paddingBottom">1dp</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:background">@drawable/btn_delete_background</item>
+        <item name="android:backgroundTint">@null</item>
+        <item name="backgroundTint">@null</item>
+        <item name="android:gravity">center</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+
+    <!-- 20sp Extra Bold 스타일 -->
+    <style name="ExtraBold20Style">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:textColor">#333333</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:fontFamily">sans-serif-black</item>
+    </style>
+</resources>

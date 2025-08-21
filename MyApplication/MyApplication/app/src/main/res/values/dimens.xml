@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 텍스트 크기 (60px 기준) -->
+    <dimen name="text_size_large">20sp</dimen>      <!-- 60px 기준 -->
+    <dimen name="text_size_medium">16sp</dimen>     <!-- 48px 기준 -->
+    <dimen name="text_size_small">14sp</dimen>      <!-- 42px 기준 -->
+    <dimen name="text_size_xsmall">12sp</dimen>     <!-- 36px 기준 -->
+    
+    <!-- 28sp Extra Bold 글씨체 -->
+    <dimen name="text_size_28sp_extra_bold">28sp</dimen> <!-- 28sp Extra Bold (큰 제목용) -->
+    
+    <!-- 특정 텍스트 크기 -->
+    <dimen name="header_app_title_size">24sp</dimen> <!-- 상단 헤더 앱 제목 (동아리) -->
+    <dimen name="app_title_size">20sp</dimen>       <!-- 동아리 (메인 제목) -->
+    <dimen name="club_name_size">20sp</dimen>       <!-- 방구석 경제 (동아리명) -->
+    <dimen name="section_title_size">16sp</dimen>   <!-- 내 동아리 (섹션 제목) -->
+    <dimen name="hashtag_size">14sp</dimen>         <!-- #분위기가 좋은 -->
+    <dimen name="location_size">14sp</dimen>        <!-- 위치 정보 -->
+    <dimen name="intro_title_size">14sp</dimen>     <!-- 동아리 소개 -->
+    <dimen name="intro_text_size">14sp</dimen>      <!-- 소개 내용 -->
+    <dimen name="category_button_size">12sp</dimen> <!-- 카테고리 버튼 -->
+    
+    <!-- 여백 및 간격 -->
+    <dimen name="margin_small">8dp</dimen>
+    <dimen name="margin_medium">16dp</dimen>
+    <dimen name="margin_large">24dp</dimen>
+    <dimen name="margin_xlarge">32dp</dimen>
+    
+    <!-- 패딩 -->
+    <dimen name="padding_small">8dp</dimen>
+    <dimen name="padding_medium">16dp</dimen>
+    <dimen name="padding_large">24dp</dimen>
+</resources>

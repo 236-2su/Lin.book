@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <!-- 상단 헤더 (로고 영역) -->
+    <LinearLayout
+        android:id="@+id/header_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingStart="24dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="24dp"
+        android:paddingBottom="16dp"
+        android:background="#FFFFFF"
+        android:gravity="center_vertical">
+
+        <ImageView
+            android:id="@+id/iv_logo"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/logo" />
+
+        <TextView
+            android:id="@+id/tv_app_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:fontFamily="sans-serif-black"
+            android:text="@string/app_title"
+            android:textColor="#333333"
+            android:textSize="@dimen/header_app_title_size"
+            android:textStyle="bold" />
+
+        <!-- 뒤로가기 버튼 (오른쪽에 배치) -->
+        <View
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" />
+
+        <Button
+            android:id="@+id/btn_back"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:text="&lt;"
+            android:textSize="24sp"
+            android:textColor="#000000"
+            android:background="@null"
+            android:textStyle="bold"
+            android:fontFamily="sans-serif-medium" />
+
+    </LinearLayout>
+
+    <!-- 내용 컨테이너 (정확한 패딩과 위치) -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true"
+        android:paddingStart="24dp"
+        android:paddingEnd="24dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="16dp">
+
+        <FrameLayout
+            android:id="@+id/content_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    </ScrollView>
+
+</LinearLayout>
