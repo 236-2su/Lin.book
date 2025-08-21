@@ -1,11 +1,17 @@
 from django.urls import include, path
-from rest_framework.routers import DefaultRouter
+from rest_framework import routers
+from rest_framework_nested import routers as nested_routers
 
 from .views import LedgerTransactionsViewSet, LedgerViewSet, ReceiptViewSet
 
-router = DefaultRouter()
-router.register(r"", LedgerViewSet)
-router.register(r"transactions", LedgerTransactionsViewSet)
-router.register(r"receipts", ReceiptViewSet)
+router = routers.SimpleRouter()
+router.register(r"", LedgerViewSet, basename="ledger")
 
-urlpatterns = [path("", include(router.urls))]
+ledgers_router = nested_routers.NestedSimpleRouter(router, r"", lookup="ledger")
+ledgers_router.register(r"transactions", LedgerTransactionsViewSet, basename="ledger-transactions")
+ledgers_router.register(r"receipts", ReceiptViewSet, basename="ledger-receipts")
+
+urlpatterns = [
+    path("", include(router.urls)),
+    path("", include(ledgers_router.urls)),
+]

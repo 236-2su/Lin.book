@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     "ledger",
     "initial_test",
     "rest_framework",
+    "rest_framework_nested",
     "drf_spectacular",
     "django.contrib.admin",
     "django.contrib.auth",
@@ -147,9 +148,8 @@ REST_FRAMEWORK = {
 }
 
 SPECTACULAR_SETTINGS = {
-    "TITLE": "Your Project API",
-    "DESCRIPTION": "Your project description",
+    "TITLE": "Lin.book",
+    "DESCRIPTION": "Lin.book 백엔드 API 문서",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
-    # OTHER SETTINGS
 }
