@@ -1,0 +1,29 @@
+# === Application (top-level) dependencies ===
+# Versions intentionally left unpinned; let pip-compile resolve compatible sets.
+# If you must pin some, add ==x.y.z here before running pip-compile.
+
+# Web frameworks (둘 다 쓰지 않으면 하나만 남기세요)
+Django
+djangorestframework
+drf-nested-routers
+drf-spectacular
+
+Flask
+flask-cors
+
+# Async HTTP client (필요할 때만 유지)
+aiohttp
+
+# Runtime & app libs
+gunicorn
+pillow
+PyJWT
+python-dotenv
+requests
+uritemplate
+inflection
+
+# LiveKit / realtime
+livekit-api
+livekit-protocol
+protobuf
