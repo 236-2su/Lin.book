@@ -53,21 +53,47 @@
 
     </LinearLayout>
 
+    <!-- 탭 영역 (다른 팀원이 작업할 공간) -->
+    <LinearLayout
+        android:id="@+id/tab_container"
+        android:layout_width="match_parent"
+        android:layout_height="35dp"
+        android:orientation="horizontal"
+        android:background="#FFFFFF"
+        android:gravity="center">
+
+        <!-- 탭 레이아웃이 여기에 들어갑니다 -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="탭 영역 (재유가 작업)"
+            android:textColor="#CCCCCC"
+            android:textSize="14sp" />
+
+    </LinearLayout>
+
     <!-- 내용 컨테이너 (정확한 패딩과 위치) -->
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:fillViewport="true"
-        android:paddingStart="24dp"
-        android:paddingEnd="24dp"
-        android:paddingTop="16dp"
-        android:paddingBottom="16dp">
+        android:fillViewport="true">
 
         <FrameLayout
             android:id="@+id/content_container"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:paddingStart="24dp"
+            android:paddingEnd="16dp">
+
+            <!-- 여기에 event_list_layout 포함 -->
+            <include layout="@layout/layout_event_list" />
+            <!-- 여기에 event_create_layout 포함 -->
+<!--            <include layout="@layout/layout_event_create" />-->
+            <!-- 여기에 event_detail_layout 포함 -->
+<!--            <include layout="@layout/layout_event_detail" />-->
+
+        </FrameLayout>
 
     </ScrollView>
 
