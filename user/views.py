@@ -108,7 +108,7 @@ class UserViewSet(viewsets.ModelViewSet):
             return
 
         if resp.status_code == 400:
-            message = resp.json.get("responseMessage")
+            message = resp.json().get("responseMessage")
             raise ValidationError({"duplicate error": message})
 
         if resp.status_code in (401, 403):
@@ -127,7 +127,7 @@ class UserViewSet(viewsets.ModelViewSet):
         if not in_ser.is_valid():
             return Response(in_ser.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        email = in_ser.validated_data.get("email")
+        email = (in_ser.validated_data or {}).get("email")
         try:
             user = User.objects.get(email=email)
         except User.DoesNotExist:

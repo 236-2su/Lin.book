@@ -1,13 +1,9 @@
 from django.shortcuts import get_object_or_404
-from rest_framework import viewsets
-from drf_spectacular.utils import (
-    extend_schema_view,
-    extend_schema,
-    OpenApiResponse,
-    OpenApiParameter,
-)
+from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema, extend_schema_view
+from rest_framework import status, viewsets
 from rest_framework.response import Response
-from rest_framework import status
+
+from club.models import Club
 
 from .models import Ledger, LedgerTransactions, Receipt
 from .serializers import LedgerSerializer, LedgerTransactionsSerializer, ReceiptSerializer
@@ -15,12 +11,22 @@ from .serializers import LedgerSerializer, LedgerTransactionsSerializer, Receipt
 
 @extend_schema_view(
     list=extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="club_pk", description="클럽 ID", required=True, type=int, location=OpenApiParameter.PATH
+            ),
+        ],
         summary="장부 목록 조회",
         description="전체 장부 목록을 조회합니다.",
         responses={200: OpenApiResponse(response=LedgerSerializer, description="OK")},
         tags=["Ledger"],
     ),
     retrieve=extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="club_pk", description="클럽 ID", required=True, type=int, location=OpenApiParameter.PATH
+            ),
+        ],
         summary="특정 장부 조회",
         description="ID로 특정 장부의 상세 정보를 조회합니다.",
         responses={
@@ -30,6 +36,11 @@ from .serializers import LedgerSerializer, LedgerTransactionsSerializer, Receipt
         tags=["Ledger"],
     ),
     create=extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="club_pk", description="클럽 ID", required=True, type=int, location=OpenApiParameter.PATH
+            ),
+        ],
         summary="장부 생성",
         description="새로운 장부를 생성합니다.",
         request=LedgerSerializer,
@@ -40,6 +51,11 @@ from .serializers import LedgerSerializer, LedgerTransactionsSerializer, Receipt
         tags=["Ledger"],
     ),
     update=extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="club_pk", description="클럽 ID", required=True, type=int, location=OpenApiParameter.PATH
+            ),
+        ],
         summary="장부 정보 전체 수정 (PUT)",
         description="장부의 모든 필드를 갱신합니다.",
         request=LedgerSerializer,
@@ -51,6 +67,11 @@ from .serializers import LedgerSerializer, LedgerTransactionsSerializer, Receipt
         tags=["Ledger"],
     ),
     partial_update=extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="club_pk", description="클럽 ID", required=True, type=int, location=OpenApiParameter.PATH
+            ),
+        ],
         summary="장부 정보 부분 수정 (PATCH)",
         description="장부의 일부 필드만 부분 갱신합니다.",
         request=LedgerSerializer,
@@ -62,6 +83,11 @@ from .serializers import LedgerSerializer, LedgerTransactionsSerializer, Receipt
         tags=["Ledger"],
     ),
     destroy=extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="club_pk", description="클럽 ID", required=True, type=int, location=OpenApiParameter.PATH
+            ),
+        ],
         summary="장부 삭제",
         description="ID로 특정 장부를 삭제합니다.",
         responses={204: OpenApiResponse(description="No Content"), 404: OpenApiResponse(description="Not Found")},
@@ -69,8 +95,14 @@ from .serializers import LedgerSerializer, LedgerTransactionsSerializer, Receipt
     ),
 )
 class LedgerViewSet(viewsets.ModelViewSet):
-    queryset = Ledger.objects.all()
     serializer_class = LedgerSerializer
+
+    def get_queryset(self):
+        return Ledger.objects.filter(club_id=self.kwargs["club_pk"])
+
+    def perform_create(self, serializer):
+        club = get_object_or_404(Club, pk=self.kwargs["club_pk"])
+        serializer.save(club=club)
 
 
 @extend_schema_view(
