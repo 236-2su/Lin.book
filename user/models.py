@@ -1,17 +1,26 @@
+from datetime import date
+
+from django.contrib.auth.models import AbstractUser
+from django.core.validators import MaxValueValidator, MinValueValidator, RegexValidator
 from django.db import models
 
 
-class User(models.Model):
-    STATUS_CHOICES = [
-        ("active", "재학중"),
-        ("absence", "휴학중"),
-        ("expelled", "제적"),
-        ("graduated", "졸업"),
-    ]
+class User(AbstractUser):
+    class Status(models.TextChoices):
+        ACTIVE = "active", "재학중"
+        ABSENCE = "absence", "휴학중"
+        EXPELLED = "expelled", "제적"
+        GRADUATED = "graduated", "졸업"
 
-    name = models.CharField(max_length=50)
-    student_number = models.CharField(max_length=50, unique=True)
-    admission_year = models.IntegerField()
-    phone_number = models.TextField()
-    status = models.CharField(max_length=50, choices=STATUS_CHOICES)
-    profile_url_image = models.TextField()
+    email = models.EmailField(unique=True)
+
+    student_number = models.CharField(max_length=50, unique=True, db_index=True)
+    admission_year = models.IntegerField(validators=[MinValueValidator(1950), MaxValueValidator(date.today().year)])
+    phone_number = models.CharField(
+        max_length=20,
+        validators=[RegexValidator(r"^\+?\d{7,15}$", message="전화번호 형식이 올바르지 않습니다.")],
+        blank=True,
+    )
+    status = models.CharField(max_length=10, choices=Status.choices, default=Status.ACTIVE)
+    profile_url_image = models.URLField(blank=True)
+    user_key = models.CharField(max_length=200, blank=True, null=True, db_index=True)
