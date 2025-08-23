@@ -36,7 +36,7 @@ class Migration(migrations.Migration):
                 ),
                 ("minor_category", models.CharField(max_length=50)),
                 ("description", models.TextField()),
-                ("hashtags", models.JSONField(default=list, validators=[club.models.Club.validate_hashtag])),
+                ("hashtags", models.TextField()),
                 ("created_at", models.DateField(auto_now_add=True)),
             ],
         ),
