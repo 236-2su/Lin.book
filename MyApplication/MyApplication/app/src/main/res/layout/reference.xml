@@ -22,118 +22,70 @@
 
             <TextView
                 android:id="@+id/btn_all"
-                style="@style/ReferenceCategoryButton"
+                style="@style/ReferenceBoardButton"
+                android:layout_marginEnd="6dp"
                 android:background="@drawable/btn_selected"
                 android:textColor="#FFFFFF"
                 android:text="전체" />
 
             <TextView
                 android:id="@+id/btn_academic"
-                style="@style/ReferenceCategoryButton"
+                style="@style/ReferenceBoardButton"
+                android:layout_marginEnd="6dp"
                 android:text="학술" />
 
             <TextView
                 android:id="@+id/btn_sports"
-                style="@style/ReferenceCategoryButton"
+                style="@style/ReferenceBoardButton"
+                android:layout_marginEnd="6dp"
                 android:text="체육" />
 
             <TextView
                 android:id="@+id/btn_volunteer"
-                style="@style/ReferenceCategoryButton"
+                style="@style/ReferenceBoardButton"
+                android:layout_marginEnd="6dp"
                 android:text="봉사활동" />
 
             <TextView
                 android:id="@+id/btn_art"
-                style="@style/ReferenceCategoryButton"
+                style="@style/ReferenceBoardButton"
+                android:layout_marginEnd="6dp"
                 android:text="예술" />
 
         </LinearLayout>
-
     </HorizontalScrollView>
-
-    <!-- 게시판 버튼들 -->
-    <TextView
-        style="@style/ReferenceSectionTitle"
-        android:text="게시판 버튼들" />
-
-    <HorizontalScrollView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:scrollbars="none"
-        android:layout_marginBottom="8dp">
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
-
-            <TextView
-                android:id="@+id/btn_notice"
-                style="@style/CategoryButton"
-                android:layout_marginEnd="6dp"
-                android:text="공지사항" />
-
-            <TextView
-                android:id="@+id/btn_free_board"
-                style="@style/CategoryButton"
-                android:layout_marginEnd="6dp"
-                android:text="자유게시판" />
-
-            <TextView
-                android:id="@+id/btn_public_account"
-                style="@style/CategoryButton"
-                android:layout_marginEnd="6dp"
-                android:text="공개장부" />
-
-            <TextView
-                android:id="@+id/btn_meeting_account"
-                style="@style/CategoryButton"
-                android:layout_marginEnd="6dp"
-                android:text="모임통장" />
-
-            <TextView
-                android:id="@+id/btn_ai_report"
-                style="@style/CategoryButton"
-                android:text="AI 리포트" />
-
-        </LinearLayout>
-
-    </HorizontalScrollView>
-
-
 
     <!-- 동아리실 위치 -->
     <TextView
-        style="@style/ReferenceSectionTitle"
+        style="@style/SectionTitleTextStyle"
         android:text="동아리실 위치" />
 
     <TextView
-        style="@style/ReferenceInfoBox"
+        style="@style/InfoBoxStyle"
         android:text="싸피캠퍼스 학생회관 421호" />
 
     <!-- 동아리 소개 -->
     <TextView
-        style="@style/ReferenceSectionTitle"
+        style="@style/SectionTitleTextStyle"
         android:text="동아리 소개" />
 
     <TextView
-        style="@style/ReferenceCardBox"
+        style="@style/CardBoxStyle"
         android:text="경제를 좋아하는 사람이라면 누구나, 함께 생각하고 말하는 힘을 키워보세요!" />
 
     <!-- 큰 카드 박스 내용 -->
     <TextView
-        style="@style/ReferenceSectionTitle"
+        style="@style/SectionTitleTextStyle"
         android:text="큰 카드 박스 내용" />
 
     <LinearLayout
-        style="@style/ReferenceLargeCardBox">
+        style="@style/CardBoxStyle">
 
         <LinearLayout
-            style="@style/ReferenceSmallCardBox">
+            style="@style/SmallCardBoxStyle">
 
             <TextView
-                style="@style/ReferenceTextExample"
+                style="@style/LabelTextStyle"
                 android:text="작은 카드 박스 내용" />
 
         </LinearLayout>
@@ -142,7 +94,7 @@
 
     <!-- 연한 파란색 카드 박스 -->
     <TextView
-        style="@style/ReferenceSectionTitle"
+        style="@style/SectionTitleTextStyle"
         android:text="연한 파란색 카드 박스" />
 
     <LinearLayout
@@ -487,12 +439,7 @@
 
     </LinearLayout>
 
-    <!-- 다음 페이지 버튼 -->
-    <Button
-        android:id="@+id/btn_next_page"
-        style="@style/ReferenceRegisterButton"
-        android:text="다음 페이지"
-        android:layout_marginTop="16dp" />
+
 
     <!-- 하단 여백 -->
     <View

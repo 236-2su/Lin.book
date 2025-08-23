@@ -70,6 +70,7 @@
 
         <!-- 게시판 버튼들 -->
         <HorizontalScrollView
+            android:id="@+id/board_buttons_scroll_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:scrollbars="none">
@@ -82,31 +83,27 @@
 
                 <TextView
                     android:id="@+id/btn_notice"
-                    style="@style/CategoryButton"
-                    android:layout_marginEnd="6dp"
+                    style="@style/ReferenceBoardButton"
                     android:text="공지사항" />
 
                 <TextView
                     android:id="@+id/btn_free_board"
-                    style="@style/CategoryButton"
-                    android:layout_marginEnd="6dp"
+                    style="@style/ReferenceBoardButton"
                     android:text="자유게시판" />
 
                 <TextView
                     android:id="@+id/btn_public_account"
-                    style="@style/CategoryButton"
-                    android:layout_marginEnd="6dp"
+                    style="@style/ReferenceBoardButton"
                     android:text="공개장부" />
 
                 <TextView
                     android:id="@+id/btn_meeting_account"
-                    style="@style/CategoryButton"
-                    android:layout_marginEnd="6dp"
+                    style="@style/ReferenceBoardButton"
                     android:text="모임통장" />
 
                 <TextView
                     android:id="@+id/btn_ai_report"
-                    style="@style/CategoryButton"
+                    style="@style/ReferenceBoardButton"
                     android:text="AI 리포트" />
 
             </LinearLayout>

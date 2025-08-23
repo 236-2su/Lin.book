@@ -6,6 +6,7 @@ import android.widget.Switch
 import android.graphics.Color
 import android.view.View
 import android.content.Intent
+import com.example.myapplication.LedgerReportActivity
 
 class MainActivity : BaseActivity() {
 
@@ -49,54 +50,10 @@ class MainActivity : BaseActivity() {
                    //     updateFilterButton(btnJoinRequest, btnAllNew)
                    // }
 
-                   // 게시판 버튼들 설정
-                   val btnNotice = contentView.findViewById<TextView>(R.id.btn_notice)
-                   val btnFreeBoard = contentView.findViewById<TextView>(R.id.btn_free_board)
-                   val btnPublicAccount = contentView.findViewById<TextView>(R.id.btn_public_account)
-                   val btnMeetingAccount = contentView.findViewById<TextView>(R.id.btn_meeting_account)
-                   val btnAiReport = contentView.findViewById<TextView>(R.id.btn_ai_report)
-                   
-                   // 초기 상태: 공지사항 버튼이 선택된 상태로 시작
-                   btnNotice.setBackgroundResource(R.drawable.btn_board_selected)
-                   btnNotice.setTextColor(Color.WHITE)
-                   
-                   // 나머지 버튼들은 기본 상태로 설정
-                   btnFreeBoard.setBackgroundResource(R.drawable.btn_board_background)
-                   btnFreeBoard.setTextColor(Color.parseColor("#333333"))
-                   btnPublicAccount.setBackgroundResource(R.drawable.btn_board_background)
-                   btnPublicAccount.setTextColor(Color.parseColor("#333333"))
-                   btnMeetingAccount.setBackgroundResource(R.drawable.btn_board_background)
-                   btnMeetingAccount.setTextColor(Color.parseColor("#333333"))
-                   btnAiReport.setBackgroundResource(R.drawable.btn_board_background)
-                   btnAiReport.setTextColor(Color.parseColor("#333333"))
-                   
-                   // 게시판 버튼 클릭 리스너 설정
-                   btnNotice.setOnClickListener {
-                       updateBoardButton(btnNotice, listOf(btnFreeBoard, btnPublicAccount, btnMeetingAccount, btnAiReport))
-                   }
-                   
-                   btnFreeBoard.setOnClickListener {
-                       updateBoardButton(btnFreeBoard, listOf(btnNotice, btnPublicAccount, btnMeetingAccount, btnAiReport))
-                   }
-                   
-                   btnPublicAccount.setOnClickListener {
-                       updateBoardButton(btnPublicAccount, listOf(btnNotice, btnFreeBoard, btnMeetingAccount, btnAiReport))
-                   }
-                   
-                   btnMeetingAccount.setOnClickListener {
-                       updateBoardButton(btnMeetingAccount, listOf(btnNotice, btnFreeBoard, btnPublicAccount, btnAiReport))
-                   }
-                   
-                   btnAiReport.setOnClickListener {
-                       updateBoardButton(btnAiReport, listOf(btnNotice, btnFreeBoard, btnPublicAccount, btnMeetingAccount))
-                   }
+                   // BaseActivity의 게시판 버튼들을 사용
+                   // (BaseActivity에서 이미 설정되어 있음)
 
-        // 다음 페이지 버튼 클릭 리스너 설정 (ClubListActivity가 존재하지 않음)
-        // val btnNextPage = contentView.findViewById<Button>(R.id.btn_next_page)
-        // btnNextPage.setOnClickListener {
-        //     val intent = Intent(this, ClubListActivity::class.java)
-        //     startActivity(intent)
-        // }
+
 
         // 토글 스위치 설정
         val toggleSwitch = contentView.findViewById<Switch>(R.id.toggle_switch)

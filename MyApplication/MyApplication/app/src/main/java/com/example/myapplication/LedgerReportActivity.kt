@@ -7,6 +7,13 @@ import android.widget.Button
 class LedgerReportActivity : BaseActivity() {
 
     override fun setupContent() {
+        // AI 리포트 버튼을 선택된 상태로 설정
+        selectBoardButton(btnAiReport)
+        
+        // Intent로 전달받은 스크롤 위치 복원
+        val scrollPosition = intent.getIntExtra("scroll_position", 0)
+        restoreBoardButtonScrollPositionFromIntent(scrollPosition)
+        
         // LedgerReportActivity 내용을 content_container에 추가
         val contentContainer = findViewById<android.widget.FrameLayout>(R.id.content_container)
         val contentView = layoutInflater.inflate(R.layout.ledger_report, null)

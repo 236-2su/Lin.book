@@ -7,6 +7,8 @@ import android.widget.TextView;
 import android.widget.Button;
 import androidx.appcompat.app.AppCompatActivity;
 import android.widget.LinearLayout;
+import android.content.Intent;
+import com.example.myapplication.LedgerReportActivity;
 
 public abstract class BaseActivity extends AppCompatActivity {
     
@@ -131,8 +133,21 @@ public abstract class BaseActivity extends AppCompatActivity {
     // 게시판 버튼 클릭 리스너 설정
     private void setupBoardButtonListeners() {
         if (btnNotice != null) {
-            btnNotice.setOnClickListener(v -> updateBoardButton(btnNotice, 
-                new TextView[]{btnFreeBoard, btnPublicAccount, btnMeetingAccount, btnAiReport}));
+            btnNotice.setOnClickListener(v -> {
+                // 이미 현재 페이지인 경우 아무것도 하지 않음
+                if (this instanceof MainActivity) {
+                    return;
+                }
+                updateBoardButton(btnNotice, 
+                    new TextView[]{btnFreeBoard, btnPublicAccount, btnMeetingAccount, btnAiReport});
+                
+                // 공지사항 버튼 클릭 시 MainActivity로 이동
+                Intent intent = new Intent(this, MainActivity.class);
+                startActivity(intent);
+
+                // 페이지 전환 애니메이션 제거
+                overridePendingTransition(0, 0);
+            });
         }
         
         if (btnFreeBoard != null) {
@@ -151,8 +166,28 @@ public abstract class BaseActivity extends AppCompatActivity {
         }
         
         if (btnAiReport != null) {
-            btnAiReport.setOnClickListener(v -> updateBoardButton(btnAiReport, 
-                new TextView[]{btnNotice, btnFreeBoard, btnPublicAccount, btnMeetingAccount}));
+            btnAiReport.setOnClickListener(v -> {
+                // 이미 현재 페이지인 경우 아무것도 하지 않음
+                if (this instanceof LedgerReportActivity) {
+                    return;
+                }
+
+                updateBoardButton(btnAiReport, 
+                    new TextView[]{btnNotice, btnFreeBoard, btnPublicAccount, btnMeetingAccount});
+                
+                // 스크롤 위치 저장
+                saveBoardButtonScrollPosition();
+
+                // AI 리포트 버튼 클릭 시 ledger_report로 이동
+                Intent intent = new Intent(this, LedgerReportActivity.class);
+                
+                // 현재 스크롤 위치를 Intent에 추가
+                intent.putExtra("scroll_position", getCurrentBoardScrollPosition());
+                startActivity(intent);
+                
+                // 페이지 전환 애니메이션 제거
+                overridePendingTransition(0, 0);
+            });
         }
     }
     
@@ -169,5 +204,92 @@ public abstract class BaseActivity extends AppCompatActivity {
                 btn.setTextColor(android.graphics.Color.parseColor("#333333"));
             }
         }
+    }
+    
+    // 특정 게시판 버튼을 선택된 상태로 설정하는 메서드
+    protected void selectBoardButton(TextView buttonToSelect) {
+        if (buttonToSelect != null) {
+            // 모든 버튼을 기본 상태로 초기화
+            if (btnNotice != null) {
+                btnNotice.setBackgroundResource(R.drawable.btn_board_background);
+                btnNotice.setTextColor(android.graphics.Color.parseColor("#333333"));
+            }
+            if (btnFreeBoard != null) {
+                btnFreeBoard.setBackgroundResource(R.drawable.btn_board_background);
+                btnFreeBoard.setTextColor(android.graphics.Color.parseColor("#333333"));
+            }
+            if (btnPublicAccount != null) {
+                btnPublicAccount.setBackgroundResource(R.drawable.btn_board_background);
+                btnPublicAccount.setTextColor(android.graphics.Color.parseColor("#333333"));
+            }
+            if (btnMeetingAccount != null) {
+                btnMeetingAccount.setBackgroundResource(R.drawable.btn_board_background);
+                btnMeetingAccount.setTextColor(android.graphics.Color.parseColor("#333333"));
+            }
+            if (btnAiReport != null) {
+                btnAiReport.setBackgroundResource(R.drawable.btn_board_background);
+                btnAiReport.setTextColor(android.graphics.Color.parseColor("#333333"));
+            }
+            
+            // 지정된 버튼을 선택된 상태로 변경
+            buttonToSelect.setBackgroundResource(R.drawable.btn_board_selected);
+            buttonToSelect.setTextColor(android.graphics.Color.parseColor("#FFFFFF"));
+        }
+    }
+    
+    // 스크롤 위치를 저장하는 메서드
+    protected void saveScrollPosition(String key, int position) {
+        android.content.SharedPreferences prefs = getSharedPreferences("scroll_positions", MODE_PRIVATE);
+        android.content.SharedPreferences.Editor editor = prefs.edit();
+        editor.putInt(key, position);
+        editor.apply();
+    }
+    
+    // 스크롤 위치를 복원하는 메서드
+    protected int getScrollPosition(String key) {
+        android.content.SharedPreferences prefs = getSharedPreferences("scroll_positions", MODE_PRIVATE);
+        return prefs.getInt(key, 0);
+    }
+    
+    // 게시판 버튼 스크롤 위치 저장
+    protected void saveBoardButtonScrollPosition() {
+        android.widget.HorizontalScrollView boardScrollView = findViewById(R.id.board_buttons_scroll_view);
+        if (boardScrollView != null) {
+            int scrollX = boardScrollView.getScrollX();
+            saveScrollPosition("board_buttons_scroll", scrollX);
+        }
+    }
+    
+    // 게시판 버튼 스크롤 위치 복원
+    protected void restoreBoardButtonScrollPosition() {
+        android.widget.HorizontalScrollView boardScrollView = findViewById(R.id.board_buttons_scroll_view);
+        if (boardScrollView != null) {
+            int savedPosition = getScrollPosition("board_buttons_scroll");
+            boardScrollView.post(() -> boardScrollView.scrollTo(savedPosition, 0));
+        }
+    }
+    
+    // 현재 게시판 버튼 스크롤 위치 가져오기
+    protected int getCurrentBoardScrollPosition() {
+        android.widget.HorizontalScrollView boardScrollView = findViewById(R.id.board_buttons_scroll_view);
+        if (boardScrollView != null) {
+            return boardScrollView.getScrollX();
+        }
+        return 0;
+    }
+    
+    // Intent로 전달받은 스크롤 위치로 복원
+    protected void restoreBoardButtonScrollPositionFromIntent(int scrollPosition) {
+        android.widget.HorizontalScrollView boardScrollView = findViewById(R.id.board_buttons_scroll_view);
+        if (boardScrollView != null) {
+            boardScrollView.post(() -> boardScrollView.scrollTo(scrollPosition, 0));
+        }
+    }
+
+    @Override
+    public void finish() {
+        super.finish();
+        // 뒤로가기 시 페이지 전환 애니메이션 제거
+        overridePendingTransition(0, 0);
     }
 }
