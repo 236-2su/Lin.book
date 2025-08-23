@@ -13,3 +13,11 @@ class ClubMemberSerializer(serializers.ModelSerializer):
     class Meta:
         model = ClubMember
         fields = "__all__"
+
+
+class ClubLoginRequestSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+
+class ClubLoginResponseSerializer(serializers.Serializer):
+    pk = serializers.IntegerField()

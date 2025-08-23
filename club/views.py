@@ -1,12 +1,11 @@
-from rest_framework import viewsets
-from drf_spectacular.utils import (
-    extend_schema_view,
-    extend_schema,
-    OpenApiResponse,
-)
+from drf_spectacular.utils import OpenApiResponse, extend_schema, extend_schema_view
+from rest_framework import status, viewsets
+from rest_framework.decorators import action
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
 
 from .models import Club, ClubMember
-from .serializers import ClubMemberSerializer, ClubSerializer
+from .serializers import ClubLoginRequestSerializer, ClubLoginResponseSerializer, ClubMemberSerializer, ClubSerializer
 
 
 @extend_schema_view(
@@ -123,7 +122,31 @@ class ClubViewSet(viewsets.ModelViewSet):
         responses={204: OpenApiResponse(description="No Content"), 404: OpenApiResponse(description="Not Found")},
         tags=["ClubMember"],
     ),
+    login=extend_schema(
+        summary="클럽 로그인",
+        description="username을 입력하면 클럽 pk를 반환함",
+        tags=["User"],
+        request=ClubLoginRequestSerializer,
+        responses={200: ClubLoginResponseSerializer},
+    ),
 )
 class ClubMemberViewSet(viewsets.ModelViewSet):
     queryset = ClubMember.objects.all()
     serializer_class = ClubMemberSerializer
+
+    @action(detail=False, methods=["post"], url_path="club-login", permission_classes=[AllowAny])
+    def club_login(self, request):
+        in_ser = ClubLoginRequestSerializer(data=request.data)
+        if not in_ser.is_valid():
+            return Response(in_ser.errors, status=status.HTTP_400_BAD_REQUEST)
+        email = (in_ser.validated_data or {}).get("email")
+        from user.models import User
+
+        try:
+            user = User.objects.get(email=email)
+            club_member = ClubMember.objects.get(user=user.pk)
+        except User.DoesNotExist:
+            return Response({"detail": "해당 이메일의 사용자가 존재하지 않습니다."}, status=status.HTTP_404_NOT_FOUND)
+
+        out_ser = ClubLoginResponseSerializer({"pk": club_member.pk})
+        return Response(out_ser.data, status=status.HTTP_200_OK)
