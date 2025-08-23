@@ -90,7 +90,7 @@ class BoardViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=["post"])
     def like(self, request, pk=None):
         board = self.get_object()
-        user = ClubMember.objects.first()
+        user = get_object_or_404(ClubMember, club=board.club, user=request.user)
 
         try:
             like = BoardLikes.objects.get(board=board, user=user)
@@ -165,8 +165,8 @@ class CommentsViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         board = get_object_or_404(Board, pk=self.kwargs["board_pk"])
-        user = ClubMember.objects.first()
-        serializer.save(author=user, board=board)
+        club_member = get_object_or_404(ClubMember, club=board.club, user=self.request.user)
+        serializer.save(author=club_member, board=board)
 
     @extend_schema(
         summary="댓글 좋아요", description="댓글에 좋아요가 있으면 삭제하고, 없으면 생성합니다.", tags=["Comments"]
@@ -174,7 +174,7 @@ class CommentsViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=["post"])
     def like(self, request, pk=None):
         comment = self.get_object()
-        user = ClubMember.objects.first()
+        user = get_object_or_404(ClubMember, club=comment.board.club, user=request.user)
 
         try:
             like = CommentLikes.objects.get(comment=comment, user=user)

@@ -5,41 +5,47 @@ import requests
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import OpenApiResponse, extend_schema, extend_schema_view
 from rest_framework import status, viewsets
-from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
 from user.models import User
 
-from .models import Accounts, AccountTransactions
-from .serializers import AccountCreateRequestSerializer, AccountSerializer
+from .models import Accounts
+from .serializers import (
+    AccountCreateRequestSerializer,
+    AccountInternalSerializer,
+    AccountResponseSerializer,
+    AccountUpdateRequestSerializer,
+)
 
 
 @extend_schema_view(
     list=extend_schema(
         summary="사용자의 계좌 목록 조회",
-        responses={200: AccountSerializer(many=True)},
+        responses={200: AccountResponseSerializer(many=True)},
         tags=["Accounts"],
     ),
     retrieve=extend_schema(
         summary="사용자의 특정 계좌 상세 조회",
-        responses={200: AccountSerializer},
+        responses={200: AccountResponseSerializer},
         tags=["Accounts"],
     ),
     create=extend_schema(
         summary="사용자 계좌 생성",
         request=AccountCreateRequestSerializer,
-        responses={201: AccountSerializer},
+        responses={201: AccountResponseSerializer},
         tags=["Accounts"],
     ),
     update=extend_schema(
         summary="사용자 계좌 정보 수정 (PUT)",
-        responses={200: AccountSerializer},
+        request=AccountUpdateRequestSerializer,
+        responses={200: AccountResponseSerializer},
         tags=["Accounts"],
     ),
     partial_update=extend_schema(
         summary="사용자 계좌 정보 부분 수정 (PATCH)",
-        responses={200: AccountSerializer},
+        request=AccountUpdateRequestSerializer,
+        responses={200: AccountResponseSerializer},
         tags=["Accounts"],
     ),
     destroy=extend_schema(
@@ -50,7 +56,7 @@ from .serializers import AccountCreateRequestSerializer, AccountSerializer
 )
 class AccountsViewSet(viewsets.ModelViewSet):
     queryset = Accounts.objects.select_related("user")
-    serializer_class = AccountSerializer
+    serializer_class = AccountInternalSerializer
 
     def get_queryset(self):
         return super().get_queryset().filter(user_id=self.kwargs["user_pk"])
