@@ -11,11 +11,11 @@ class LedgerReportActivity : BaseActivity() {
         val contentContainer = findViewById<android.widget.FrameLayout>(R.id.content_container)
         val contentView = layoutInflater.inflate(R.layout.ledger_report, null)
         contentContainer.addView(contentView)
-        
+
         // 버튼 클릭 이벤트 설정
         setupButtonClickEvents(contentView)
     }
-    
+
     private fun setupButtonClickEvents(contentView: android.view.View) {
         // 리포트 생성 버튼 클릭 이벤트
         val btnCreateReport = contentView.findViewById<Button>(R.id.btn_create_report)
