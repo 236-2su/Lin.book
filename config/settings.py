@@ -28,7 +28,7 @@ load_dotenv()
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "your-default-secret-key")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ["127.0.0.1", "localhost", "54.206.122.170"]
 
@@ -88,10 +88,13 @@ WSGI_APPLICATION = "config.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+SQLITE_PATH = os.getenv("SQLITE_PATH")
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "NAME": SQLITE_PATH if SQLITE_PATH else str(BASE_DIR / "db.sqlite3"),
     }
 }
 
