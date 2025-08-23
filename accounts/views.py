@@ -9,7 +9,7 @@ from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
-from club.models import User
+from user.models import User
 
 from .models import Accounts, AccountTransactions
 from .serializers import AccountCreateRequestSerializer, AccountSerializer
@@ -19,19 +19,33 @@ from .serializers import AccountCreateRequestSerializer, AccountSerializer
     list=extend_schema(
         summary="사용자의 계좌 목록 조회",
         responses={200: AccountSerializer(many=True)},
+        tags=["Accounts"],
     ),
     retrieve=extend_schema(
         summary="사용자의 특정 계좌 상세 조회",
         responses={200: AccountSerializer},
+        tags=["Accounts"],
     ),
     create=extend_schema(
         summary="사용자 계좌 생성",
         request=AccountCreateRequestSerializer,
         responses={201: AccountSerializer},
+        tags=["Accounts"],
+    ),
+    update=extend_schema(
+        summary="사용자 계좌 정보 수정 (PUT)",
+        responses={200: AccountSerializer},
+        tags=["Accounts"],
+    ),
+    partial_update=extend_schema(
+        summary="사용자 계좌 정보 부분 수정 (PATCH)",
+        responses={200: AccountSerializer},
+        tags=["Accounts"],
     ),
     destroy=extend_schema(
         summary="사용자 계좌 삭제",
         responses={204: OpenApiResponse(description="No Content")},
+        tags=["Accounts"],
     ),
 )
 class AccountsViewSet(viewsets.ModelViewSet):
