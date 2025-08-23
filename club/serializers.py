@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Club, ClubMember
+from .models import Club, User
 
 
 class ClubSerializer(serializers.ModelSerializer):
@@ -11,5 +11,5 @@ class ClubSerializer(serializers.ModelSerializer):
 
 class ClubMemberSerializer(serializers.ModelSerializer):
     class Meta:
-        model = ClubMember
+        model = User
         fields = "__all__"

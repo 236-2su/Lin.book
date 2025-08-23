@@ -1,6 +1,6 @@
 from django.db import models
 
-from club.models import Club, ClubMember
+from club.models import Club, User
 
 
 class Ledger(models.Model):
@@ -9,7 +9,7 @@ class Ledger(models.Model):
     name = models.CharField(max_length=50)
     created_at = models.DateField(auto_now_add=True)
     amount = models.IntegerField()
-    admin = models.ForeignKey(ClubMember, on_delete=models.SET_NULL, null=True)
+    admin = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
 
 
 class Receipt(models.Model):

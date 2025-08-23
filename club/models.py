@@ -22,6 +22,7 @@ class Club(models.Model):
                 raise ValidationError("해시태그는 #으로 시작해야 합니다")
 
     name = models.CharField(max_length=50)
+    department = models.CharField(max_length=20)
     major_category = models.CharField(max_length=20, choices=CLUB_MAJOR_CATEGORY_CHOICES)
     minor_category = models.CharField(max_length=50)
     description = models.TextField()
@@ -29,7 +30,7 @@ class Club(models.Model):
     created_at = models.DateField(auto_now_add=True)
 
 
-class ClubMember(models.Model):
+class User(models.Model):
     CLUB_MEMBER_STATUS_CHOICES = [
         ("active", "활동중"),
         ("absence", "휴학중"),
@@ -54,7 +55,7 @@ class ClubMember(models.Model):
 
 
 class Dues(models.Model):
-    member = models.ForeignKey(ClubMember, on_delete=models.CASCADE)
+    member = models.ForeignKey(User, on_delete=models.CASCADE)
     amount = models.IntegerField()
     due_to = models.DateField()
     paid_at = models.DateField(null=True, blank=True)

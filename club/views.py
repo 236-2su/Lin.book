@@ -1,11 +1,7 @@
+from drf_spectacular.utils import OpenApiResponse, extend_schema, extend_schema_view
 from rest_framework import viewsets
-from drf_spectacular.utils import (
-    extend_schema_view,
-    extend_schema,
-    OpenApiResponse,
-)
 
-from .models import Club, ClubMember
+from .models import Club, User
 from .serializers import ClubMemberSerializer, ClubSerializer
 
 
@@ -125,5 +121,5 @@ class ClubViewSet(viewsets.ModelViewSet):
     ),
 )
 class ClubMemberViewSet(viewsets.ModelViewSet):
-    queryset = ClubMember.objects.all()
+    queryset = User.objects.all()
     serializer_class = ClubMemberSerializer
