@@ -11,6 +11,7 @@ class User(models.Model):
         EXPELLED = "expelled", "제적"
         GRADUATED = "graduated", "졸업"
 
+    name = models.CharField(max_length=20)
     email = models.EmailField(unique=True)
     student_number = models.CharField(max_length=50, unique=True, db_index=True)
     admission_year = models.IntegerField(validators=[MinValueValidator(1950), MaxValueValidator(date.today().year)])
