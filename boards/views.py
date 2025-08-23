@@ -1,15 +1,10 @@
 from django.shortcuts import get_object_or_404
+from drf_spectacular.utils import OpenApiExample, OpenApiResponse, extend_schema, extend_schema_view
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from drf_spectacular.utils import (
-    extend_schema_view,
-    extend_schema,
-    OpenApiResponse,
-    OpenApiExample,
-)
 
-from club.models import ClubMember
+from club.models import Club, ClubMember
 
 from .models import Board, BoardLikes, CommentLikes, Comments
 from .serializers import BoardSerializer, CommentsSerializer
@@ -80,7 +75,16 @@ class BoardViewSet(viewsets.ModelViewSet):
     queryset = Board.objects.select_related("author")
     serializer_class = BoardSerializer
 
-    @extend_schema(summary="게시글 좋아요", description="게시글에 좋아요가 있으면 삭제하고, 없으면 생성합니다.", tags=["Board"])
+    def get_queryset(self):
+        return super().get_queryset().filter(club_id=self.kwargs["club_pk"])
+
+    def perform_create(self, serializer):
+        club = get_object_or_404(Club, pk=self.kwargs["club_pk"])
+        serializer.save(club=club)
+
+    @extend_schema(
+        summary="게시글 좋아요", description="게시글에 좋아요가 있으면 삭제하고, 없으면 생성합니다.", tags=["Board"]
+    )
     @action(detail=True, methods=["post"])
     def like(self, request, pk=None):
         board = self.get_object()
@@ -162,7 +166,9 @@ class CommentsViewSet(viewsets.ModelViewSet):
         user = ClubMember.objects.first()
         serializer.save(author=user, board=board)
 
-    @extend_schema(summary="댓글 좋아요", description="댓글에 좋아요가 있으면 삭제하고, 없으면 생성합니다.", tags=["Comments"])
+    @extend_schema(
+        summary="댓글 좋아요", description="댓글에 좋아요가 있으면 삭제하고, 없으면 생성합니다.", tags=["Comments"]
+    )
     @action(detail=True, methods=["post"])
     def like(self, request, pk=None):
         comment = self.get_object()

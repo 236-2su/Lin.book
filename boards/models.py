@@ -1,6 +1,6 @@
 from django.db import models
 
-from club.models import ClubMember
+from club.models import Club, ClubMember
 
 
 class Board(models.Model):
@@ -12,6 +12,7 @@ class Board(models.Model):
     views = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    club = models.ForeignKey(Club, on_delete=models.CASCADE)
 
 
 class AttachedFiles(models.Model):
