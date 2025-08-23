@@ -18,6 +18,7 @@ from .serializers import LoginRequestSerializer, LoginResponseSerializer, UserSe
     list=extend_schema(
         summary="사용자 목록 조회(실제로 안 씀)",
         description="전체 사용자 목록을 조회합니다.",
+        request="",
         responses={200: OpenApiResponse(response=UserSerializer, description="OK")},
         tags=["User"],
     ),
@@ -84,8 +85,8 @@ class UserViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         try:
             user = serializer.save()
-        except IntegrityError:
-            raise ValidationError({"email": "이미 등록된 이메일이거나 학번입니다."})
+        except Exception:
+            raise ValidationError("요청 형식 오류")
 
         if not os.getenv("FINAPI_SECRET"):
             raise ValidationError({"external": "서버 설정 오류(FINAPI_SECRET 미설정)."})
@@ -113,15 +114,51 @@ class UserViewSet(viewsets.ModelViewSet):
             user.save(update_fields=["user_key"])
             return
 
-        if resp.status_code == 400:
-            message = resp.json().get("responseMessage")
-            raise ValidationError({"duplicate error": message})
+        # Handle cases where the user might already exist in the external system (400 or 409)
+        if resp.status_code in (400, 409):
+            try:
+                search_resp = requests.post(
+                    "https://finopenapi.ssafy.io/ssafy/api/v1/member/search",
+                    json={"apiKey": os.getenv("FINAPI_SECRET"), "userId": user.email},
+                    timeout=5,
+                )
+            except requests.RequestException as e:
+                raise ValidationError({"external": f"finopenapi search call failed: {e}"})
+
+            if search_resp.status_code in (200, 201):
+                try:
+                    payload = search_resp.json()
+                except ValueError:
+                    raise ValidationError({"external": "External search response parsing failed (not JSON)."})
+
+                user_key = payload.get("userKey")
+                if not user_key:
+                    message = payload.get("responseMessage", "User not found via search after initial create failed.")
+                    raise ValidationError({"external": message})
+
+                user.user_key = user_key
+                user.save(update_fields=["user_key"])
+                return
+            else:
+                # The search request itself failed, which is unexpected if the user exists.
+                # Provide a detailed error message for debugging.
+                error_body = ""
+                try:
+                    # Try to get the JSON response for a more structured error message.
+                    error_body = search_resp.json()
+                except ValueError:
+                    # If the response is not JSON, use the raw text.
+                    error_body = search_resp.text
+
+                message = (
+                    f"Search API call failed with status {search_resp.status_code}. "
+                    f"This is unexpected because the initial creation failed, implying the user already exists. "
+                    f"Response body: {error_body}"
+                )
+                raise ValidationError({"external": message})
 
         if resp.status_code in (401, 403):
             raise ValidationError({"external": "외부 인증 실패(서버 설정 확인 필요)."})
-
-        if resp.status_code == 409:
-            raise ValidationError({"email": "이미 외부 시스템에 등록된 이메일입니다."})
 
         raise ValidationError({"external": f"예상치 못한 상태코드: {resp.status_code}"})
 
