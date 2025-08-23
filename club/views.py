@@ -1,8 +1,11 @@
+from django.db import transaction
 from drf_spectacular.utils import OpenApiResponse, extend_schema, extend_schema_view
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
+
+from user.models import User
 
 from .models import Club, ClubMember
 from .serializers import ClubLoginRequestSerializer, ClubLoginResponseSerializer, ClubMemberSerializer, ClubSerializer
@@ -26,7 +29,9 @@ from .serializers import ClubLoginRequestSerializer, ClubLoginResponseSerializer
     ),
     create=extend_schema(
         summary="클럽 생성",
-        description="새로운 클럽을 생성합니다.",
+        description="""새로운 클럽을 생성합니다. 요청 `body`에 `admin` 필드로 `user`의 `pk`를 포함해야 합니다.
+
+ex) `{"name": "test club", ..., "admin": 1}`""",
         request=ClubSerializer,
         responses={
             201: OpenApiResponse(ClubSerializer, description="Created"),
@@ -66,6 +71,30 @@ from .serializers import ClubLoginRequestSerializer, ClubLoginResponseSerializer
 class ClubViewSet(viewsets.ModelViewSet):
     queryset = Club.objects.all()
     serializer_class = ClubSerializer
+
+    def create(self, request, *args, **kwargs):
+        data = request.data.copy()
+        admin_pk = data.pop("admin", None)
+
+        if admin_pk is None:
+            return Response({"admin": ["This field is required."]}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            admin_user = User.objects.get(pk=admin_pk)
+        except User.DoesNotExist:
+            return Response({"admin": [f"User with pk {admin_pk} does not exist."]}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+
+        with transaction.atomic():
+            club = serializer.save()
+            ClubMember.objects.create(
+                club=club, user=admin_user, role="leader", status="active", amount_fee=0, paid_fee=0
+            )
+
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 
 @extend_schema_view(
@@ -134,19 +163,29 @@ class ClubMemberViewSet(viewsets.ModelViewSet):
     queryset = ClubMember.objects.all()
     serializer_class = ClubMemberSerializer
 
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        club_id = self.request.query_params.get("club")
+        if club_id:
+            queryset = queryset.filter(club_id=club_id)
+        return queryset
+
     @action(detail=False, methods=["post"], url_path="club-login", permission_classes=[AllowAny])
     def club_login(self, request):
         in_ser = ClubLoginRequestSerializer(data=request.data)
         if not in_ser.is_valid():
             return Response(in_ser.errors, status=status.HTTP_400_BAD_REQUEST)
         email = (in_ser.validated_data or {}).get("email")
+        club_id = (in_ser.validated_data or {}).get("club_id")
         from user.models import User
 
         try:
             user = User.objects.get(email=email)
-            club_member = ClubMember.objects.get(user=user.pk)
+            club_member = ClubMember.objects.get(user=user.pk, club_id=club_id)
         except User.DoesNotExist:
             return Response({"detail": "해당 이메일의 사용자가 존재하지 않습니다."}, status=status.HTTP_404_NOT_FOUND)
+        except ClubMember.DoesNotExist:
+            return Response({"detail": "해당 클럽에 가입된 사용자가 아닙니다."}, status=status.HTTP_404_NOT_FOUND)
 
         out_ser = ClubLoginResponseSerializer({"pk": club_member.pk})
         return Response(out_ser.data, status=status.HTTP_200_OK)

@@ -17,6 +17,7 @@ class ClubMemberSerializer(serializers.ModelSerializer):
 
 class ClubLoginRequestSerializer(serializers.Serializer):
     email = serializers.EmailField()
+    club_id = serializers.IntegerField()
 
 
 class ClubLoginResponseSerializer(serializers.Serializer):
