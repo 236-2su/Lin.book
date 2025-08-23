@@ -80,7 +80,9 @@ class BoardViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         club = get_object_or_404(Club, pk=self.kwargs["club_pk"])
-        serializer.save(club=club)
+        author_id = serializer.validated_data.get("author")
+        author = get_object_or_404(ClubMember, pk=author_id.id)
+        serializer.save(club=club, author=author)
 
     @extend_schema(
         summary="게시글 좋아요", description="게시글에 좋아요가 있으면 삭제하고, 없으면 생성합니다.", tags=["Board"]
