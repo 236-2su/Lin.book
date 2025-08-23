@@ -326,7 +326,7 @@
             <!-- 생성하기 버튼 -->
             <Button
                 android:id="@+id/btn_create_report"
-                style="@style/InfoBoxRegisterButtonStyle"
+                style="@style/ReferenceRegisterButton"
                 android:layout_marginBottom="20dp"
                 android:text="생성하기" />
 

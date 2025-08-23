@@ -12,9 +12,9 @@ class SplashActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash)
         
-        // 2초 후에 MainActivity로 전환
+        // 2초 후에 LoginActivity로 전환
         Handler(Looper.getMainLooper()).postDelayed({
-            val intent = Intent(this, MainActivity::class.java)
+            val intent = Intent(this, LoginActivity::class.java)
             startActivity(intent)
             finish() // SplashActivity 종료
         }, 2000) // 2초 지연

@@ -1,74 +1,503 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:background="@android:color/white"
+    android:padding="8dp">
 
     <!-- 카테고리 버튼들 -->
-    <Button
-        android:id="@+id/btn_all"
-        android:layout_width="wrap_content"
+    <HorizontalScrollView
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="전체" />
+        android:scrollbars="none"
+        android:layout_marginBottom="16dp">
 
-    <Button
-        android:id="@+id/btn_academic"
-        android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/btn_all"
+                style="@style/ReferenceCategoryButton"
+                android:background="@drawable/btn_selected"
+                android:textColor="#FFFFFF"
+                android:text="전체" />
+
+            <TextView
+                android:id="@+id/btn_academic"
+                style="@style/ReferenceCategoryButton"
+                android:text="학술" />
+
+            <TextView
+                android:id="@+id/btn_sports"
+                style="@style/ReferenceCategoryButton"
+                android:text="체육" />
+
+            <TextView
+                android:id="@+id/btn_volunteer"
+                style="@style/ReferenceCategoryButton"
+                android:text="봉사활동" />
+
+            <TextView
+                android:id="@+id/btn_art"
+                style="@style/ReferenceCategoryButton"
+                android:text="예술" />
+
+        </LinearLayout>
+
+    </HorizontalScrollView>
+
+    <!-- 게시판 버튼들 -->
+    <TextView
+        style="@style/ReferenceSectionTitle"
+        android:text="게시판 버튼들" />
+
+    <HorizontalScrollView
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="학술" />
+        android:scrollbars="none"
+        android:layout_marginBottom="8dp">
 
-    <Button
-        android:id="@+id/btn_sports"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="스포츠" />
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
 
-    <Button
-        android:id="@+id/btn_volunteer"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="봉사" />
+            <TextView
+                android:id="@+id/btn_notice"
+                style="@style/CategoryButton"
+                android:layout_marginEnd="6dp"
+                android:text="공지사항" />
 
-    <Button
-        android:id="@+id/btn_art"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="예술" />
+            <TextView
+                android:id="@+id/btn_free_board"
+                style="@style/CategoryButton"
+                android:layout_marginEnd="6dp"
+                android:text="자유게시판" />
 
-    <!-- 토글 스위치와 라벨 -->
+            <TextView
+                android:id="@+id/btn_public_account"
+                style="@style/CategoryButton"
+                android:layout_marginEnd="6dp"
+                android:text="공개장부" />
+
+            <TextView
+                android:id="@+id/btn_meeting_account"
+                style="@style/CategoryButton"
+                android:layout_marginEnd="6dp"
+                android:text="모임통장" />
+
+            <TextView
+                android:id="@+id/btn_ai_report"
+                style="@style/CategoryButton"
+                android:text="AI 리포트" />
+
+        </LinearLayout>
+
+    </HorizontalScrollView>
+
+
+
+    <!-- 동아리실 위치 -->
+    <TextView
+        style="@style/ReferenceSectionTitle"
+        android:text="동아리실 위치" />
+
+    <TextView
+        style="@style/ReferenceInfoBox"
+        android:text="싸피캠퍼스 학생회관 421호" />
+
+    <!-- 동아리 소개 -->
+    <TextView
+        style="@style/ReferenceSectionTitle"
+        android:text="동아리 소개" />
+
+    <TextView
+        style="@style/ReferenceCardBox"
+        android:text="경제를 좋아하는 사람이라면 누구나, 함께 생각하고 말하는 힘을 키워보세요!" />
+
+    <!-- 큰 카드 박스 내용 -->
+    <TextView
+        style="@style/ReferenceSectionTitle"
+        android:text="큰 카드 박스 내용" />
+
+    <LinearLayout
+        style="@style/ReferenceLargeCardBox">
+
+        <LinearLayout
+            style="@style/ReferenceSmallCardBox">
+
+            <TextView
+                style="@style/ReferenceTextExample"
+                android:text="작은 카드 박스 내용" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- 연한 파란색 카드 박스 -->
+    <TextView
+        style="@style/ReferenceSectionTitle"
+        android:text="연한 파란색 카드 박스" />
+
+    <LinearLayout
+        style="@style/ReferenceLightBlueCardBox">
+
+        <TextView
+            style="@style/ReferenceTextExample"
+            android:text="연한 파란색 배경의 카드 박스 내용" />
+
+    </LinearLayout>
+
+    <!-- 온/오프 토글 -->
+    <TextView
+        style="@style/ReferenceSectionTitle"
+        android:text="온/오프 토글" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginTop="20dp">
+        android:gravity="center_vertical"
+        android:layout_marginBottom="16dp">
 
         <TextView
             android:id="@+id/text_off"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            style="@style/ReferenceLikeCommentText"
             android:text="OFF"
-            android:layout_marginEnd="10dp" />
+            android:layout_marginEnd="20dp" />
 
         <Switch
             android:id="@+id/toggle_switch"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_width="56dp"
+            android:layout_height="24dp"
+            android:thumb="@drawable/switch_thumb_selector"
+            android:track="@drawable/switch_track_selector" />
 
         <TextView
             android:id="@+id/text_on"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            style="@style/ReferenceLikeCommentText"
             android:text="ON"
-            android:layout_marginStart="10dp" />
+            android:layout_marginStart="12dp" />
+
     </LinearLayout>
 
-    <!-- 넘어가기 버튼 -->
-    <Button
-        android:id="@+id/btn_navigate"
-        android:layout_width="wrap_content"
+    <!-- 지출/소모품비 버튼 -->
+    <TextView
+        style="@style/ReferenceSectionTitle"
+        android:text="지출/소모품비 버튼" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="30dp"
-        android:text="넘어가기" />
+        android:orientation="horizontal"
+        android:layout_marginBottom="16dp">
+
+        <TextView
+            style="@style/ReferenceSmallButton.Expense"
+            android:text="지출" />
+
+        <TextView
+            style="@style/ReferenceSmallButton.Supplies"
+            android:text="소모품비" />
+
+    </LinearLayout>
+
+    <!-- 수입/회비 버튼 -->
+    <TextView
+        style="@style/ReferenceSectionTitle"
+        android:text="수입/회비 버튼" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="16dp">
+
+        <TextView
+            style="@style/ReferenceSmallButton.Income"
+            android:text="수입" />
+
+        <TextView
+            style="@style/ReferenceSmallButton.Membership"
+            android:text="회비" />
+
+    </LinearLayout>
+
+    <!-- Me/회장 버튼 -->
+    <TextView
+        style="@style/ReferenceSectionTitle"
+        android:text="Me/회장 버튼" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="16dp">
+
+        <TextView
+            style="@style/ReferenceSmallButton.Me"
+            android:text="Me" />
+
+        <TextView
+            style="@style/ReferenceSmallButton.President"
+            android:text="회장" />
+
+        <TextView
+            style="@style/ReferenceSmallButton.VicePresident"
+            android:text="부회장" />
+
+        <TextView
+            style="@style/ReferenceSmallButton.General"
+            android:text="일반" />
+
+    </LinearLayout>
+
+    <!-- 등록하기 버튼 -->
+    <TextView
+        style="@style/ReferenceSectionTitle"
+        android:text="등록하기 버튼" />
+
+    <TextView
+        android:id="@+id/btn_register"
+        style="@style/ReferenceRegisterButton"
+        android:text="등록하기" />
+
+    <!-- 연동하기/개설하기 버튼 -->
+    <TextView
+        style="@style/ReferenceSectionTitle"
+        android:text="연동하기/개설하기 버튼" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginBottom="16dp">
+
+        <!-- 연동하기 버튼 -->
+        <LinearLayout
+            style="@style/ReferenceCardButton.Link"
+            android:layout_marginBottom="8dp">
+
+            <ImageView
+                style="@style/ReferenceIcon"
+                android:src="@drawable/connection"
+                android:layout_marginBottom="8dp"
+                android:rotation="-45" />
+
+            <TextView
+                style="@style/ReferenceLikeCommentText"
+                android:text="연동하기" />
+
+        </LinearLayout>
+
+        <!-- 개설하기 버튼 -->
+        <LinearLayout
+            style="@style/ReferenceCardButton.Create">
+
+            <ImageView
+                style="@style/ReferenceIcon"
+                android:src="@drawable/account"
+                android:layout_marginBottom="8dp" />
+
+            <TextView
+                style="@style/ReferenceLikeCommentText"
+                android:text="개설하기" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- 댓글 입력창 -->
+    <TextView
+        style="@style/ReferenceSectionTitle"
+        android:text="댓글 입력창" />
+
+    <LinearLayout
+        style="@style/ReferenceCommentInput">
+
+        <EditText
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="댓글을 입력해주세요"
+            android:textSize="14sp"
+            android:textColorHint="#999999"
+            android:textColor="#333333"
+            android:background="@null"
+            android:padding="0dp"
+            android:maxLines="1"
+            android:inputType="text" />
+
+        <ImageView
+            style="@style/ReferenceIcon"
+            android:src="@drawable/ic_send_white_blue"
+            android:layout_marginStart="8dp" />
+
+    </LinearLayout>
+
+    <!-- 텍스트 크기 예시 (60px 기준) -->
+    <TextView
+        style="@style/ReferenceSectionTitle"
+        android:text="텍스트 크기 예시 (60px 기준)" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginBottom="16dp">
+
+        <TextView
+            style="@style/ReferenceTextExample"
+            android:textSize="20sp"
+            android:text="60px 기준 - 20sp (메인 제목, 동아리명)" />
+
+        <TextView
+            style="@style/ReferenceTextExample"
+            android:textSize="16sp"
+            android:text="48px 기준 - 16sp (섹션 제목, 버튼 텍스트)" />
+
+        <TextView
+            style="@style/ReferenceTextExample"
+            android:textSize="14sp"
+            android:text="42px 기준 - 14sp (해시태그, 위치, 소개)" />
+
+        <TextView
+            style="@style/ReferenceTextExample"
+            android:textSize="12sp"
+            android:text="36px 기준 - 12sp (카테고리 버튼, 작은 텍스트)" />
+
+    </LinearLayout>
+
+    <!-- 좋아요/댓글 수 예시 -->
+    <TextView
+        style="@style/ReferenceSectionTitle"
+        android:text="좋아요/댓글 수 예시" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginBottom="16dp">
+
+        <!-- 좋아요 -->
+        <LinearLayout
+            style="@style/ReferenceLikeCommentLayout"
+            android:layout_marginEnd="32dp">
+
+            <ImageView
+                style="@style/ReferenceSmallIcon"
+                android:src="@drawable/ic_heart" />
+
+            <TextView
+                style="@style/ReferenceLikeCommentText"
+                android:text="4" />
+
+        </LinearLayout>
+
+        <!-- 댓글 -->
+        <LinearLayout
+            style="@style/ReferenceLikeCommentLayout">
+
+            <ImageView
+                style="@style/ReferenceSmallIcon"
+                android:src="@drawable/speech_bubble" />
+
+            <TextView
+                style="@style/ReferenceLikeCommentText"
+                android:text="4" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- 공유/설정 아이콘 예시 -->
+    <TextView
+        style="@style/ReferenceSectionTitle"
+        android:text="공유/설정 아이콘 예시" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginBottom="16dp">
+
+        <!-- 공유 -->
+        <LinearLayout
+            style="@style/ReferenceIconLayout">
+
+            <ImageView
+                style="@style/ReferenceIcon"
+                android:src="@drawable/share_rounded" />
+
+        </LinearLayout>
+
+        <!-- 설정 -->
+        <LinearLayout
+            style="@style/ReferenceIconLayout"
+            android:layout_marginEnd="0dp">
+
+            <ImageView
+                style="@style/ReferenceIcon"
+                android:src="@drawable/settings" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- 전화/채팅 아이콘 예시 -->
+    <TextView
+        style="@style/ReferenceSectionTitle"
+        android:text="전화/채팅 아이콘 예시" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginBottom="16dp">
+
+        <!-- 전화 -->
+        <LinearLayout
+            style="@style/ReferenceIconLayout">
+
+            <ImageView
+                style="@style/ReferenceIcon"
+                android:src="@drawable/ringer_volume" />
+
+        </LinearLayout>
+
+        <!-- 채팅 -->
+        <LinearLayout
+            style="@style/ReferenceIconLayout"
+            android:layout_marginEnd="0dp">
+
+            <ImageView
+                style="@style/ReferenceIcon"
+                android:src="@drawable/chat_message" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- 다음 페이지 버튼 -->
+    <Button
+        android:id="@+id/btn_next_page"
+        style="@style/ReferenceRegisterButton"
+        android:text="다음 페이지"
+        android:layout_marginTop="16dp" />
+
+    <!-- 하단 여백 -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
 
 </LinearLayout>

@@ -5,17 +5,34 @@
     android:orientation="vertical">
 
     <!-- 상단 헤더 (로고 영역) -->
+
+    <!-- 내용 컨테이너 (정확한 패딩과 위치) -->
     <LinearLayout
         android:id="@+id/header_container"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="116dp"
+        android:background="#FFFFFF"
+        android:gravity="center_vertical"
         android:orientation="horizontal"
         android:paddingStart="24dp"
+        android:paddingTop="60dp"
         android:paddingEnd="16dp"
-        android:paddingTop="24dp"
-        android:paddingBottom="16dp"
-        android:background="#FFFFFF"
-        android:gravity="center_vertical">
+        android:paddingBottom="8dp">
+
+        <!-- 뒤로가기 버튼 -->
+        <TextView
+            android:id="@+id/btn_back"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="@null"
+            android:gravity="center"
+            android:text="←"
+            android:textColor="#000000"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?android:attr/selectableItemBackground" />
 
         <ImageView
             android:id="@+id/iv_logo"
@@ -34,41 +51,67 @@
             android:textSize="@dimen/header_app_title_size"
             android:textStyle="bold" />
 
-        <!-- 뒤로가기 버튼 (오른쪽에 배치) -->
-        <View
-            android:layout_width="0dp"
-            android:layout_height="1dp"
-            android:layout_weight="1" />
 
-        <Button
-            android:id="@+id/btn_back"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:text="&lt;"
-            android:textSize="24sp"
-            android:textColor="#000000"
-            android:background="@null"
-            android:textStyle="bold"
-            android:fontFamily="sans-serif-medium" />
 
     </LinearLayout>
 
-    <!-- 탭 영역 (다른 팀원이 작업할 공간) -->
-    <LinearLayout
-        android:id="@+id/tab_container"
-        android:layout_width="match_parent"
-        android:layout_height="35dp"
-        android:orientation="horizontal"
-        android:background="#FFFFFF"
-        android:gravity="center">
+    <!-- 게시판 버튼 영역 -->
 
-        <!-- 탭 레이아웃이 여기에 들어갑니다 -->
-        <TextView
-            android:layout_width="wrap_content"
+    <LinearLayout
+            android:id="@+id/board_buttons_container"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="탭 영역 (재유가 작업)"
-            android:textColor="#CCCCCC"
-            android:textSize="14sp" />
+            android:background="#FFFFFF"
+            android:orientation="vertical"
+            android:paddingStart="24dp"
+            android:paddingTop="12dp"
+            android:paddingEnd="22dp"
+            android:paddingBottom="8dp">
+
+        <!-- 게시판 버튼들 -->
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scrollbars="none">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/btn_notice"
+                    style="@style/CategoryButton"
+                    android:layout_marginEnd="6dp"
+                    android:text="공지사항" />
+
+                <TextView
+                    android:id="@+id/btn_free_board"
+                    style="@style/CategoryButton"
+                    android:layout_marginEnd="6dp"
+                    android:text="자유게시판" />
+
+                <TextView
+                    android:id="@+id/btn_public_account"
+                    style="@style/CategoryButton"
+                    android:layout_marginEnd="6dp"
+                    android:text="공개장부" />
+
+                <TextView
+                    android:id="@+id/btn_meeting_account"
+                    style="@style/CategoryButton"
+                    android:layout_marginEnd="6dp"
+                    android:text="모임통장" />
+
+                <TextView
+                    android:id="@+id/btn_ai_report"
+                    style="@style/CategoryButton"
+                    android:text="AI 리포트" />
+
+            </LinearLayout>
+
+        </HorizontalScrollView>
 
     </LinearLayout>
 
@@ -77,14 +120,18 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:fillViewport="true">
+        android:fillViewport="true"
+        android:paddingStart="24dp"
+        android:paddingTop="0dp"
+        android:paddingEnd="24dp"
+        android:paddingBottom="16dp">
 
         <FrameLayout
             android:id="@+id/content_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingStart="24dp"
-            android:paddingEnd="16dp">
+            android:paddingStart="0dp"
+            android:paddingEnd="0dp">
 
             <!-- 여기에 event_list_layout 포함 -->
 <!--            <include layout="@layout/layout_event_list" />-->
