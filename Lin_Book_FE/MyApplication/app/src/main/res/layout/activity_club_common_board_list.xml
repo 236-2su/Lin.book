@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- 메인 콘텐츠 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        android:padding="16dp">
+
+    <!-- 뒤로가기 버튼 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="24dp"
+        android:layout_gravity="center_vertical">
+        
+
+        <Button
+            android:id="@+id/btn_back"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:backgroundTint="#FFFFFF"
+            android:background="?attr/selectableItemBackgroundBorderless"
+
+            android:fontFamily="sans-serif-medium"
+            android:text="뒤로가기"
+            android:textColor="@android:color/black"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+        
+        <ImageView
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/logo" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="짱구네 코딩"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:layout_marginStart="8dp"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginBottom="16dp">
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:src="@drawable/club_cover_img"
+            android:scaleType="centerCrop"
+            android:adjustViewBounds="true"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- 동아리 대문 타이틀 + 공유/설정 버튼-->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="16dp">
+
+            <!-- 동아리 대문 타이틀 -->
+            <TextView
+                android:layout_width="216dp"
+                android:layout_height="match_parent"
+                android:text="🎇 Welcome"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1" />
+
+            <!-- 공유/설정 버튼 -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <!-- 공유하기 버튼 -->
+                <androidx.appcompat.widget.AppCompatImageButton
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+
+                    android:backgroundTint="#FFFFFF"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+
+                    app:srcCompat="@drawable/share_icon"
+                    android:scaleType="centerInside"
+                    android:adjustViewBounds="true"
+                    android:padding="6dp"
+                    android:contentDescription="공유하기" />
+
+
+                <!-- 설정 버튼 -->
+
+                <androidx.appcompat.widget.AppCompatImageButton
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+
+                    android:backgroundTint="#FFFFFF"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+
+                    app:srcCompat="@drawable/settings_icon"
+                    android:scaleType="centerInside"
+                    android:adjustViewBounds="true"
+                    android:padding="6dp"
+                    android:contentDescription="공유하기" />
+            </LinearLayout>
+
+        </LinearLayout>
+        
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="안녕하세요. 짱구네 코딩입니다! 😀 아이디어에 코드를 입히는 순간, 상상은 현실이 돼요! 코딩이 처음이어도, 짱구처럼 호기심 많고 용기 있따면 누구든 환영해요. 함께 배우고 만들고 성장하는 짱구네로 놀러오세요!"
+            android:textSize="16sp"
+            android:lineSpacingMultiplier="1.2" />
+    </LinearLayout>
+
+    <!-- 게시판 버튼 영역 -->
+
+    <LinearLayout
+        android:id="@+id/board_buttons_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#FFFFFF"
+        android:orientation="vertical"
+        android:paddingTop="12dp"
+        android:paddingBottom="8dp">
+
+        <!-- 게시판 버튼들 -->
+        <HorizontalScrollView
+            android:id="@+id/board_buttons_scroll_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scrollbars="none">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/btn_notice"
+                    style="@style/ReferenceBoardButton"
+                    android:text="공지사항" />
+
+                <TextView
+                    android:id="@+id/btn_free_board"
+                    style="@style/ReferenceBoardButton"
+                    android:text="자유게시판" />
+
+                <TextView
+                    android:id="@+id/btn_public_account"
+                    style="@style/ReferenceBoardButton"
+                    android:text="공개장부" />
+
+                <TextView
+                    android:id="@+id/btn_meeting_account"
+                    style="@style/ReferenceBoardButton"
+                    android:text="모임통장" />
+
+                <TextView
+                    android:id="@+id/btn_ai_report"
+                    style="@style/ReferenceBoardButton"
+                    android:text="AI 리포트" />
+
+            </LinearLayout>
+
+        </HorizontalScrollView>
+
+    </LinearLayout>
+
+    <!-- 공지사항 목록 -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_board_list"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+    
+    </LinearLayout>
+
+    <!-- Floating Action Button -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab_add_post"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="24dp"
+        android:src="@drawable/ic_add"
+        app:backgroundTint="#1976D2"
+        app:tint="#FFFFFF"
+        app:fabSize="normal" />
+    
+</FrameLayout>

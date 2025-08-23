@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <solid android:color="#F0F0F0"/> <!-- #4F4F4F1A와 유사한 연한 회색 -->
-    <corners android:radius="24dp"/>
-</shape>
