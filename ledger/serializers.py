@@ -9,6 +9,12 @@ class LedgerSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class LedgerCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Ledger
+        fields = ["account", "name", "admin"]
+
+
 class ReceiptSerializer(serializers.ModelSerializer):
     class Meta:
         model = Receipt

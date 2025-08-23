@@ -9,6 +9,28 @@ class ClubSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class ClubCreateSerializer(serializers.ModelSerializer):
+    admin = serializers.IntegerField(write_only=True)
+
+    class Meta:
+        model = Club
+        fields = [
+            "name",
+            "department",
+            "major_category",
+            "minor_category",
+            "description",
+            "hashtags",
+            "admin",
+        ]
+
+
+class ClubMemberCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ClubMember
+        fields = ["status", "role", "club", "user"]
+
+
 class ClubMemberSerializer(serializers.ModelSerializer):
     class Meta:
         model = ClubMember

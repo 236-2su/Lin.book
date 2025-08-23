@@ -9,6 +9,12 @@ class BoardSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class BoardCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Board
+        fields = ["author", "type", "title", "content"]
+
+
 class AttachedFilesSerializer(serializers.ModelSerializer):
     class Meta:
         model = AttachedFiles

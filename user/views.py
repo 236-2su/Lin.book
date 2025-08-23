@@ -11,7 +11,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
 from .models import User
-from .serializers import LoginRequestSerializer, LoginResponseSerializer, UserSerializer
+from .serializers import LoginRequestSerializer, LoginResponseSerializer, UserCreateSerializer, UserSerializer
 
 
 @extend_schema_view(
@@ -34,7 +34,7 @@ from .serializers import LoginRequestSerializer, LoginResponseSerializer, UserSe
     create=extend_schema(
         summary="사용자 생성(회원가입 대체)",
         description="새로운 사용자를 생성합니다.",
-        request=UserSerializer,
+        request=UserCreateSerializer,
         responses={
             201: OpenApiResponse(UserSerializer, description="Created"),
             400: OpenApiResponse(description="Bad Request"),

@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from club.models import Club, ClubMember
 
 from .models import Board, BoardLikes, CommentLikes, Comments
-from .serializers import BoardSerializer, CommentsSerializer
+from .serializers import BoardCreateSerializer, BoardSerializer, CommentsSerializer
 
 
 @extend_schema_view(
@@ -29,7 +29,7 @@ from .serializers import BoardSerializer, CommentsSerializer
     create=extend_schema(
         summary="글 등록",
         description="새 글을 생성합니다.",
-        request=BoardSerializer,
+        request=BoardCreateSerializer,
         responses={
             201: OpenApiResponse(BoardSerializer, description="Created"),
             400: OpenApiResponse(description="Bad Request"),

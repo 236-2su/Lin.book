@@ -37,6 +37,19 @@ class UserSerializer(serializers.ModelSerializer):
         return instance
 
 
+class UserCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = [
+            "name",
+            "email",
+            "student_number",
+            "admission_year",
+            "phone_number",
+            "status",
+        ]
+
+
 class LoginRequestSerializer(serializers.Serializer):
     email = serializers.EmailField()
 

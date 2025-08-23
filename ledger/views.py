@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from club.models import Club
 
 from .models import Ledger, LedgerTransactions, Receipt
-from .serializers import LedgerSerializer, LedgerTransactionsSerializer, ReceiptSerializer
+from .serializers import LedgerCreateSerializer, LedgerSerializer, LedgerTransactionsSerializer, ReceiptSerializer
 
 
 @extend_schema_view(
@@ -43,7 +43,7 @@ from .serializers import LedgerSerializer, LedgerTransactionsSerializer, Receipt
         ],
         summary="장부 생성",
         description="새로운 장부를 생성합니다.",
-        request=LedgerSerializer,
+        request=LedgerCreateSerializer,
         responses={
             201: OpenApiResponse(LedgerSerializer, description="Created"),
             400: OpenApiResponse(description="Bad Request"),
@@ -233,11 +233,12 @@ class LedgerTransactionsViewSet(viewsets.ModelViewSet):
                 name="ledger_pk", description="장부 ID", required=True, type=int, location=OpenApiParameter.PATH
             ),
         ],
-        summary="영수증 생성 (미지원)",
-        description="영수증은 거래 내역을 통해서만 생성될 수 있습니다. 이 API는 영수증 생성을 지원하지 않습니다.",
+        summary="영수증 생성",
+        description="새로운 영수증을 생성합니다.",
         request=ReceiptSerializer,
         responses={
-            405: OpenApiResponse(description="Method Not Allowed"),
+            201: OpenApiResponse(ReceiptSerializer, description="Created"),
+            400: OpenApiResponse(description="Bad Request"),
         },
         tags=["Receipt"],
     ),
@@ -290,6 +291,3 @@ class ReceiptViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return Receipt.objects.filter(ledgertransactions__ledger_id=self.kwargs["ledger_pk"])
-
-    def create(self, request, *args, **kwargs):
-        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)

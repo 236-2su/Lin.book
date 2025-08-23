@@ -8,7 +8,14 @@ from rest_framework.response import Response
 from user.models import User
 
 from .models import Club, ClubMember
-from .serializers import ClubLoginRequestSerializer, ClubLoginResponseSerializer, ClubMemberSerializer, ClubSerializer
+from .serializers import (
+    ClubCreateSerializer,
+    ClubLoginRequestSerializer,
+    ClubLoginResponseSerializer,
+    ClubMemberCreateSerializer,
+    ClubMemberSerializer,
+    ClubSerializer,
+)
 
 
 @extend_schema_view(
@@ -32,7 +39,7 @@ from .serializers import ClubLoginRequestSerializer, ClubLoginResponseSerializer
         description="""새로운 클럽을 생성합니다. 요청 `body`에 `admin` 필드로 `user`의 `pk`를 포함해야 합니다.
 
 ex) `{"name": "test club", ..., "admin": 1}`""",
-        request=ClubSerializer,
+        request=ClubCreateSerializer,
         responses={
             201: OpenApiResponse(ClubSerializer, description="Created"),
             400: OpenApiResponse(description="Bad Request"),
@@ -116,7 +123,7 @@ class ClubViewSet(viewsets.ModelViewSet):
     create=extend_schema(
         summary="클럽 멤버 추가",
         description="새로운 클럽 멤버를 추가합니다.",
-        request=ClubMemberSerializer,
+        request=ClubMemberCreateSerializer,
         responses={
             201: OpenApiResponse(ClubMemberSerializer, description="Created"),
             400: OpenApiResponse(description="Bad Request"),
