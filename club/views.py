@@ -163,11 +163,20 @@ class ClubMemberViewSet(viewsets.ModelViewSet):
     queryset = ClubMember.objects.all()
     serializer_class = ClubMemberSerializer
 
+    def perform_create(self, serializer):
+        from rest_framework.exceptions import ValidationError
+
+        if ClubMember.objects.filter(
+            user=serializer.validated_data["user"], club=serializer.validated_data["club"]
+        ).exists():
+            raise ValidationError({"detail": "이미 해당 클럽에 가입된 유저입니다."})
+        serializer.save()
+
     def get_queryset(self):
         queryset = super().get_queryset()
-        club_id = self.request.query_params.get("club")
-        if club_id:
-            queryset = queryset.filter(club_id=club_id)
+        club_pk = self.kwargs.get("club_pk")
+        if club_pk:
+            queryset = queryset.filter(club__pk=club_pk)
         return queryset
 
     @action(detail=False, methods=["post"], url_path="club-login", permission_classes=[AllowAny])
