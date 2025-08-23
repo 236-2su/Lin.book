@@ -22,6 +22,7 @@ class Club(models.Model):
                 raise ValidationError("해시태그는 #으로 시작해야 합니다")
 
     name = models.CharField(max_length=50)
+    department = models.CharField(max_length=20)
     major_category = models.CharField(max_length=20, choices=CLUB_MAJOR_CATEGORY_CHOICES)
     minor_category = models.CharField(max_length=50)
     description = models.TextField()
