@@ -11,7 +11,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
 from .models import User
-from .serializers import UserSerializer
+from .serializers import LoginRequestSerializer, LoginResponseSerializer, UserSerializer
 
 
 @extend_schema_view(
@@ -68,7 +68,13 @@ from .serializers import UserSerializer
         responses={204: OpenApiResponse(description="No Content"), 404: OpenApiResponse(description="Not Found")},
         tags=["User"],
     ),
-    login=extend_schema(summary="로그인", description="username을 입력하면 user_pk를 반환함", tags=["User"]),
+    login=extend_schema(
+        summary="로그인",
+        description="username을 입력하면 user_pk를 반환함",
+        tags=["User"],
+        request=LoginRequestSerializer,
+        responses={200: LoginResponseSerializer},
+    ),
 )
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
@@ -121,8 +127,6 @@ class UserViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=["post"], url_path="login", permission_classes=[AllowAny])
     def login(self, request):
-        from .serializers import LoginRequestSerializer, LoginResponseSerializer
-
         in_ser = LoginRequestSerializer(data=request.data)
         if not in_ser.is_valid():
             return Response(in_ser.errors, status=status.HTTP_400_BAD_REQUEST)
