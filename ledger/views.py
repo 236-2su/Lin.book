@@ -6,7 +6,13 @@ from rest_framework.response import Response
 from club.models import Club
 
 from .models import Ledger, LedgerTransactions, Receipt
-from .serializers import LedgerCreateSerializer, LedgerSerializer, LedgerTransactionsSerializer, ReceiptSerializer
+from .serializers import (
+    LedgerCreateSerializer,
+    LedgerSerializer,
+    LedgerTransactionCreateSerializer,
+    LedgerTransactionsSerializer,
+    ReceiptSerializer,
+)
 
 
 @extend_schema_view(
@@ -139,7 +145,7 @@ class LedgerViewSet(viewsets.ModelViewSet):
         ],
         summary="특정 장부에 거래 내역 생성",
         description="특정 장부에 새로운 거래 내역을 생성합니다.",
-        request=LedgerTransactionsSerializer,
+        request=LedgerTransactionCreateSerializer,
         responses={
             201: OpenApiResponse(LedgerTransactionsSerializer, description="Created"),
             400: OpenApiResponse(description="Bad Request"),

@@ -25,3 +25,9 @@ class LedgerTransactionsSerializer(serializers.ModelSerializer):
     class Meta:
         model = LedgerTransactions
         fields = "__all__"
+
+
+class LedgerTransactionCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LedgerTransactions
+        fields = ["date", "amount", "type", "payment_method", "description", "receipt"]
