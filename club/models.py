@@ -14,19 +14,12 @@ class Club(models.Model):
         ("religion", "종교"),
     ]
 
-    def validate_hashtag(self, value):
-        if not isinstance(value, list):
-            raise ValidationError("리스트 형태여야 합니다")
-        for item in value:
-            if not item.startswith("#"):
-                raise ValidationError("해시태그는 #으로 시작해야 합니다")
-
     name = models.CharField(max_length=50)
     department = models.CharField(max_length=20)
     major_category = models.CharField(max_length=20, choices=CLUB_MAJOR_CATEGORY_CHOICES)
     minor_category = models.CharField(max_length=50)
     description = models.TextField()
-    hashtags = models.JSONField(default=list, validators=[validate_hashtag])
+    hashtags = models.TextField()
     created_at = models.DateField(auto_now_add=True)
 
 
