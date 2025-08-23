@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center_horizontal"
+    android:padding="16dp">
+
+    <!-- 뒤로가기 버튼 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="24dp"
+        android:layout_gravity="center_vertical">
+        
+
+        <Button
+            android:id="@+id/btn_back"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:backgroundTint="#FFFFFF"
+            android:background="?attr/selectableItemBackgroundBorderless"
+
+            android:fontFamily="sans-serif-medium"
+            android:text="<"
+            android:textColor="@android:color/black"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+        
+        <ImageView
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/logo" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="짱구네 코딩"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:layout_marginStart="8dp"/>
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginBottom="16dp">
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:src="@drawable/club_cover_img"
+            android:scaleType="centerCrop"
+            android:adjustViewBounds="true"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- 동아리 대문 타이틀 + 공유/설정 버튼-->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="16dp">
+
+            <!-- 동아리 대문 타이틀 -->
+            <TextView
+                android:layout_width="216dp"
+                android:layout_height="match_parent"
+                android:text="🎇 Welcome"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1" />
+
+            <!-- 공유/설정 버튼 -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <!-- 공유하기 버튼 -->
+                <androidx.appcompat.widget.AppCompatImageButton
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+
+                    android:backgroundTint="#FFFFFF"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+
+                    app:srcCompat="@drawable/share_icon"
+                    android:scaleType="centerInside"
+                    android:adjustViewBounds="true"
+                    android:padding="6dp"
+                    android:contentDescription="공유하기" />
+
+
+                <!-- 설정 버튼 -->
+
+                <androidx.appcompat.widget.AppCompatImageButton
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+
+                    android:backgroundTint="#FFFFFF"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+
+                    app:srcCompat="@drawable/settings_icon"
+                    android:scaleType="centerInside"
+                    android:adjustViewBounds="true"
+                    android:padding="6dp"
+                    android:contentDescription="공유하기" />
+            </LinearLayout>
+
+        </LinearLayout>
+        
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="안녕하세요. 짱구네 코딩입니다! 😀 아이디어에 코드를 입히는 순간, 상상은 현실이 돼요! 코딩이 처음이어도, 짱구처럼 호기심 많고 용기 있따면 누구든 환영해요. 함께 배우고 만들고 성장하는 짱구네로 놀러오세요!"
+            android:textSize="16sp"
+            android:lineSpacingMultiplier="1.2" />
+    </LinearLayout>
+
+    <!-- 공지사항 목록 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="2025년 08월 20일(수) 10:25"
+                android:textSize="16sp"
+                android:layout_marginBottom="8dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="2025년 3분기 정기 총회"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="안녕하세요! 짱구네 코딩 운영진입니다 😀 2025년 3분기 정기 총회를 아래와 같이 개최하오니, 모든 동아리원들의 많은 참여 바랍니다."
+                android:textSize="16sp"
+                android:lineSpacingMultiplier="1.2"
+                android:layout_marginBottom="8dp" />
+            
+            <!-- 조회수 + 좋아요 수 + 댓글 수 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="조회수 13"
+                    android:textSize="16sp" />
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/like_img" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="6dp"
+                        android:text="0"
+                        android:textSize="16sp" />
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_marginStart="16dp"
+                        android:src="@drawable/comment_img" />
+
+                    <TextView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_marginStart="6dp"
+                        android:text="0"
+                        android:textSize="16sp" />
+                </LinearLayout>
+            </LinearLayout>
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#DDDDDD"
+                android:layout_marginVertical="8dp" />
+        </LinearLayout>
+
+
+    </LinearLayout>
+    
+</LinearLayout>
