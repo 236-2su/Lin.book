@@ -38,6 +38,14 @@
             android:name=".SecondActivity"
             android:exported="false" />
 
+        <activity
+            android:name=".LedgerReportActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".LedgerReportCreateActivity"
+            android:exported="false" />
+
     </application>
 
 </manifest>
