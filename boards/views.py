@@ -80,8 +80,8 @@ class BoardViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         club = get_object_or_404(Club, pk=self.kwargs["club_pk"])
-        author_id = serializer.validated_data.get("author")
-        author = get_object_or_404(ClubMember, pk=author_id.id)
+        author_data = serializer.validated_data.pop("author")
+        author = get_object_or_404(ClubMember, pk=author_data.pk)
         serializer.save(club=club, author=author)
 
     @extend_schema(
