@@ -46,6 +46,34 @@
             android:name=".ClubCommonBoardListActivity"
             android:exported="false" />
 
+        <activity
+            android:name=".ClubCommonBoardDetailActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ClubCommonBoardCreateActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ClubCommonBoardUpdateActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ClubForumBoardListActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ClubForumBoardDetailActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ClubForumBoardCreateActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ClubForumBoardUpdateActivity"
+            android:exported="false" />
+
     </application>
 
 </manifest>

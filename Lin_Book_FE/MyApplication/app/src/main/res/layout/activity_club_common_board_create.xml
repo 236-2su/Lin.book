@@ -18,15 +18,19 @@
 
         <Button
             android:id="@+id/btn_back"
-            android:layout_width="48dp"
+            android:layout_width="24dp"
             android:layout_height="48dp"
+            android:minWidth="0dp"
+            android:minHeight="0dp"
+            android:padding="0dp"
             android:backgroundTint="#FFFFFF"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:fontFamily="sans-serif-medium"
-            android:text="뒤로가기"
-            android:textColor="@android:color/black"
+            android:text="&lt;"
+            android:textColor="@android:color/darker_gray"
             android:textSize="16sp"
-            android:textStyle="bold" />
+            android:fontFamily="sans-serif-light"
+            android:clickable="true"
+            android:focusable="true" />
 
         <ImageView
             android:layout_width="48dp"
@@ -36,8 +40,9 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="짱구네 코딩"
+            android:text="공지사항 작성"
             android:textSize="24sp"
+            android:textColor="@android:color/black"
             android:textStyle="bold"
             android:layout_marginStart="8dp"/>
     </LinearLayout>
@@ -52,7 +57,8 @@
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:fillViewport="true">
+            android:fillViewport="true"
+            android:scrollbars="none">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -63,398 +69,108 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="이번 주 정기 모임 일정 안내"
-                    android:textSize="28sp"
+                    android:text="제목"
+                    android:textSize="16sp"
                     android:textStyle="bold"
+                    android:textColor="@android:color/black"
                     android:layout_marginBottom="12dp" />
 
-                <!-- 메타 정보: 작성자/시간/조회수 및 좋아요·댓글 수 -->
+                <!-- 제목 입력 영역 -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingHorizontal="8dp"
+                    android:paddingVertical="6dp"
+                    android:background="@drawable/board_input_box"
                     android:layout_marginBottom="12dp">
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
+                    <EditText
+                        android:id="@+id/et_title"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical">
-
-                        <ImageView
-                            android:layout_width="44dp"
-                            android:layout_height="44dp"
-                            android:src="@drawable/account" />
-
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:orientation="vertical"
-                            android:layout_marginStart="12dp">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="천광민 14학번 전자공학과"
-                                android:textSize="16sp"
-                                android:textStyle="bold" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="2025. 08. 19(화) 02:17"
-                                android:textSize="14sp" />
-                        </LinearLayout>
-
-                        <View
-                            android:layout_width="0dp"
-                            android:layout_height="1dp"
-                            android:layout_weight="1" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="조회수 13"
-                            android:textSize="14sp" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_marginTop="8dp"
-                        android:gravity="end|center_vertical">
-
-                        <ImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:src="@drawable/like_img" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="4"
-                            android:textSize="16sp"
-                            android:layout_marginStart="6dp" />
-
-                        <ImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:layout_marginStart="16dp"
-                            android:src="@drawable/comment_img" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="4"
-                            android:textSize="16sp"
-                            android:layout_marginStart="6dp" />
-                    </LinearLayout>
+                        android:layout_weight="1"
+                        android:hint="제목을 입력해주세요"
+                        android:background="@android:color/transparent"
+                        android:padding="8dp"
+                        android:textSize="16sp" />
                 </LinearLayout>
 
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="#DDDDDD"
-                    android:layout_marginBottom="16dp" />
-
-                <!-- 본문 내용 -->
+                <!-- 게시글 내용 -->
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="이번 주 정기 모임은 수요일 저녁 7시, 동아리방에서 진행됩니다. 모두 참석 부탁드려요!"
-                    android:textSize="18sp"
-                    android:lineSpacingMultiplier="1.2"
-                    android:layout_marginBottom="24dp" />
-
-                <!-- 댓글 헤더 -->
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="댓글(4)"
+                    android:text="내용"
+                    android:textSize="16sp"
                     android:textStyle="bold"
-                    android:textSize="22sp"
+                    android:textColor="@android:color/black"
                     android:layout_marginBottom="12dp" />
 
-                <!-- 댓글 1 -->
+                <!-- 내용 입력 영역 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="200dp"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="8dp"
+                    android:paddingVertical="6dp"
+                    android:background="@drawable/board_input_box"
+                    android:layout_marginBottom="12dp"
+                    >
+
+                    <EditText
+                        android:id="@+id/et_content"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:hint="내용을 입력해주세요"
+                        android:background="@android:color/transparent"
+                        android:padding="8dp"
+                        android:textSize="16sp" />
+                </LinearLayout>
+
+                <!-- 게시글 첨부파일 -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="첨부파일"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/black"
+                    android:layout_marginBottom="12dp" />
+
+                <!-- 내용 입력 영역 -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:gravity="top"
-                    android:layout_marginBottom="16dp">
+                    android:gravity="center_vertical"
+                    android:paddingHorizontal="8dp"
+                    android:paddingVertical="6dp"
+                    android:background="@drawable/board_input_box"
+                    android:layout_marginBottom="12dp">
 
-                    <ImageView
-                        android:layout_width="44dp"
-                        android:layout_height="44dp"
-                        android:src="@drawable/account" />
-
-                    <LinearLayout
+                    <EditText
+                        android:id="@+id/su_file"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:layout_marginStart="12dp">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="이상욱 14학번 국제무역학과"
-                            android:textSize="16sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="2025. 08. 19(화) 02:33"
-                            android:textSize="14sp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="확인했습니다! 그 때 뵙겠습니다 :)"
-                            android:textSize="16sp"
-                            android:layout_marginTop="4dp" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical">
-
-                        <ImageView
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"
-                            android:src="@drawable/like_img" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="1"
-                            android:textSize="14sp"
-                            android:layout_marginStart="6dp" />
-                    </LinearLayout>
+                        android:hint="눌러서 파일 첨부하기"
+                        android:background="@android:color/transparent"
+                        android:padding="8dp"
+                        android:textSize="16sp" />
                 </LinearLayout>
 
-                <!-- 댓글 2 -->
-                <LinearLayout
+                <Button
+                    android:id="@+id/btn_submit"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="top"
-                    android:layout_marginBottom="16dp">
-
-                    <ImageView
-                        android:layout_width="44dp"
-                        android:layout_height="44dp"
-                        android:src="@drawable/account" />
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:layout_marginStart="12dp">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="김재유 21학번 통계학과?"
-                            android:textSize="16sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="2025. 08. 19(화) 02:33"
-                            android:textSize="14sp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="확인했습니다! 그 때 뵙겠습니다 :)"
-                            android:textSize="16sp"
-                            android:layout_marginTop="4dp" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical">
-
-                        <ImageView
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"
-                            android:src="@drawable/like_img" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="1"
-                            android:textSize="14sp"
-                            android:layout_marginStart="6dp" />
-                    </LinearLayout>
-                </LinearLayout>
-
-                <!-- 댓글 3 -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="top"
-                    android:layout_marginBottom="16dp">
-
-                    <ImageView
-                        android:layout_width="44dp"
-                        android:layout_height="44dp"
-                        android:src="@drawable/account" />
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:layout_marginStart="12dp">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="남다현 19학번 경영학과?"
-                            android:textSize="16sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="2025. 08. 19(화) 02:33"
-                            android:textSize="14sp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="확인했습니다! 그 때 뵙겠습니다 :)"
-                            android:textSize="16sp"
-                            android:layout_marginTop="4dp" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical">
-
-                        <ImageView
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"
-                            android:src="@drawable/like_img" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="1"
-                            android:textSize="14sp"
-                            android:layout_marginStart="6dp" />
-                    </LinearLayout>
-                </LinearLayout>
-
-                <!-- 댓글 4 -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="top"
-                    android:layout_marginBottom="24dp">
-
-                    <ImageView
-                        android:layout_width="44dp"
-                        android:layout_height="44dp"
-                        android:src="@drawable/account" />
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:layout_marginStart="12dp">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="이재익 15학번 기계공학"
-                            android:textSize="16sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="2025. 08. 19(화) 02:33"
-                            android:textSize="14sp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="확인했습니다! 그 때 뵙겠습니다 :)"
-                            android:textSize="16sp"
-                            android:layout_marginTop="4dp" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical">
-
-                        <ImageView
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"
-                            android:src="@drawable/like_img" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="1"
-                            android:textSize="14sp"
-                            android:layout_marginStart="6dp" />
-                    </LinearLayout>
-                </LinearLayout>
-
+                    android:layout_height="48dp"
+                    android:text="등록하기"
+                    android:background="@drawable/btn_register"
+                    android:textColor="@android:color/white"
+                    android:textSize="16sp" />
             </LinearLayout>
         </ScrollView>
-    </LinearLayout>
-
-    <!-- 댓글 입력 영역 -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:layout_marginTop="8dp"
-        android:paddingHorizontal="8dp"
-        android:paddingVertical="6dp"
-        android:background="@drawable/comment_input_background">
-
-        <EditText
-            android:id="@+id/et_comment"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:hint="댓글을 입력해주세요"
-            android:background="@android:color/transparent"
-            android:padding="8dp"
-            android:textSize="16sp" />
-
-        <androidx.appcompat.widget.AppCompatImageButton
-            android:id="@+id/btn_send_comment"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:backgroundTint="#FFFFFF"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:scaleType="centerInside"
-            android:padding="6dp"
-            app:srcCompat="@drawable/comment_send_icon"
-            android:contentDescription="댓글 전송" />
     </LinearLayout>
 
 </LinearLayout>

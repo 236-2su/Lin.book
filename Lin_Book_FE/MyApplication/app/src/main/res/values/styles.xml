@@ -573,4 +573,10 @@
         <item name="android:textColor">#333333</item>
     </style>
 
+    <!-- 다이얼로그 애니메이션 스타일 -->
+    <style name="Animation.Dialog" parent="android:Animation">
+        <item name="android:windowEnterAnimation">@anim/dialog_slide_up</item>
+        <item name="android:windowExitAnimation">@anim/dialog_slide_down</item>
+    </style>
+
 </resources>

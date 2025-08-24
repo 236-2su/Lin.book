@@ -20,20 +20,23 @@
         android:layout_marginTop="16dp"
         android:layout_marginBottom="24dp"
         android:layout_gravity="center_vertical">
-        
+
 
         <Button
             android:id="@+id/btn_back"
-            android:layout_width="48dp"
+            android:layout_width="24dp"
             android:layout_height="48dp"
+            android:minWidth="0dp"
+            android:minHeight="0dp"
+            android:padding="0dp"
             android:backgroundTint="#FFFFFF"
             android:background="?attr/selectableItemBackgroundBorderless"
-
-            android:fontFamily="sans-serif-medium"
-            android:text="뒤로가기"
-            android:textColor="@android:color/black"
+            android:text="&lt;"
+            android:textColor="@android:color/darker_gray"
             android:textSize="16sp"
-            android:textStyle="bold" />
+            android:fontFamily="sans-serif-light"
+            android:clickable="true"
+            android:focusable="true" />
         
         <ImageView
             android:layout_width="48dp"
@@ -46,6 +49,7 @@
             android:text="짱구네 코딩"
             android:textSize="24sp"
             android:textStyle="bold"
+            android:textColor="@android:color/black"
             android:layout_marginStart="8dp"/>
     </LinearLayout>
 
@@ -76,6 +80,7 @@
                 android:layout_height="match_parent"
                 android:text="🎇 Welcome"
                 android:textSize="24sp"
+                android:textColor="@android:color/black"
                 android:textStyle="bold" />
 
             <View
@@ -127,6 +132,7 @@
             android:layout_height="wrap_content"
             android:text="안녕하세요. 짱구네 코딩입니다! 😀 아이디어에 코드를 입히는 순간, 상상은 현실이 돼요! 코딩이 처음이어도, 짱구처럼 호기심 많고 용기 있따면 누구든 환영해요. 함께 배우고 만들고 성장하는 짱구네로 놀러오세요!"
             android:textSize="16sp"
+            android:textColor="@android:color/black"
             android:lineSpacingMultiplier="1.2" />
     </LinearLayout>
 
@@ -156,7 +162,7 @@
 
                 <TextView
                     android:id="@+id/btn_notice"
-                    style="@style/ReferenceBoardButton"
+                    style="@style/ReferenceCategoryButton.Selected"
                     android:text="공지사항" />
 
                 <TextView
@@ -190,7 +196,8 @@
         android:id="@+id/rv_board_list"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1" />
+        android:layout_weight="1"
+        android:scrollbars="none" />
     
     </LinearLayout>
 

@@ -20,6 +20,7 @@
         android:text="2025년 3분기 정기 총회"
         android:textSize="24sp"
         android:textStyle="bold"
+        android:textColor="@android:color/black"
         android:layout_marginBottom="8dp"/>
 
     <TextView
@@ -28,6 +29,7 @@
         android:layout_height="wrap_content"
         android:text="안녕하세요! 짱구네 코딩 운영진입니다 😀 2025년 3분기 정기 총회를 아래와 같이 개최하오니, 모든 동아리원들의 많은 참여 바랍니다."
         android:textSize="16sp"
+        android:textColor="@android:color/black"
         android:lineSpacingMultiplier="1.2"
         android:layout_marginBottom="8dp" />
     

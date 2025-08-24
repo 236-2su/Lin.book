@@ -121,7 +121,8 @@
         android:paddingStart="24dp"
         android:paddingTop="0dp"
         android:paddingEnd="24dp"
-        android:paddingBottom="16dp">
+        android:paddingBottom="16dp"
+        android:scrollbars="none">
 
         <FrameLayout
             android:id="@+id/content_container"
