@@ -13,6 +13,7 @@ from .serializers import (
     LedgerTransactionsSerializer,
     ReceiptSerializer,
 )
+from .utils import sync_ledger_amount
 
 
 @extend_schema_view(
@@ -205,6 +206,17 @@ class LedgerTransactionsViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         ledger = get_object_or_404(Ledger, pk=self.kwargs["ledger_pk"])
         serializer.save(ledger=ledger)
+        sync_ledger_amount(ledger)
+
+    def perform_update(self, serializer):
+        ledger = get_object_or_404(Ledger, pk=self.kwargs["ledger_pk"])
+        serializer.save(ledger=ledger)
+        sync_ledger_amount(ledger)
+
+    def perform_destroy(self, instance):
+        ledger = instance.ledger
+        super().perform_destroy(instance)
+        sync_ledger_amount(ledger)
 
 
 @extend_schema_view(
