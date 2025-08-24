@@ -1,5 +1,7 @@
 from rest_framework import serializers
 
+from user.models import User
+
 from .models import AttachedFiles, Board, BoardLikes, CommentLikes, Comments
 
 
@@ -27,10 +29,13 @@ class AttachedFilesSerializer(serializers.ModelSerializer):
 
 
 class BoardLikesSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = BoardLikes
         fields = "__all__"
+
+
+class LikeCreateSerializer(serializers.Serializer):
+    user_id = serializers.IntegerField()
 
 
 class CommentsSerializer(serializers.ModelSerializer):
@@ -45,7 +50,6 @@ class CommentsSerializer(serializers.ModelSerializer):
 
 
 class CommentLikesSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = CommentLikes
         fields = "__all__"

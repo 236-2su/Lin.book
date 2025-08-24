@@ -7,7 +7,14 @@ from rest_framework.response import Response
 from club.models import Club, ClubMember
 
 from .models import Board, BoardLikes, CommentLikes, Comments
-from .serializers import BoardCreateSerializer, BoardSerializer, CommentsSerializer
+from .serializers import (
+    BoardCreateSerializer,
+    BoardLikesSerializer,
+    BoardSerializer,
+    CommentLikesSerializer,
+    CommentsSerializer,
+    LikeCreateSerializer,
+)
 
 
 @extend_schema_view(
@@ -85,12 +92,19 @@ class BoardViewSet(viewsets.ModelViewSet):
         serializer.save(club=club, author=author)
 
     @extend_schema(
-        summary="게시글 좋아요", description="게시글에 좋아요가 있으면 삭제하고, 없으면 생성합니다.", tags=["Board"]
+        summary="게시글 좋아요",
+        description="게시글에 좋아요가 있으면 삭제하고, 없으면 생성합니다.",
+        request=LikeCreateSerializer,
+        tags=["Board"],
     )
     @action(detail=True, methods=["post"])
     def like(self, request, pk=None):
+        serializer = LikeCreateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user_id = serializer.validated_data["user_id"]
+
         board = self.get_object()
-        user = get_object_or_404(ClubMember, club=board.club, user=request.user)
+        user = get_object_or_404(ClubMember, club=board.club, user_id=user_id)
 
         try:
             like = BoardLikes.objects.get(board=board, user=user)
@@ -168,12 +182,19 @@ class CommentsViewSet(viewsets.ModelViewSet):
         serializer.save(board=board)
 
     @extend_schema(
-        summary="댓글 좋아요", description="댓글에 좋아요가 있으면 삭제하고, 없으면 생성합니다.", tags=["Comments"]
+        summary="댓글 좋아요",
+        description="댓글에 좋아요가 있으면 삭제하고, 없으면 생성합니다.",
+        request=LikeCreateSerializer,
+        tags=["Comments"],
     )
     @action(detail=True, methods=["post"])
     def like(self, request, pk=None):
+        serializer = LikeCreateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user_id = serializer.validated_data["user_id"]
+
         comment = self.get_object()
-        user = get_object_or_404(ClubMember, club=comment.board.club, user=request.user)
+        user = get_object_or_404(ClubMember, club=comment.board.club, user_id=user_id)
 
         try:
             like = CommentLikes.objects.get(comment=comment, user=user)
