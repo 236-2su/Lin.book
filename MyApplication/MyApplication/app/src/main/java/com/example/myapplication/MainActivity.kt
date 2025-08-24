@@ -16,13 +16,15 @@ class MainActivity : BaseActivity() {
     override fun setupContent() {
         // MainActivity 내용을 content_container에 추가
         val contentContainer = findViewById<android.widget.FrameLayout>(R.id.content_container)
-        contentView = layoutInflater.inflate(R.layout.reference, null)
-        contentContainer.addView(contentView)
+//        contentView = layoutInflater.inflate(R.layout.reference, null)
+//        contentContainer.addView(contentView)
+        
+        // MemberManagementActivity 시작 (테스트용)
+//        startActivity(Intent(this, MemberManagementActivity::class.java))
         
                            // MainActivity 로직 실행
-                   setupMainActivityLogic()
+//                   setupMainActivityLogic()
                }
-               
                private fun setupMainActivityLogic() {
 
                    // 카테고리 버튼들을 리스트에 추가 (나중에 초기화)
