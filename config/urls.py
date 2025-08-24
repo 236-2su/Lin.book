@@ -25,6 +25,7 @@ urlpatterns = [
     path("user/", include("user.urls")),
     path("boards/", include("boards.urls")),
     path("club/", include("club.urls")),
+    path("", include("ledger_report.urls")),
     # YOUR PATTERNS
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     # Optional UI:
