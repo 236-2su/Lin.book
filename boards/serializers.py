@@ -7,6 +7,7 @@ from .models import AttachedFiles, Board, BoardLikes, CommentLikes, Comments
 
 class BoardSerializer(serializers.ModelSerializer):
     likes = serializers.SerializerMethodField()
+    comments = serializers.SerializerMethodField()
 
     class Meta:
         model = Board
@@ -14,6 +15,9 @@ class BoardSerializer(serializers.ModelSerializer):
 
     def get_likes(self, obj):
         return obj.boardlikes_set.count()
+
+    def get_comments(self, obj):
+        return obj.comments_set.count()
 
 
 class BoardCreateSerializer(serializers.ModelSerializer):

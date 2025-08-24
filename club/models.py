@@ -21,6 +21,14 @@ class Club(models.Model):
     description = models.TextField()
     hashtags = models.TextField()
     created_at = models.DateField(auto_now_add=True)
+    location = models.TextField()
+    short_description = models.TextField()
+
+
+class ClubWelcomePage(models.Model):
+    club = models.OneToOneField(Club, on_delete=models.CASCADE)
+    image = models.ImageField(upload_to="welcome/")
+    content = models.TextField()
 
 
 class ClubMember(models.Model):

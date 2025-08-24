@@ -29,4 +29,5 @@ class LedgerTransactions(models.Model):
     payment_method = models.CharField(max_length=50)  # 거래 방법(현금, 카드, 계좌이체, 기타등등)
     receipt = models.OneToOneField(Receipt, on_delete=models.SET_NULL, null=True, blank=True)  # 영수증 OCR 이미지
     description = models.TextField()
+    vendor = models.CharField(max_length=100)
     # account_transaction = models.ForeignKey(AccountTransaction, on_delete=models.SET_NULL)

@@ -1,12 +1,23 @@
 from rest_framework import serializers
 
-from .models import Club, ClubMember
+from .models import Club, ClubMember, ClubWelcomePage
 
 
 class ClubSerializer(serializers.ModelSerializer):
     class Meta:
         model = Club
         fields = "__all__"
+
+
+class ClubWelcomePageSerializer(serializers.ModelSerializer):
+    short_description = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ClubWelcomePage
+        fields = ["image", "content", "short_description"]
+
+    def get_short_description(self, obj):
+        return obj.club.short_description
 
 
 class ClubCreateSerializer(serializers.ModelSerializer):

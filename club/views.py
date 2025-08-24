@@ -7,7 +7,7 @@ from rest_framework.response import Response
 
 from user.models import User
 
-from .models import Club, ClubMember
+from .models import Club, ClubMember, ClubWelcomePage
 from .serializers import (
     ClubCreateSerializer,
     ClubLoginRequestSerializer,
@@ -15,6 +15,7 @@ from .serializers import (
     ClubMemberCreateSerializer,
     ClubMemberSerializer,
     ClubSerializer,
+    ClubWelcomePageSerializer,
 )
 
 
@@ -205,3 +206,56 @@ class ClubMemberViewSet(viewsets.ModelViewSet):
 
         out_ser = ClubLoginResponseSerializer({"pk": club_member.pk})
         return Response(out_ser.data, status=status.HTTP_200_OK)
+
+
+@extend_schema_view(
+    list=extend_schema(
+        summary="클럽 Welcome Page 목록 조회",
+        description="특정 클럽의 Welcome Page를 조회합니다. (OneToOne 관계이므로 1개만 반환)",
+        tags=["ClubWelcomePage"],
+    ),
+    retrieve=extend_schema(
+        summary="클럽 Welcome Page 상세 조회",
+        description="ID로 특정 클럽 Welcome Page의 상세 정보를 조회합니다.",
+        tags=["ClubWelcomePage"],
+    ),
+    create=extend_schema(
+        summary="클럽 Welcome Page 생성",
+        description="특정 클럽에 대한 Welcome Page를 생성합니다.",
+        tags=["ClubWelcomePage"],
+    ),
+    update=extend_schema(
+        summary="클럽 Welcome Page 전체 수정 (PUT)",
+        description="클럽 Welcome Page의 모든 필드를 갱신합니다.",
+        tags=["ClubWelcomePage"],
+    ),
+    partial_update=extend_schema(
+        summary="클럽 Welcome Page 부분 수정 (PATCH)",
+        description="클럽 Welcome Page의 일부 필드만 부분 갱신합니다.",
+        tags=["ClubWelcomePage"],
+    ),
+    destroy=extend_schema(
+        summary="클럽 Welcome Page 삭제",
+        description="ID로 특정 클럽 Welcome Page를 삭제합니다.",
+        tags=["ClubWelcomePage"],
+    ),
+)
+class ClubWelcomePageViewSet(viewsets.ModelViewSet):
+    queryset = ClubWelcomePage.objects.all()
+    serializer_class = ClubWelcomePageSerializer
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        club_pk = self.kwargs.get("club_pk")
+        if club_pk:
+            queryset = queryset.filter(club__pk=club_pk)
+        return queryset
+
+    def perform_create(self, serializer):
+        from rest_framework.exceptions import ValidationError
+
+        club_pk = self.kwargs.get("club_pk")
+        club = Club.objects.get(pk=club_pk)
+        if ClubWelcomePage.objects.filter(club=club).exists():
+            raise ValidationError({"detail": "해당 클럽의 Welcome Page가 이미 존재합니다."})
+        serializer.save(club=club)
