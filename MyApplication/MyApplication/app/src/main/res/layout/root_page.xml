@@ -130,12 +130,7 @@
             android:paddingStart="0dp"
             android:paddingEnd="0dp">
 
-            <!-- 여기에 event_list_layout 포함 -->
-<!--            <include layout="@layout/layout_event_list" />-->
-            <!-- 여기에 event_create_layout 포함 -->
-<!--            <include layout="@layout/layout_event_create" />-->
-            <!-- 여기에 event_detail_layout 포함 -->
-            <include layout="@layout/layout_event_detail" />
+            <!-- 동적으로 레이아웃이 추가될 영역 -->
 
         </FrameLayout>
 

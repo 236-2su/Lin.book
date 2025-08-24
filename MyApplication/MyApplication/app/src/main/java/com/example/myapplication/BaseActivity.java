@@ -156,8 +156,16 @@ public abstract class BaseActivity extends AppCompatActivity {
         }
         
         if (btnPublicAccount != null) {
-            btnPublicAccount.setOnClickListener(v -> updateBoardButton(btnPublicAccount, 
-                new TextView[]{btnNotice, btnFreeBoard, btnMeetingAccount, btnAiReport}));
+            btnPublicAccount.setOnClickListener(v -> {
+                updateBoardButton(btnPublicAccount, 
+                    new TextView[]{btnNotice, btnFreeBoard, btnMeetingAccount, btnAiReport});
+                
+                // EventListFragment로 전환
+                getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.content_container, new EventListFragment())
+                    .commit();
+            });
         }
         
         if (btnMeetingAccount != null) {

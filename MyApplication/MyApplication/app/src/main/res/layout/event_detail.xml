@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     android:orientation="vertical">
 
     <!-- 상단 행사 정보 카드 -->
@@ -14,6 +14,7 @@
         android:padding="16dp">
 
         <TextView
+            android:id="@+id/tv_event_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="2025 상반기 부경대학교 가을 축제 부스 운영"
@@ -26,6 +27,7 @@
             android:gravity="center" />
 
         <TextView
+            android:id="@+id/tv_event_period"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="행사 예정 기간: 2025. 09. 01. ~ 09. 03."
@@ -131,7 +133,7 @@
             android:background="#E0E0E0"
             />
 
-        <!-- 현재 지출 -->
+        <!-- 현재 잔액 -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -142,7 +144,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="현재 지출"
+                android:text="현재 잔액"
                 android:textSize="12sp"
                 android:textColor="#666666"
                 android:layout_marginBottom="3.3dp" />
@@ -154,7 +156,7 @@
                 android:text="25,000원"
                 android:textSize="14sp"
                 android:textStyle="bold"
-                android:textColor="#FF0000" />
+                android:textColor="#0000FF" />
 
         </LinearLayout>
 
@@ -163,7 +165,8 @@
     <!-- 거래 내역 리스트 -->
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="0dp"
+        android:layout_weight="1">
 
         <LinearLayout
             android:layout_width="match_parent"
