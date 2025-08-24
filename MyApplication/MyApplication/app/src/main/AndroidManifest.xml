@@ -42,6 +42,15 @@
             android:name=".LedgerReportCreateActivity"
             android:exported="false" />
 
+        <activity
+            android:name=".ClubListActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ClubCreateActivity"
+            android:exported="false" />
+        <activity
+            android:name=".LedgerListActivity"
+            android:exported="false" />
     </application>
 
 </manifest>

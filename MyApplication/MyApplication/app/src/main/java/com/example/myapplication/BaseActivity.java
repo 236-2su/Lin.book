@@ -9,6 +9,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.widget.LinearLayout;
 import android.content.Intent;
 import com.example.myapplication.LedgerReportActivity;
+import com.example.myapplication.LedgerListActivity;
+import android.graphics.Color;
 
 public abstract class BaseActivity extends AppCompatActivity {
     
@@ -75,7 +77,29 @@ public abstract class BaseActivity extends AppCompatActivity {
         }
     }
     
-    // 각 페이지의 내용을 설정하는 추상 메서드
+    // 앱 제목 설정
+    protected void setAppTitle(String title) {
+        TextView titleText = findViewById(R.id.tv_app_title);
+        if (titleText != null) {
+            titleText.setText(title);
+        }
+    }
+    
+    // 게시판 버튼들 숨김
+    protected void hideBoardButtons() {
+        View boardButtons = findViewById(R.id.board_buttons_container);
+        if (boardButtons != null) {
+            boardButtons.setVisibility(View.GONE);
+        }
+    }
+
+    protected void hideToolbar() {
+        View toolbar = findViewById(R.id.toolbar_root);
+        if (toolbar != null) {
+            toolbar.setVisibility(View.GONE);
+        }
+    }
+
     protected abstract void setupContent();
     
     // 공통 여백 설정 헬퍼 메서드
@@ -156,8 +180,11 @@ public abstract class BaseActivity extends AppCompatActivity {
         }
         
         if (btnPublicAccount != null) {
-            btnPublicAccount.setOnClickListener(v -> updateBoardButton(btnPublicAccount, 
-                new TextView[]{btnNotice, btnFreeBoard, btnMeetingAccount, btnAiReport}));
+            btnPublicAccount.setOnClickListener(v -> {
+                Intent intent = new Intent(this, LedgerListActivity.class);
+                startActivity(intent);
+                overridePendingTransition(0, 0); // 애니메이션 제거
+            });
         }
         
         if (btnMeetingAccount != null) {
@@ -191,17 +218,17 @@ public abstract class BaseActivity extends AppCompatActivity {
         }
     }
     
-    // 게시판 버튼 상태 업데이트
-    private void updateBoardButton(TextView selectedButton, TextView[] unselectedButtons) {
-        // 선택된 버튼을 파란색으로 변경
+    // 게시판 버튼 상태를 업데이트하는 메서드
+    protected void updateBoardButton(TextView selectedButton, TextView... unselectedButtons) {
+        // 선택된 버튼 스타일 적용
         selectedButton.setBackgroundResource(R.drawable.btn_board_selected);
-        selectedButton.setTextColor(android.graphics.Color.parseColor("#FFFFFF"));
-        
-        // 선택되지 않은 모든 버튼을 원래대로 변경
-        for (TextView btn : unselectedButtons) {
-            if (btn != null) {
-                btn.setBackgroundResource(R.drawable.btn_board_background);
-                btn.setTextColor(android.graphics.Color.parseColor("#333333"));
+        selectedButton.setTextColor(Color.parseColor("#FFFFFF"));
+
+        // 선택되지 않은 버튼들 스타일 초기화
+        for (TextView button : unselectedButtons) {
+            if (button != null) {
+                button.setBackgroundResource(R.drawable.btn_board_background);
+                button.setTextColor(Color.parseColor("#333333"));
             }
         }
     }

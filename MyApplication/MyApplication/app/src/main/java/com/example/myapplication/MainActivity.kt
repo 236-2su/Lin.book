@@ -7,6 +7,7 @@ import android.graphics.Color
 import android.view.View
 import android.content.Intent
 import com.example.myapplication.LedgerReportActivity
+import com.example.myapplication.ClubListActivity
 
 class MainActivity : BaseActivity() {
 
@@ -91,7 +92,12 @@ class MainActivity : BaseActivity() {
             }
         }
 
-
+        // 넘어가기 버튼 클릭 리스너 설정
+        val btnNextPage = contentView.findViewById<Button>(R.id.btn_next_page)
+        btnNextPage.setOnClickListener {
+            val intent = Intent(this, ClubListActivity::class.java)
+            startActivity(intent)
+        }
 
     }
 

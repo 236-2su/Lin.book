@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="club_categories">
+        <item>학술</item>
+        <item>체육</item>
+        <item>봉사활동</item>
+        <item>예술</item>
+    </string-array>
+</resources>

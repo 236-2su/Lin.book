@@ -142,22 +142,22 @@
     </style>
 
                                                                                                                                                                                                                                                                                                                                    <!-- reference.xml의 게시판 버튼 스타일 -->
-    <style name="ReferenceBoardButton">
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">36dp</item>
-        <item name="android:layout_marginEnd">6dp</item>
-        <item name="android:textSize">@dimen/category_button_size</item>
-        <item name="android:background">@drawable/btn_board_background</item>
-        <item name="android:textColor">#333333</item>
-        <item name="android:gravity">center</item>
-        <item name="android:clickable">true</item>
-        <item name="android:focusable">true</item>
-        <item name="android:foreground">?android:attr/selectableItemBackground</item>
-        <item name="android:paddingStart">16dp</item>
-        <item name="android:paddingEnd">16dp</item>
-        <item name="android:paddingTop">2dp</item>
-        <item name="android:paddingBottom">2dp</item>
-    </style>
+            <style name="ReferenceBoardButton">
+            <item name="android:layout_width">wrap_content</item>
+            <item name="android:layout_height">36dp</item>
+            <item name="android:layout_marginEnd">6dp</item>
+            <item name="android:textSize">@dimen/category_button_size</item>
+            <item name="android:background">@drawable/btn_board_background</item>
+            <item name="android:textColor">#333333</item>
+            <item name="android:gravity">center</item>
+            <item name="android:clickable">true</item>
+            <item name="android:focusable">true</item>
+            <item name="android:foreground">?android:attr/selectableItemBackground</item>
+            <item name="android:paddingStart">16dp</item>
+            <item name="android:paddingEnd">16dp</item>
+            <item name="android:paddingTop">2dp</item>
+            <item name="android:paddingBottom">2dp</item>
+        </style>
 
     <!-- reference.xml의 작은 버튼 스타일 -->
     <style name="ReferenceSmallButton">
@@ -179,7 +179,7 @@
     <style name="ReferenceRegisterButton">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">51dp</item>
-        <item name="android:textSize">@dimen/text_size_small</item>
+        <item name="android:textSize">16sp</item>
         <item name="android:textColor">#FFFFFF</item>
         <item name="android:background">@drawable/btn_register</item>
         <item name="android:gravity">center</item>
@@ -508,6 +508,12 @@
         <item name="android:textStyle">bold</item>
     </style>
 
+    <style name="ClubCreateInputStyle" parent="InfoBoxStyle">
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:layout_marginBottom">24dp</item>
+    </style>
+
     <!-- 20sp Extra Bold 스타일 -->
     <style name="ExtraBold20Style">
         <item name="android:layout_width">wrap_content</item>
@@ -571,6 +577,37 @@
         <item name="android:layout_height">wrap_content</item>
         <item name="android:textSize">@dimen/text_size_small</item>
         <item name="android:textColor">#333333</item>
+    </style>
+
+    <style name="ClubLargeCardBox">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:background">#FAFAFA</item>
+        <item name="android:padding">16dp</item>
+        <item name="android:layout_marginBottom">16dp</item>
+    </style>
+
+    <style name="ClubSmallCardBox">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:background">#EBEBEB</item>
+        <item name="android:padding">16dp</item>
+        <item name="android:layout_marginBottom">16dp</item>
+    </style>
+
+    <style name="FloatingActionButtonStyle" parent="Widget.Design.FloatingActionButton">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginEnd">8dp</item>
+        <item name="android:layout_marginBottom">16dp</item>
+        <item name="srcCompat">@drawable/pencil</item>
+        <item name="backgroundTint">#2457C5</item>
+        <item name="tint">@android:color/white</item>
+        <item name="elevation">0dp</item>
+        <item name="pressedTranslationZ">0dp</item>
+        <item name="maxImageSize">32dp</item>
     </style>
 
 </resources>
