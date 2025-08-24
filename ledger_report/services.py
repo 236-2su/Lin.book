@@ -1,13 +1,18 @@
 # ledger_report/services.py
 from calendar import monthrange
 from datetime import date as dt_date
+from typing import Optional
 
 from django.db.models import Case, IntegerField, Sum, Value, When
 
 from ledger.models import Ledger, LedgerTransactions  # 기존 앱의 모델 사용
 
 
-def monthly_ledger_stats(ledger_id: int, year: int | None = None, month: int | None = None) -> dict:
+def monthly_ledger_stats(
+    ledger_id: int,
+    year: Optional[int] = None,
+    month: Optional[int] = None,
+) -> dict:
     """
     특정 장부의 월간 통계를 계산해 dict로 반환.
     가정: 수입=양수, 지출=음수
