@@ -76,17 +76,48 @@ class ClubAnnouncementBoardListActivity : AppCompatActivity() {
     }
     
     private fun fetchBoardList() {
-        val url = "$BASE_URL/club/$CLUB_PK/boards/"
-        android.util.Log.d("API_REQUEST", "요청 URL: $url")
+        val primaryUrl = "$BASE_URL/club/$CLUB_PK/boards"
+        val fallbackUrl = "$BASE_URL/club/$CLUB_PK/boards/"
+        android.util.Log.d("API_REQUEST", "요청 URL(우선): $primaryUrl")
         
         val client = OkHttpClient()
-        val request = Request.Builder()
-            .url(url)
-            .get()
-            .addHeader("Content-Type", "application/json")
-            .build()
-        
-        client.newCall(request).enqueue(object : Callback {
+        fun buildRequest(targetUrl: String): Request =
+            Request.Builder()
+                .url(targetUrl)
+                .get()
+                .addHeader("Accept", "application/json")
+                .build()
+
+        fun handleResponse(response: Response, usedUrl: String) {
+            val responseBody = response.body?.string()
+            android.util.Log.d("API_RESPONSE", "응답 코드: ${'$'}{response.code} (URL: ${'$'}usedUrl)")
+            android.util.Log.d("API_RESPONSE", "응답 본문: ${'$'}responseBody")
+            runOnUiThread {
+                if (response.isSuccessful && responseBody != null) {
+                    try {
+                        val gson = Gson()
+                        val type = object : TypeToken<List<BoardItem>>() {}.type
+                        val boards = gson.fromJson<List<BoardItem>>(responseBody, type)
+                        android.util.Log.d("API_SUCCESS", "파싱된 게시글 수: ${'$'}{boards.size}")
+                        val announcementBoards = boards.filter { it.type == "announcement" }
+                        android.util.Log.d("API_SUCCESS", "공지사항 게시글 수: ${'$'}{announcementBoards.size}")
+                        boardList.clear()
+                        boardList.addAll(announcementBoards)
+                        boardAdapter.notifyDataSetChanged()
+                    } catch (e: Exception) {
+                        android.util.Log.e("API_ERROR", "데이터 파싱 오류: ${'$'}{e.message}")
+                        Toast.makeText(this@ClubAnnouncementBoardListActivity, 
+                            "데이터 파싱 오류: ${'$'}{e.message}", Toast.LENGTH_LONG).show()
+                    }
+                } else {
+                    android.util.Log.e("API_ERROR", "서버 오류: ${'$'}{response.code} - ${'$'}responseBody")
+                    Toast.makeText(this@ClubAnnouncementBoardListActivity, 
+                        "서버 오류: ${'$'}{response.code} - ${'$'}{responseBody ?: "응답 없음"}", Toast.LENGTH_LONG).show()
+                }
+            }
+        }
+
+        client.newCall(buildRequest(primaryUrl)).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
                 android.util.Log.e("API_ERROR", "네트워크 오류: ${e.message}")
                 runOnUiThread {
@@ -96,38 +127,22 @@ class ClubAnnouncementBoardListActivity : AppCompatActivity() {
             }
             
             override fun onResponse(call: Call, response: Response) {
-                val responseBody = response.body?.string()
-                android.util.Log.d("API_RESPONSE", "응답 코드: ${response.code}")
-                android.util.Log.d("API_RESPONSE", "응답 본문: $responseBody")
-                
-                runOnUiThread {
-                    if (response.isSuccessful && responseBody != null) {
-                        try {
-                            val gson = Gson()
-                            val type = object : TypeToken<List<BoardItem>>() {}.type
-                            val boards = gson.fromJson<List<BoardItem>>(responseBody, type)
-                            
-                            android.util.Log.d("API_SUCCESS", "파싱된 게시글 수: ${boards.size}")
-                            
-                            // announcement 타입만 필터링
-                            val announcementBoards = boards.filter { it.type == "announcement" }
-                            
-                            android.util.Log.d("API_SUCCESS", "공지사항 게시글 수: ${announcementBoards.size}")
-                            
-                            boardList.clear()
-                            boardList.addAll(announcementBoards)
-                            boardAdapter.notifyDataSetChanged()
-                            
-                        } catch (e: Exception) {
-                            android.util.Log.e("API_ERROR", "데이터 파싱 오류: ${e.message}")
-                            Toast.makeText(this@ClubAnnouncementBoardListActivity, 
-                                "데이터 파싱 오류: ${e.message}", Toast.LENGTH_LONG).show()
+                if (!response.isSuccessful && response.code == 400) {
+                    android.util.Log.w("API_RETRY", "400 발생. 대체 URL로 재시도: $fallbackUrl")
+                    client.newCall(buildRequest(fallbackUrl)).enqueue(object : Callback {
+                        override fun onFailure(call: Call, e: IOException) {
+                            android.util.Log.e("API_ERROR", "재시도 네트워크 오류: ${'$'}{e.message}")
+                            runOnUiThread {
+                                Toast.makeText(this@ClubAnnouncementBoardListActivity,
+                                    "재시도 네트워크 오류: ${'$'}{e.message}", Toast.LENGTH_LONG).show()
+                            }
                         }
-                    } else {
-                        android.util.Log.e("API_ERROR", "서버 오류: ${response.code} - $responseBody")
-                        Toast.makeText(this@ClubAnnouncementBoardListActivity, 
-                            "서버 오류: ${response.code} - ${responseBody ?: "응답 없음"}", Toast.LENGTH_LONG).show()
-                    }
+                        override fun onResponse(call: Call, retryResponse: Response) {
+                            handleResponse(retryResponse, fallbackUrl)
+                        }
+                    })
+                } else {
+                    handleResponse(response, primaryUrl)
                 }
             }
         })
