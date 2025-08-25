@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 앱 이름 -->
+    <string name="app_name">Lin.Book</string>
+    
+    <!-- 앱 제목 및 로고 -->
+    <string name="app_logo">YHE</string>
+    <string name="app_title">동아리</string>
+
+    <!-- activity_club_create.xml 대분류 스피너 옵션 -->
+    <string-array name="club_categories">
+        <item>학술</item>
+        <item>체육</item>
+        <item>봉사활동</item>
+        <item>예술</item>
+        <item>기타</item>
+    </string-array>
+
+    <!-- LedgerEditActivity 스피너 배열 -->
+    <string-array name="ledger_types">
+        <item>수입</item>
+        <item>지출</item>
+    </string-array>
+    <string-array name="payment_methods">
+        <item>현금</item>
+        <item>카드</item>
+        <item>계좌이체</item>
+        <item>기타</item>
+    </string-array>
+
+    <!-- 내 동아리 섹션 -->
+    <string name="my_clubs_title">내 동아리</string>
+    <string name="my_club_name">짱구네 코딩</string>
+    <string name="my_club_location">싸피캠퍼스 학생회관 421호</string>
+    <string name="my_club_hashtag_1">#분위기가좋은</string>
+    <string name="my_club_hashtag_2">#동아리실이 편한</string>
+
+    <!-- 카테고리 필터 버튼 -->
+    <string name="category_all">전체</string>
+    <string name="category_academic">학술</string>
+    <string name="category_sports">체육</string>
+    <string name="category_volunteer">봉사활동</string>
+    <string name="category_art">예술</string>
+
+    <!-- 동아리 카드 정보 -->
+    <string name="club_name">방구석 경제</string>
+    <string name="club_location">싸피캠퍼스 학생회관 421호</string>
+    <string name="club_hashtag">#분위기가 좋은</string>
+    <string name="club_intro_title">동아리 소개</string>
+    <string name="club_intro_text">경제를 좋아하는 사람이라면 누구나, 함께 생각하고 말하는 힘을 키워보세요!</string>
+
+    <!-- 기존 텍스트들 -->
+    <string name="comment_hint">댓글을 입력해주세요</string>
+    <string name="register_button">등록하기</string>
+</resources>
