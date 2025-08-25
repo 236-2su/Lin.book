@@ -4,6 +4,17 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    
+    <!-- 카메라 하드웨어 기능 선언 -->
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.camera.autofocus"
+        android:required="false" />
 
     <application
         android:allowBackup="true"
@@ -43,7 +54,20 @@
             android:exported="false" />
 
         <activity
+		android:name=".ClubCreateActivity"
+            android:exported="false" />
+        <activity
+            android:name=".LedgerDetailActivity"
+            android:exported="false" />
+        <activity
+            android:name=".LedgerCreateActivity"
+            android:exported="false" />
+	<activity   
             android:name=".MemberManagementActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".LedgerEditActivity"
             android:exported="false" />
 
     </application>
