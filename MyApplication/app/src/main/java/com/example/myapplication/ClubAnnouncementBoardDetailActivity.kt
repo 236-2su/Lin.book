@@ -13,7 +13,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.snackbar.Snackbar
 
-class ClubCommonBoardDetailActivity : AppCompatActivity() {
+class ClubAnnouncementBoardDetailActivity : AppCompatActivity() {
     
     private lateinit var boardItem: BoardItem
     
@@ -64,7 +64,7 @@ class ClubCommonBoardDetailActivity : AppCompatActivity() {
             when (item.itemId) {
                 R.id.action_edit -> {
                     // 수정하기 화면으로 이동
-                    val intent = Intent(this, ClubCommonBoardUpdateActivity::class.java)
+                    val intent = Intent(this, ClubAnnouncementBoardUpdateActivity::class.java)
                     intent.putExtra("board_item", boardItem)
                     startActivity(intent)
                     true

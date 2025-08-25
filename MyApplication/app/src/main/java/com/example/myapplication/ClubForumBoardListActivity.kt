@@ -64,7 +64,7 @@ class ClubForumBoardListActivity : AppCompatActivity() {
     private fun setupBoardButtons() {
         // 공지사항 버튼
         findViewById<TextView>(R.id.btn_notice).setOnClickListener {
-            val intent = Intent(this, ClubCommonBoardListActivity::class.java)
+            val intent = Intent(this, ClubAnnouncementBoardListActivity::class.java)
             startActivity(intent)
             finish()
         }

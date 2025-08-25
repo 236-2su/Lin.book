@@ -43,19 +43,19 @@
             android:exported="false" />
 
         <activity
-            android:name=".ClubCommonBoardListActivity"
+            android:name=".ClubAnnouncementBoardListActivity"
             android:exported="false" />
 
         <activity
-            android:name=".ClubCommonBoardDetailActivity"
+            android:name=".ClubAnnouncementBoardDetailActivity"
             android:exported="false" />
 
         <activity
-            android:name=".ClubCommonBoardCreateActivity"
+            android:name=".ClubAnnouncementBoardCreateActivity"
             android:exported="false" />
 
         <activity
-            android:name=".ClubCommonBoardUpdateActivity"
+            android:name=".ClubAnnouncementBoardUpdateActivity"
             android:exported="false" />
 
         <activity

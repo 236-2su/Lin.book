@@ -6,7 +6,7 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 
-class ClubCommonBoardUpdateActivity : AppCompatActivity() {
+class ClubAnnouncementBoardUpdateActivity : AppCompatActivity() {
     
     private lateinit var etTitle: EditText
     private lateinit var etContent: EditText

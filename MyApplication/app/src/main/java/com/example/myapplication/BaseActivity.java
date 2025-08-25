@@ -137,8 +137,8 @@ public abstract class BaseActivity extends AppCompatActivity {
                 updateBoardButton(btnNotice, 
                     new TextView[]{btnFreeBoard, btnPublicAccount, btnMeetingAccount, btnAiReport});
                 
-                // 공지사항 버튼 클릭 시 ClubCommonBoardListActivity로 이동
-                Intent intent = new Intent(this, ClubCommonBoardListActivity.class);
+                // 공지사항 버튼 클릭 시 ClubAnnouncementBoardListActivity로 이동
+                Intent intent = new Intent(this, ClubAnnouncementBoardListActivity.class);
                 startActivity(intent);
 
                 // 페이지 전환 애니메이션 제거

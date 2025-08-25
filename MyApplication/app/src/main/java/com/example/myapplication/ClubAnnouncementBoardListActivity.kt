@@ -13,7 +13,7 @@ import com.google.gson.reflect.TypeToken
 import okhttp3.*
 import java.io.IOException
 
-class ClubCommonBoardListActivity : AppCompatActivity() {
+class ClubAnnouncementBoardListActivity : AppCompatActivity() {
     
     private lateinit var recyclerView: RecyclerView
     private lateinit var boardAdapter: BoardAdapter
@@ -40,7 +40,7 @@ class ClubCommonBoardListActivity : AppCompatActivity() {
         
         // Floating Action Button 설정
         findViewById<com.google.android.material.floatingactionbutton.FloatingActionButton>(R.id.fab_add_post).setOnClickListener {
-            val intent = Intent(this, ClubCommonBoardCreateActivity::class.java)
+            val intent = Intent(this, ClubAnnouncementBoardCreateActivity::class.java)
             startActivity(intent)
         }
         
@@ -50,7 +50,7 @@ class ClubCommonBoardListActivity : AppCompatActivity() {
         
         boardAdapter = BoardAdapter(boardList) { boardItem ->
             // 아이템 클릭 시 상세 페이지로 이동
-            val intent = Intent(this, ClubCommonBoardDetailActivity::class.java)
+            val intent = Intent(this, ClubAnnouncementBoardDetailActivity::class.java)
             intent.putExtra("board_item", boardItem)
             startActivity(intent)
         }
@@ -90,7 +90,7 @@ class ClubCommonBoardListActivity : AppCompatActivity() {
             override fun onFailure(call: Call, e: IOException) {
                 android.util.Log.e("API_ERROR", "네트워크 오류: ${e.message}")
                 runOnUiThread {
-                    Toast.makeText(this@ClubCommonBoardListActivity, 
+                    Toast.makeText(this@ClubAnnouncementBoardListActivity, 
                         "네트워크 오류: ${e.message}", Toast.LENGTH_LONG).show()
                 }
             }
@@ -120,12 +120,12 @@ class ClubCommonBoardListActivity : AppCompatActivity() {
                             
                         } catch (e: Exception) {
                             android.util.Log.e("API_ERROR", "데이터 파싱 오류: ${e.message}")
-                            Toast.makeText(this@ClubCommonBoardListActivity, 
+                            Toast.makeText(this@ClubAnnouncementBoardListActivity, 
                                 "데이터 파싱 오류: ${e.message}", Toast.LENGTH_LONG).show()
                         }
                     } else {
                         android.util.Log.e("API_ERROR", "서버 오류: ${response.code} - $responseBody")
-                        Toast.makeText(this@ClubCommonBoardListActivity, 
+                        Toast.makeText(this@ClubAnnouncementBoardListActivity, 
                             "서버 오류: ${response.code} - ${responseBody ?: "응답 없음"}", Toast.LENGTH_LONG).show()
                     }
                 }
