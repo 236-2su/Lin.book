@@ -4,6 +4,7 @@ from datetime import date as dt_date
 from typing import Optional
 
 from django.db.models import Case, IntegerField, Sum, Value, When
+from django.db.models.functions import TruncDate
 
 from ledger.models import Ledger, LedgerTransactions  # 기존 앱의 모델 사용
 
@@ -27,7 +28,7 @@ def monthly_ledger_stats(
     last_day = monthrange(year, month)[1]
     end = dt_date(year, month, last_day)
 
-    qs = LedgerTransactions.objects.filter(ledger=ledger, date__gte=start, date__lte=end)
+    qs = LedgerTransactions.objects.filter(ledger=ledger, date_time__date__range=(start, end))
 
     income_sum = qs.filter(amount__gt=0).aggregate(s=Sum("amount"))["s"] or 0
     expense_sum_raw = qs.filter(amount__lt=0).aggregate(s=Sum("amount"))["s"] or 0
@@ -77,11 +78,18 @@ def monthly_ledger_stats(
         )
 
     # 일자별(빈 날은 0으로 채움)
-    daily_totals = dict(qs.values_list("date").annotate(total=Sum("amount")).values_list("date", "total"))
+    daily_totals = (
+        qs.annotate(date=TruncDate("date_time"))
+        .values("date")
+        .annotate(total=Sum("amount"))
+        .values_list("date", "total")
+    )
+    daily_totals_dict = dict(daily_totals)
+
     daily_series = []
     for d in range(1, last_day + 1):
         day = dt_date(year, month, d)
-        daily_series.append({"date": day.isoformat(), "total": int(daily_totals.get(day, 0) or 0)})
+        daily_series.append({"date": day.isoformat(), "total": int(daily_totals_dict.get(day, 0) or 0)})
 
     return {
         "ledger_id": ledger.id,
