@@ -28,30 +28,7 @@
     <string name="club_intro_title">동아리 소개</string>
     <string name="club_intro_text">경제를 좋아하는 사람이라면 누구나, 함께 생각하고 말하는 힘을 키워보세요!</string>
 
-    <!-- 동아리 카테고리 -->
-    <string-array name="club_categories">
-        <item>학술</item>
-        <item>체육</item>
-        <item>봉사</item>
-        <item>예술</item>
-        <item>종교</item>
-        <item>친목</item>
-    </string-array>
-
     <!-- 기존 텍스트들 -->
     <string name="comment_hint">댓글을 입력해주세요</string>
     <string name="register_button">등록하기</string>
-
-    <!-- 장부 타입 -->
-    <string-array name="ledger_types">
-        <item>수입</item>
-        <item>지출</item>
-    </string-array>
-
-    <!-- 결제 수단 -->
-    <string-array name="payment_methods">
-        <item>현금</item>
-        <item>카드</item>
-        <item>계좌이체</item>
-    </string-array>
 </resources>

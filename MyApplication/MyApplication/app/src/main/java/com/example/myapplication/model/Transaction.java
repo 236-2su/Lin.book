@@ -16,7 +16,7 @@ public class Transaction {
     private String date;
     
     @SerializedName("amount")
-    private long amount; // int -> long
+    private int amount;
     
     @SerializedName("type")
     private String type;
@@ -26,12 +26,6 @@ public class Transaction {
     
     @SerializedName("description")
     private String description;
-    
-    @SerializedName("ledger_id")
-    private int ledgerId;
-    
-    @SerializedName("club_pk")
-    private int clubPk;
     
     @SerializedName("vendor")
     private String vendor;
@@ -59,7 +53,7 @@ public class Transaction {
         return date;
     }
     
-    public long getAmount() { // int -> long
+    public int getAmount() {
         return amount;
     }
     
@@ -75,22 +69,6 @@ public class Transaction {
         return description;
     }
     
-    public int getLedgerId() {
-        return ledgerId;
-    }
-
-    public void setLedgerId(int ledgerId) {
-        this.ledgerId = ledgerId;
-    }
-
-    public int getClubPk() {
-        return clubPk;
-    }
-
-    public void setClubPk(int clubPk) {
-        this.clubPk = clubPk;
-    }
-
     public String getVendor() {
         return vendor;
     }
@@ -120,7 +98,7 @@ public class Transaction {
         this.date = date;
     }
     
-    public void setAmount(long amount) { // int -> long
+    public void setAmount(int amount) {
         this.amount = amount;
     }
     

@@ -2,11 +2,11 @@ package com.example.myapplication
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.ImageButton
+import android.widget.Button
 
 class LedgerReportActivity : BaseActivity() {
 
-    override fun setupContent(savedInstanceState: Bundle?) {
+    override fun setupContent() {
         // AI 리포트 버튼을 선택된 상태로 설정
         selectBoardButton(btnAiReport)
         
@@ -25,7 +25,7 @@ class LedgerReportActivity : BaseActivity() {
 
     private fun setupButtonClickEvents(contentView: android.view.View) {
         // 리포트 생성 버튼 클릭 이벤트
-        val btnCreateReport = contentView.findViewById<ImageButton>(R.id.btn_create_report)
+        val btnCreateReport = contentView.findViewById<Button>(R.id.btn_create_report)
         btnCreateReport.setOnClickListener {
             val intent = Intent(this, LedgerReportCreateActivity::class.java)
             startActivity(intent)

@@ -10,37 +10,13 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.fragment.app.Fragment;
 import com.example.myapplication.api.ApiClient;
-import com.example.myapplication.api.ApiService;
 import com.example.myapplication.model.Ledger;
-import com.example.myapplication.LedgerApiItem; // LedgerApiItem 임포트 추가
 import java.util.List;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import android.content.Intent; // Intent 임포트 추가
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 public class EventListFragment extends Fragment {
-
-    private LinearLayout ledgerContainer;
-    private int clubPk; // clubPk 멤버 변수 선언
-
-    public static EventListFragment newInstance(int clubPk) {
-        EventListFragment fragment = new EventListFragment();
-        Bundle args = new Bundle();
-        args.putInt("club_pk", clubPk);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            this.clubPk = getArguments().getInt("club_pk"); // 멤버 변수에 clubPk 저장
-        }
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -49,11 +25,8 @@ public class EventListFragment extends Fragment {
     }
 
     @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        
-        ledgerContainer = view.findViewById(R.id.ledger_container);
-        loadLedgerList(this.clubPk); // 저장된 멤버 변수 사용
         
         // 행사 장부 생성 버튼 클릭 리스너
         View createEventButton = view.findViewById(R.id.btn_create_event);
@@ -67,18 +40,21 @@ public class EventListFragment extends Fragment {
                     .commit();
             });
         }
+        
+        // API 호출하여 장부 목록 가져오기
+        loadLedgerList();
     }
     
-    private void loadLedgerList(int clubPk) {
+    private void loadLedgerList() {
         // SharedPreferences에서 club_pk 가져오기 (임시로 2 사용)
-        // int clubPk = 4; // TODO: SharedPreferences에서 실제 club_pk 가져오기
+        int clubPk = 4; // TODO: SharedPreferences에서 실제 club_pk 가져오기
         
         
-        ApiClient.getApiService().getLedgerList(clubPk).enqueue(new Callback<List<LedgerApiItem>>() {
+        ApiClient.getApiService().getLedgerList(clubPk).enqueue(new Callback<List<Ledger>>() {
             @Override
-            public void onResponse(Call<List<LedgerApiItem>> call, Response<List<LedgerApiItem>> response) {
+            public void onResponse(Call<List<Ledger>> call, Response<List<Ledger>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    List<LedgerApiItem> ledgers = response.body();
+                    List<Ledger> ledgers = response.body();
                     Log.d("EventListFragment", "API 성공: " + ledgers.size() + "개 장부");
                     
                     // UI 업데이트 (기존 하드코딩된 아이템들을 API 데이터로 교체)
@@ -89,13 +65,13 @@ public class EventListFragment extends Fragment {
             }
 
             @Override
-            public void onFailure(Call<List<LedgerApiItem>> call, Throwable t) {
+            public void onFailure(Call<List<Ledger>> call, Throwable t) {
                 Log.e("EventListFragment", "API 호출 실패: " + t.getMessage());
             }
         });
     }
     
-    private void updateLedgerItems(List<LedgerApiItem> ledgers) {
+    private void updateLedgerItems(List<Ledger> ledgers) {
         View rootView = getView();
         if (rootView == null) return;
         
@@ -117,13 +93,13 @@ public class EventListFragment extends Fragment {
         LinearLayout mainContainer = (LinearLayout) rootView;
         
         // API 데이터로 동적 아이템 생성
-        for (LedgerApiItem ledger : ledgers) {
+        for (Ledger ledger : ledgers) {
             View ledgerItem = createLedgerItemView(ledger);
             mainContainer.addView(ledgerItem);
         }
     }
     
-    private View createLedgerItemView(LedgerApiItem ledger) {
+    private View createLedgerItemView(Ledger ledger) {
         // 동적으로 장부 아이템 생성 (기존 아이템과 동일한 스타일)
         LinearLayout itemLayout = new LinearLayout(getContext());
         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
@@ -158,7 +134,7 @@ public class EventListFragment extends Fragment {
             // EventDetailFragment로 전환하면서 ledger ID 전달
             Bundle bundle = new Bundle();
             bundle.putInt("ledger_id", ledger.getId());
-            bundle.putInt("club_pk", this.clubPk); // ledger.getClub() -> this.clubPk
+            bundle.putInt("club_pk", ledger.getClub());
             
             EventDetailFragment fragment = new EventDetailFragment();
             fragment.setArguments(bundle);

@@ -9,9 +9,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.widget.LinearLayout;
 import android.content.Intent;
 import com.example.myapplication.LedgerReportActivity;
-import android.graphics.Color;
-import com.example.myapplication.LedgerListFragment;
-import com.example.myapplication.ReferenceFragment;
 
 public abstract class BaseActivity extends AppCompatActivity {
     
@@ -31,44 +28,30 @@ public abstract class BaseActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        android.util.Log.d("BaseActivity", "=== onCreate 시작 ===");
-        try {
-            setContentView(R.layout.root_page);
-            android.util.Log.d("BaseActivity", "setContentView(R.layout.root_page) 성공");
-            
-            setupHeader();
-            android.util.Log.d("BaseActivity", "setupHeader() 호출 성공");
-            
-            setupContent(savedInstanceState);
-            android.util.Log.d("BaseActivity", "setupContent() 호출 성공");
-
-        } catch (Exception e) {
-            android.util.Log.e("BaseActivity", "onCreate에서 심각한 오류 발생!", e);
-        }
-        android.util.Log.d("BaseActivity", "=== onCreate 완료 ===");
+        setContentView(R.layout.root_page);
+        setupHeader();
+        setupContent();
     }
     
     // 상단 헤더 설정 (로고, 제목 등)
     private void setupHeader() {
-        android.util.Log.d("BaseActivity", "--- setupHeader 시작 ---");
         // 로고 설정
         ImageView logoImage = findViewById(R.id.iv_logo);
         logoImage.setImageResource(R.drawable.logo);
-        android.util.Log.d("BaseActivity", "로고 이미지 설정 완료");
         
         // 뒤로가기 버튼 설정
         backButton = findViewById(R.id.btn_back);
         setupBackButton();
-        android.util.Log.d("BaseActivity", "뒤로가기 버튼 설정 완료");
         
         // 기본적으로 뒤로가기 버튼 숨김
         hideBackButton();
-        android.util.Log.d("BaseActivity", "뒤로가기 버튼 숨김 완료");
         
         // 게시판 버튼들 설정
         setupBoardButtons();
-        android.util.Log.d("BaseActivity", "게시판 버튼 설정 완료");
-        android.util.Log.d("BaseActivity", "--- setupHeader 완료 ---");
+        
+//        // 앱 제목 설정
+//        TextView titleText = findViewById(R.id.tv_app_title);
+//        TextView titleText.setText(R.string.app_title);
     }
     
     // 뒤로가기 버튼 기본 설정
@@ -92,38 +75,8 @@ public abstract class BaseActivity extends AppCompatActivity {
         }
     }
     
-    // 앱 제목 설정
-    protected void setAppTitle(String title) {
-        TextView titleText = findViewById(R.id.tv_app_title);
-        if (titleText != null) {
-            titleText.setText(title);
-        }
-    }
-    
-    // 게시판 버튼들 숨김
-    protected void hideBoardButtons() {
-        View boardButtons = findViewById(R.id.board_buttons_container);
-        if (boardButtons != null) {
-            boardButtons.setVisibility(View.GONE);
-        }
-    }
-
-    // 게시판 버튼들 표시
-    protected void showBoardButtons() {
-        View boardButtons = findViewById(R.id.board_buttons_container);
-        if (boardButtons != null) {
-            boardButtons.setVisibility(View.VISIBLE);
-        }
-    }
-
-    protected void hideToolbar() {
-        View toolbar = findViewById(R.id.toolbar_root);
-        if (toolbar != null) {
-            toolbar.setVisibility(View.GONE);
-        }
-    }
-
-    protected abstract void setupContent(Bundle savedInstanceState);
+    // 각 페이지의 내용을 설정하는 추상 메서드
+    protected abstract void setupContent();
     
     // 공통 여백 설정 헬퍼 메서드
     protected void applyCommonMargins(View view) {
@@ -165,15 +118,14 @@ public abstract class BaseActivity extends AppCompatActivity {
             btnPublicAccount.setBackgroundResource(R.drawable.btn_board_background);
             btnPublicAccount.setTextColor(android.graphics.Color.parseColor("#333333"));
         }
-        if (btnMeetingAccount != null) {
-            btnMeetingAccount.setBackgroundResource(R.drawable.btn_board_background);
-            btnMeetingAccount.setTextColor(android.graphics.Color.parseColor("#333333"));
-        }
         if (btnEventAccount != null) {
             btnEventAccount.setBackgroundResource(R.drawable.btn_board_background);
             btnEventAccount.setTextColor(android.graphics.Color.parseColor("#333333"));
         }
-
+        if (btnMeetingAccount != null) {
+            btnMeetingAccount.setBackgroundResource(R.drawable.btn_board_background);
+            btnMeetingAccount.setTextColor(android.graphics.Color.parseColor("#333333"));
+        }
         if (btnAiReport != null) {
             btnAiReport.setBackgroundResource(R.drawable.btn_board_background);
             btnAiReport.setTextColor(android.graphics.Color.parseColor("#333333"));
@@ -187,58 +139,48 @@ public abstract class BaseActivity extends AppCompatActivity {
     private void setupBoardButtonListeners() {
         if (btnNotice != null) {
             btnNotice.setOnClickListener(v -> {
+                // 이미 현재 페이지인 경우 아무것도 하지 않음
+                if (this instanceof MainActivity) {
+                    return;
+                }
                 updateBoardButton(btnNotice, 
                     new TextView[]{btnFreeBoard, btnPublicAccount, btnEventAccount, btnMeetingAccount, btnAiReport});
+                
+                // 공지사항 버튼 클릭 시 MainActivity로 이동
+                Intent intent = new Intent(this, MainActivity.class);
+                startActivity(intent);
 
-                if (this instanceof MainActivity) {
-                    ((MainActivity) this).replaceFragment(new ReferenceFragment());
-                } else {
-                    Intent intent = new Intent(this, MainActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                    startActivity(intent);
-                    overridePendingTransition(0, 0);
-                }
+                // 페이지 전환 애니메이션 제거
+                overridePendingTransition(0, 0);
             });
         }
         
         if (btnFreeBoard != null) {
-            btnFreeBoard.setOnClickListener(v -> {
-                updateBoardButton(btnFreeBoard, 
-                    new TextView[]{btnNotice, btnPublicAccount, btnEventAccount, btnMeetingAccount, btnAiReport});
-                // TODO: FreeBoardFragment 만들어서 교체하는 로직 추가
-            });
+            btnFreeBoard.setOnClickListener(v -> updateBoardButton(btnFreeBoard, 
+                new TextView[]{btnNotice, btnPublicAccount, btnEventAccount, btnMeetingAccount, btnAiReport}));
         }
         
         if (btnPublicAccount != null) {
-            btnPublicAccount.setOnClickListener(v -> {
-                updateBoardButton(btnPublicAccount, 
-                    new TextView[]{btnNotice, btnFreeBoard, btnEventAccount, btnMeetingAccount, btnAiReport});
-                
-                if (this instanceof MainActivity) {
-                    ((MainActivity) this).replaceFragment(new LedgerListFragment());
-                } else {
-                    Intent intent = new Intent(this, MainActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                    startActivity(intent);
-                    overridePendingTransition(0, 0);
-                }
-            });
+            btnPublicAccount.setOnClickListener(v -> updateBoardButton(btnPublicAccount, 
+                new TextView[]{btnNotice, btnFreeBoard, btnEventAccount, btnMeetingAccount, btnAiReport}));
         }
         
         if (btnEventAccount != null) {
             btnEventAccount.setOnClickListener(v -> {
                 updateBoardButton(btnEventAccount, 
                     new TextView[]{btnNotice, btnFreeBoard, btnPublicAccount, btnMeetingAccount, btnAiReport});
-                // TODO: EventAccountFragment 만들어서 교체하는 로직 추가
+                
+                // EventListFragment로 전환
+                getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.content_container, new EventListFragment())
+                    .commit();
             });
         }
         
         if (btnMeetingAccount != null) {
-            btnMeetingAccount.setOnClickListener(v -> {
-                updateBoardButton(btnMeetingAccount, 
-                    new TextView[]{btnNotice, btnFreeBoard, btnPublicAccount, btnEventAccount, btnAiReport});
-                // TODO: MeetingAccountFragment 만들어서 교체하는 로직 추가
-            });
+            btnMeetingAccount.setOnClickListener(v -> updateBoardButton(btnMeetingAccount, 
+                new TextView[]{btnNotice, btnFreeBoard, btnPublicAccount, btnEventAccount, btnAiReport}));
         }
         
         if (btnAiReport != null) {
@@ -267,17 +209,17 @@ public abstract class BaseActivity extends AppCompatActivity {
         }
     }
     
-    // 게시판 버튼 상태를 업데이트하는 메서드
-    protected void updateBoardButton(TextView selectedButton, TextView... unselectedButtons) {
-        // 선택된 버튼 스타일 적용
+    // 게시판 버튼 상태 업데이트
+    private void updateBoardButton(TextView selectedButton, TextView[] unselectedButtons) {
+        // 선택된 버튼을 파란색으로 변경
         selectedButton.setBackgroundResource(R.drawable.btn_board_selected);
-        selectedButton.setTextColor(Color.parseColor("#FFFFFF"));
-
-        // 선택되지 않은 버튼들 스타일 초기화
-        for (TextView button : unselectedButtons) {
-            if (button != null) {
-                button.setBackgroundResource(R.drawable.btn_board_background);
-                button.setTextColor(Color.parseColor("#333333"));
+        selectedButton.setTextColor(android.graphics.Color.parseColor("#FFFFFF"));
+        
+        // 선택되지 않은 모든 버튼을 원래대로 변경
+        for (TextView btn : unselectedButtons) {
+            if (btn != null) {
+                btn.setBackgroundResource(R.drawable.btn_board_background);
+                btn.setTextColor(android.graphics.Color.parseColor("#333333"));
             }
         }
     }
