@@ -5,8 +5,9 @@ from rest_framework.response import Response
 
 from club.models import Club
 
-from .models import Ledger, LedgerTransactions, Receipt
+from .models import Event, Ledger, LedgerTransactions, Receipt
 from .serializers import (
+    EventSerializer,
     LedgerCreateSerializer,
     LedgerSerializer,
     LedgerTransactionCreateSerializer,
@@ -309,3 +310,99 @@ class ReceiptViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return Receipt.objects.filter(ledgertransactions__ledger_id=self.kwargs["ledger_pk"])
+
+
+@extend_schema_view(
+    list=extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="club_pk", description="클럽 ID", required=True, type=int, location=OpenApiParameter.PATH
+            ),
+        ],
+        summary="이벤트 목록 조회",
+        description="클럽의 전체 이벤트 목록을 조회합니다.",
+        responses={200: OpenApiResponse(response=EventSerializer, description="OK")},
+        tags=["Event"],
+    ),
+    retrieve=extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="club_pk", description="클럽 ID", required=True, type=int, location=OpenApiParameter.PATH
+            ),
+        ],
+        summary="특정 이벤트 조회",
+        description="ID로 특정 이벤트의 상세 정보를 조회합니다.",
+        responses={
+            200: OpenApiResponse(EventSerializer, description="OK"),
+            404: OpenApiResponse(description="Not Found"),
+        },
+        tags=["Event"],
+    ),
+    create=extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="club_pk", description="클럽 ID", required=True, type=int, location=OpenApiParameter.PATH
+            ),
+        ],
+        summary="이벤트 생성",
+        description="새로운 이벤트를 생성합니다.",
+        request=EventSerializer,
+        responses={
+            201: OpenApiResponse(EventSerializer, description="Created"),
+            400: OpenApiResponse(description="Bad Request"),
+        },
+        tags=["Event"],
+    ),
+    update=extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="club_pk", description="클럽 ID", required=True, type=int, location=OpenApiParameter.PATH
+            ),
+        ],
+        summary="이벤트 정보 전체 수정 (PUT)",
+        description="이벤트의 모든 필드를 갱신합니다.",
+        request=EventSerializer,
+        responses={
+            200: OpenApiResponse(EventSerializer, description="OK"),
+            400: OpenApiResponse(description="Bad Request"),
+            404: OpenApiResponse(description="Not Found"),
+        },
+        tags=["Event"],
+    ),
+    partial_update=extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="club_pk", description="클럽 ID", required=True, type=int, location=OpenApiParameter.PATH
+            ),
+        ],
+        summary="이벤트 정보 부분 수정 (PATCH)",
+        description="이벤트의 일부 필드만 부분 갱신합니다.",
+        request=EventSerializer,
+        responses={
+            200: OpenApiResponse(EventSerializer, description="OK"),
+            400: OpenApiResponse(description="Bad Request"),
+            404: OpenApiResponse(description="Not Found"),
+        },
+        tags=["Event"],
+    ),
+    destroy=extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="club_pk", description="클럽 ID", required=True, type=int, location=OpenApiParameter.PATH
+            ),
+        ],
+        summary="이벤트 삭제",
+        description="ID로 특정 이벤트를 삭제합니다.",
+        responses={204: OpenApiResponse(description="No Content"), 404: OpenApiResponse(description="Not Found")},
+        tags=["Event"],
+    ),
+)
+class EventViewSet(viewsets.ModelViewSet):
+    serializer_class = EventSerializer
+
+    def get_queryset(self):
+        return Event.objects.filter(club_id=self.kwargs["club_pk"])
+
+    def perform_create(self, serializer):
+        club = get_object_or_404(Club, pk=self.kwargs["club_pk"])
+        serializer.save(club=club)
