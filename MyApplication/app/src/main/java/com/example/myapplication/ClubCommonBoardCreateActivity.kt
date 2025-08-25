@@ -15,7 +15,7 @@ class ClubCommonBoardCreateActivity : AppCompatActivity() {
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_club_common_board_create)
+        setContentView(R.layout.activity_club_announcement_board_create)
         
         initViews()
         setupListeners()

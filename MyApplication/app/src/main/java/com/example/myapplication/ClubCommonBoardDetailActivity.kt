@@ -19,7 +19,7 @@ class ClubCommonBoardDetailActivity : AppCompatActivity() {
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_club_common_board_detail)
+        setContentView(R.layout.activity_club_announcement_board_detail)
         
         // Intent에서 BoardItem 데이터 받기
         boardItem = intent.getParcelableExtra("board_item") ?: BoardItem(

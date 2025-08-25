@@ -26,7 +26,7 @@ class ClubCommonBoardListActivity : AppCompatActivity() {
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_club_common_board_list)
+        setContentView(R.layout.activity_club_announcement_board_list)
         
         // 뒤로가기 버튼 설정
         findViewById<Button>(R.id.btn_back).setOnClickListener {
