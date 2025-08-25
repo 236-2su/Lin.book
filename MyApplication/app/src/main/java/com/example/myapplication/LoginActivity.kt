@@ -39,8 +39,8 @@ class LoginActivity : AppCompatActivity() {
         btnLogin.setOnClickListener {
             // TODO: 실제 로그인 검증 로직 구현 (현재는 검증 없이 바로 이동)
             
-            // ClubCommonBoardListActivity로 이동
-            val intent = android.content.Intent(this, ClubCommonBoardListActivity::class.java)
+            // ClubAnnouncementBoardListActivity로 이동
+            val intent = android.content.Intent(this, ClubAnnouncementBoardListActivity::class.java)
             startActivity(intent)
             finish() // LoginActivity 종료
         }

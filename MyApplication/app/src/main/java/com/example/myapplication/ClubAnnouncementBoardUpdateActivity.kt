@@ -6,19 +6,26 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 
-class ClubCommonBoardCreateActivity : AppCompatActivity() {
+class ClubAnnouncementBoardUpdateActivity : AppCompatActivity() {
     
     private lateinit var etTitle: EditText
     private lateinit var etContent: EditText
     private lateinit var btnBack: Button
     private lateinit var btnSubmit: Button
+    private lateinit var boardItem: BoardItem
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_club_common_board_create)
+        setContentView(R.layout.activity_club_announcement_board_update)
+        
+        // Intent에서 BoardItem 데이터 받기
+        boardItem = intent.getParcelableExtra("board_item") ?: BoardItem(
+            1, "announcement", "샘플 게시글", "샘플 내용", 13, "2025-08-20T10:25:00.000000+09:00", 1
+        )
         
         initViews()
         setupListeners()
+        loadBoardData()
     }
     
     private fun initViews() {
@@ -35,9 +42,14 @@ class ClubCommonBoardCreateActivity : AppCompatActivity() {
         
         btnSubmit.setOnClickListener {
             if (validateInput()) {
-                createBoard()
+                updateBoard()
             }
         }
+    }
+    
+    private fun loadBoardData() {
+        etTitle.setText(boardItem.title)
+        etContent.setText(boardItem.content)
     }
     
     private fun validateInput(): Boolean {
@@ -59,12 +71,12 @@ class ClubCommonBoardCreateActivity : AppCompatActivity() {
         return true
     }
     
-    private fun createBoard() {
+    private fun updateBoard() {
         val title = etTitle.text.toString().trim()
         val content = etContent.text.toString().trim()
         
-        // TODO: API 호출하여 게시글 생성
-        Toast.makeText(this, "게시글이 작성되었습니다.", Toast.LENGTH_SHORT).show()
+        // TODO: API 호출하여 게시글 수정
+        Toast.makeText(this, "게시글이 수정되었습니다.", Toast.LENGTH_SHORT).show()
         finish()
     }
 }

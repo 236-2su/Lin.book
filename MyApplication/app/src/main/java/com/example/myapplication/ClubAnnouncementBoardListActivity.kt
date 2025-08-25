@@ -13,7 +13,7 @@ import com.google.gson.reflect.TypeToken
 import okhttp3.*
 import java.io.IOException
 
-class ClubForumBoardListActivity : AppCompatActivity() {
+class ClubAnnouncementBoardListActivity : AppCompatActivity() {
     
     private lateinit var recyclerView: RecyclerView
     private lateinit var boardAdapter: BoardAdapter
@@ -26,23 +26,23 @@ class ClubForumBoardListActivity : AppCompatActivity() {
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_club_forum_board_list)
+        setContentView(R.layout.activity_club_announcement_board_list)
         
         // 뒤로가기 버튼 설정
         findViewById<Button>(R.id.btn_back).setOnClickListener {
-            val intent = Intent(this, MainActivity::class.java)
+            val intent = android.content.Intent(this, MainActivity::class.java)
             startActivity(intent)
             finish()
         }
         
-        // Floating Action Button 설정
-        findViewById<com.google.android.material.floatingactionbutton.FloatingActionButton>(R.id.fab_add_post).setOnClickListener {
-            val intent = Intent(this, ClubForumBoardCreateActivity::class.java)
-            startActivity(intent)
-        }
-        
         // 게시판 버튼 설정
         setupBoardButtons()
+        
+        // Floating Action Button 설정
+        findViewById<com.google.android.material.floatingactionbutton.FloatingActionButton>(R.id.fab_add_post).setOnClickListener {
+            val intent = Intent(this, ClubAnnouncementBoardCreateActivity::class.java)
+            startActivity(intent)
+        }
         
         // RecyclerView 설정
         recyclerView = findViewById(R.id.rv_board_list)
@@ -50,7 +50,7 @@ class ClubForumBoardListActivity : AppCompatActivity() {
         
         boardAdapter = BoardAdapter(boardList) { boardItem ->
             // 아이템 클릭 시 상세 페이지로 이동
-            val intent = Intent(this, ClubForumBoardDetailActivity::class.java)
+            val intent = Intent(this, ClubAnnouncementBoardDetailActivity::class.java)
             intent.putExtra("board_item", boardItem)
             startActivity(intent)
         }
@@ -62,16 +62,16 @@ class ClubForumBoardListActivity : AppCompatActivity() {
     }
     
     private fun setupBoardButtons() {
-        // 공지사항 버튼
+        // 공지사항 버튼 (현재 화면이므로 아무것도 하지 않음)
         findViewById<TextView>(R.id.btn_notice).setOnClickListener {
-            val intent = Intent(this, ClubAnnouncementBoardListActivity::class.java)
-            startActivity(intent)
-            finish()
+            // 이미 공지사항 화면이므로 아무것도 하지 않음
         }
         
-        // 자유게시판 버튼 (현재 화면이므로 아무것도 하지 않음)
+        // 자유게시판 버튼
         findViewById<TextView>(R.id.btn_free_board).setOnClickListener {
-            // 이미 자유게시판 화면이므로 아무것도 하지 않음
+            val intent = Intent(this, ClubForumBoardListActivity::class.java)
+            startActivity(intent)
+            finish()
         }
     }
     
@@ -99,19 +99,19 @@ class ClubForumBoardListActivity : AppCompatActivity() {
                         val type = object : TypeToken<List<BoardItem>>() {}.type
                         val boards = gson.fromJson<List<BoardItem>>(responseBody, type)
                         android.util.Log.d("API_SUCCESS", "파싱된 게시글 수: ${'$'}{boards.size}")
-                        val freeBoardBoards = boards.filter { it.type == "free_board" }
-                        android.util.Log.d("API_SUCCESS", "자유게시판 게시글 수: ${'$'}{freeBoardBoards.size}")
+                        val announcementBoards = boards.filter { it.type == "announcement" }
+                        android.util.Log.d("API_SUCCESS", "공지사항 게시글 수: ${'$'}{announcementBoards.size}")
                         boardList.clear()
-                        boardList.addAll(freeBoardBoards)
+                        boardList.addAll(announcementBoards)
                         boardAdapter.notifyDataSetChanged()
                     } catch (e: Exception) {
                         android.util.Log.e("API_ERROR", "데이터 파싱 오류: ${'$'}{e.message}")
-                        Toast.makeText(this@ClubForumBoardListActivity, 
+                        Toast.makeText(this@ClubAnnouncementBoardListActivity, 
                             "데이터 파싱 오류: ${'$'}{e.message}", Toast.LENGTH_LONG).show()
                     }
                 } else {
                     android.util.Log.e("API_ERROR", "서버 오류: ${'$'}{response.code} - ${'$'}responseBody")
-                    Toast.makeText(this@ClubForumBoardListActivity, 
+                    Toast.makeText(this@ClubAnnouncementBoardListActivity, 
                         "서버 오류: ${'$'}{response.code} - ${'$'}{responseBody ?: "응답 없음"}", Toast.LENGTH_LONG).show()
                 }
             }
@@ -121,7 +121,7 @@ class ClubForumBoardListActivity : AppCompatActivity() {
             override fun onFailure(call: Call, e: IOException) {
                 android.util.Log.e("API_ERROR", "네트워크 오류: ${e.message}")
                 runOnUiThread {
-                    Toast.makeText(this@ClubForumBoardListActivity, 
+                    Toast.makeText(this@ClubAnnouncementBoardListActivity, 
                         "네트워크 오류: ${e.message}", Toast.LENGTH_LONG).show()
                 }
             }
@@ -133,7 +133,7 @@ class ClubForumBoardListActivity : AppCompatActivity() {
                         override fun onFailure(call: Call, e: IOException) {
                             android.util.Log.e("API_ERROR", "재시도 네트워크 오류: ${'$'}{e.message}")
                             runOnUiThread {
-                                Toast.makeText(this@ClubForumBoardListActivity,
+                                Toast.makeText(this@ClubAnnouncementBoardListActivity,
                                     "재시도 네트워크 오류: ${'$'}{e.message}", Toast.LENGTH_LONG).show()
                             }
                         }

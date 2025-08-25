@@ -13,13 +13,13 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.snackbar.Snackbar
 
-class ClubCommonBoardDetailActivity : AppCompatActivity() {
+class ClubAnnouncementBoardDetailActivity : AppCompatActivity() {
     
     private lateinit var boardItem: BoardItem
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_club_common_board_detail)
+        setContentView(R.layout.activity_club_announcement_board_detail)
         
         // Intent에서 BoardItem 데이터 받기
         boardItem = intent.getParcelableExtra("board_item") ?: BoardItem(
@@ -64,7 +64,7 @@ class ClubCommonBoardDetailActivity : AppCompatActivity() {
             when (item.itemId) {
                 R.id.action_edit -> {
                     // 수정하기 화면으로 이동
-                    val intent = Intent(this, ClubCommonBoardUpdateActivity::class.java)
+                    val intent = Intent(this, ClubAnnouncementBoardUpdateActivity::class.java)
                     intent.putExtra("board_item", boardItem)
                     startActivity(intent)
                     true
