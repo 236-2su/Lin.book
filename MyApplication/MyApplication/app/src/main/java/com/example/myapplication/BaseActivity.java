@@ -23,7 +23,7 @@ public abstract class BaseActivity extends AppCompatActivity {
     protected TextView backButton;
     
     // 게시판 버튼들 참조
-    protected TextView btnNotice, btnFreeBoard, btnPublicAccount, btnMeetingAccount, btnAiReport;
+    protected TextView btnNotice, btnFreeBoard, btnPublicAccount, btnEventAccount, btnMeetingAccount, btnAiReport;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,6 +99,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         btnNotice = findViewById(R.id.btn_notice);
         btnFreeBoard = findViewById(R.id.btn_free_board);
         btnPublicAccount = findViewById(R.id.btn_public_account);
+        btnEventAccount = findViewById(R.id.btn_event_account);
         btnMeetingAccount = findViewById(R.id.btn_meeting_account);
         btnAiReport = findViewById(R.id.btn_ai_report);
         
@@ -116,6 +117,10 @@ public abstract class BaseActivity extends AppCompatActivity {
         if (btnPublicAccount != null) {
             btnPublicAccount.setBackgroundResource(R.drawable.btn_board_background);
             btnPublicAccount.setTextColor(android.graphics.Color.parseColor("#333333"));
+        }
+        if (btnEventAccount != null) {
+            btnEventAccount.setBackgroundResource(R.drawable.btn_board_background);
+            btnEventAccount.setTextColor(android.graphics.Color.parseColor("#333333"));
         }
         if (btnMeetingAccount != null) {
             btnMeetingAccount.setBackgroundResource(R.drawable.btn_board_background);
@@ -139,7 +144,7 @@ public abstract class BaseActivity extends AppCompatActivity {
                     return;
                 }
                 updateBoardButton(btnNotice, 
-                    new TextView[]{btnFreeBoard, btnPublicAccount, btnMeetingAccount, btnAiReport});
+                    new TextView[]{btnFreeBoard, btnPublicAccount, btnEventAccount, btnMeetingAccount, btnAiReport});
                 
                 // 공지사항 버튼 클릭 시 MainActivity로 이동
                 Intent intent = new Intent(this, MainActivity.class);
@@ -152,13 +157,18 @@ public abstract class BaseActivity extends AppCompatActivity {
         
         if (btnFreeBoard != null) {
             btnFreeBoard.setOnClickListener(v -> updateBoardButton(btnFreeBoard, 
-                new TextView[]{btnNotice, btnPublicAccount, btnMeetingAccount, btnAiReport}));
+                new TextView[]{btnNotice, btnPublicAccount, btnEventAccount, btnMeetingAccount, btnAiReport}));
         }
         
         if (btnPublicAccount != null) {
-            btnPublicAccount.setOnClickListener(v -> {
-                updateBoardButton(btnPublicAccount, 
-                    new TextView[]{btnNotice, btnFreeBoard, btnMeetingAccount, btnAiReport});
+            btnPublicAccount.setOnClickListener(v -> updateBoardButton(btnPublicAccount, 
+                new TextView[]{btnNotice, btnFreeBoard, btnEventAccount, btnMeetingAccount, btnAiReport}));
+        }
+        
+        if (btnEventAccount != null) {
+            btnEventAccount.setOnClickListener(v -> {
+                updateBoardButton(btnEventAccount, 
+                    new TextView[]{btnNotice, btnFreeBoard, btnPublicAccount, btnMeetingAccount, btnAiReport});
                 
                 // EventListFragment로 전환
                 getSupportFragmentManager()
@@ -170,7 +180,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         
         if (btnMeetingAccount != null) {
             btnMeetingAccount.setOnClickListener(v -> updateBoardButton(btnMeetingAccount, 
-                new TextView[]{btnNotice, btnFreeBoard, btnPublicAccount, btnAiReport}));
+                new TextView[]{btnNotice, btnFreeBoard, btnPublicAccount, btnEventAccount, btnAiReport}));
         }
         
         if (btnAiReport != null) {
@@ -181,7 +191,7 @@ public abstract class BaseActivity extends AppCompatActivity {
                 }
 
                 updateBoardButton(btnAiReport, 
-                    new TextView[]{btnNotice, btnFreeBoard, btnPublicAccount, btnMeetingAccount});
+                    new TextView[]{btnNotice, btnFreeBoard, btnPublicAccount, btnEventAccount, btnMeetingAccount});
                 
                 // 스크롤 위치 저장
                 saveBoardButtonScrollPosition();
@@ -229,6 +239,10 @@ public abstract class BaseActivity extends AppCompatActivity {
             if (btnPublicAccount != null) {
                 btnPublicAccount.setBackgroundResource(R.drawable.btn_board_background);
                 btnPublicAccount.setTextColor(android.graphics.Color.parseColor("#333333"));
+            }
+            if (btnEventAccount != null) {
+                btnEventAccount.setBackgroundResource(R.drawable.btn_board_background);
+                btnEventAccount.setTextColor(android.graphics.Color.parseColor("#333333"));
             }
             if (btnMeetingAccount != null) {
                 btnMeetingAccount.setBackgroundResource(R.drawable.btn_board_background);
