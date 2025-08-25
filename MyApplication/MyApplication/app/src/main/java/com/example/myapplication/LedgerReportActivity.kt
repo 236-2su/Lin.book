@@ -3,10 +3,15 @@ package com.example.myapplication
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
+import java.text.SimpleDateFormat
+import java.util.*
 
 class LedgerReportActivity : BaseActivity() {
 
-    override fun setupContent() {
+    override fun setupContent(savedInstanceState: Bundle?) {
+        // 앱 제목을 "AI 리포트"로 설정
+        setAppTitle("AI 리포트")
+        
         // AI 리포트 버튼을 선택된 상태로 설정
         selectBoardButton(btnAiReport)
         

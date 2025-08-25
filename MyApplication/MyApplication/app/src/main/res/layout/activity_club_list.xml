@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -139,18 +139,32 @@
                         android:text="체육" />
 
                     <TextView
+                        android:id="@+id/btn_culture_art"
+                        style="@style/ReferenceBoardButton"
+                        android:layout_marginStart="0dp"
+                        android:layout_marginEnd="8dp"
+                        android:text="문화예술" />
+
+                    <TextView
                         android:id="@+id/btn_volunteer"
                         style="@style/ReferenceBoardButton"
                         android:layout_marginStart="0dp"
                         android:layout_marginEnd="8dp"
-                        android:text="봉사활동" />
+                        android:text="봉사" />
 
                     <TextView
-                        android:id="@+id/btn_art"
+                        android:id="@+id/btn_startup"
                         style="@style/ReferenceBoardButton"
                         android:layout_marginStart="0dp"
                         android:layout_marginEnd="8dp"
-                        android:text="예술" />
+                        android:text="창업" />
+
+                    <TextView
+                        android:id="@+id/btn_religion"
+                        style="@style/ReferenceBoardButton"
+                        android:layout_marginStart="0dp"
+                        android:layout_marginEnd="8dp"
+                        android:text="종교" />
 
                 </LinearLayout>
 
@@ -158,152 +172,12 @@
 
             <!-- 동아리 목록 -->
             <LinearLayout
+                android:id="@+id/club_list_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <!-- 동아리 항목 전체 카드 -->
-                <androidx.cardview.widget.CardView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="4dp"
-                    android:layout_marginEnd="4dp"
-                    android:layout_marginTop="4dp"
-                    android:layout_marginBottom="16dp"
-                    app:cardElevation="2dp"
-                    app:cardCornerRadius="12dp"
-                    app:cardBackgroundColor="#FAFAFA">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="16dp">
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:gravity="bottom"
-                            android:layout_marginBottom="12dp">
-
-                            <LinearLayout
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:orientation="vertical">
-
-                                <!-- 해시태그 -->
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="#분위기가 좋은"
-                                    android:textColor="#2457C5"
-                                    android:textSize="12sp"
-                                    android:layout_marginBottom="4dp"/>
-
-                                <!-- 동아리 이름 -->
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="방구석 경제"
-                                    android:textColor="#000000"
-                                    android:textSize="18sp"
-                                    android:textStyle="bold"
-                                    android:layout_marginBottom="4dp"/>
-
-                                <!-- 위치 정보 -->
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="싸피캠퍼스 학생회관 421호"
-                                    android:textColor="#666666"
-                                    android:textSize="13sp"/>
-
-                            </LinearLayout>
-
-                            <androidx.cardview.widget.CardView
-                                android:layout_width="120dp"
-                                android:layout_height="80dp"
-                                app:cardCornerRadius="4dp"
-                                app:cardElevation="0dp">
-
-                                <ImageView
-                                    android:layout_width="match_parent"
-                                    android:layout_height="match_parent"
-                                    android:src="@drawable/club"
-                                    android:scaleType="centerCrop"
-                                    android:contentDescription="동아리 이미지" />
-                            </androidx.cardview.widget.CardView>
-
-                        </LinearLayout>
-
-                        <!-- 동아리 소개 중첩 카드 -->
-                        <LinearLayout
-                            style="@style/ReferenceSmallCardBox"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="vertical"
-                            android:paddingStart="16dp"
-                            android:paddingTop="8dp"
-                            android:paddingEnd="16dp"
-                            android:paddingBottom="16dp">
-
-                            <!-- 제목 -->
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:orientation="horizontal"
-                                android:gravity="center_vertical"
-                                android:layout_marginBottom="4dp">
-
-                                <ImageView
-                                    android:layout_width="16dp"
-                                    android:layout_height="16dp"
-                                    android:src="@drawable/ic_pushpin"
-                                    android:layout_marginEnd="8dp"
-                                    android:contentDescription="압정 아이콘"/>
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="동아리 소개"
-                                    android:textColor="#000000"
-                                    android:textSize="14sp"
-                                    android:textStyle="bold"/>
-
-                            </LinearLayout>
-
-                            <!-- 내용 -->
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:orientation="horizontal"
-                                android:gravity="top">
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="💬"
-                                    android:textSize="16sp"
-                                    android:layout_marginEnd="8dp"/>
-
-                                <TextView
-                                    android:layout_width="0dp"
-                                    android:layout_height="wrap_content"
-                                    android:layout_weight="1"
-                                    android:text="경제를 좋아하는 사람이라면 누구나, 함께 생각하고 말하는 힘을 키워보세요!"
-                                    android:textColor="#333333"
-                                    android:textSize="12sp"
-                                    android:lineSpacingExtra="2dp"
-                                    android:paddingBottom="4dp"/>
-
-                            </LinearLayout>
-
-                        </LinearLayout>
-
-                    </LinearLayout>
-                </androidx.cardview.widget.CardView>
+                <!-- 동적으로 생성된 동아리 카드들이 여기에 추가됩니다 -->
 
             </LinearLayout>
 
@@ -311,11 +185,6 @@
 
     </ScrollView>
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab_edit"
-        style="@style/FloatingActionButtonStyle"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentBottom="true"
-        android:contentDescription="편집" />
 
-</RelativeLayout>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

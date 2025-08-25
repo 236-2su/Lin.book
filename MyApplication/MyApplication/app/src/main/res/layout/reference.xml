@@ -345,7 +345,7 @@
 
             <ImageView
                 style="@style/ReferenceSmallIcon"
-                android:src="@drawable/ic_heart" />
+                android:src="@drawable/ic_heart_filled" />
 
             <TextView
                 style="@style/ReferenceLikeCommentText"
