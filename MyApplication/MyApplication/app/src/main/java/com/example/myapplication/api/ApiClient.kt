@@ -11,6 +11,7 @@ class ApiClient {
     companion object {
         private var apiService: ApiService? = null
         
+        @JvmStatic
         fun getApiService(): ApiService {
             if (apiService == null) {
                 // 로깅 인터셉터 (디버깅용)

@@ -173,6 +173,7 @@ public abstract class BaseActivity extends AppCompatActivity {
             btnEventAccount.setBackgroundResource(R.drawable.btn_board_background);
             btnEventAccount.setTextColor(android.graphics.Color.parseColor("#333333"));
         }
+
         if (btnAiReport != null) {
             btnAiReport.setBackgroundResource(R.drawable.btn_board_background);
             btnAiReport.setTextColor(android.graphics.Color.parseColor("#333333"));

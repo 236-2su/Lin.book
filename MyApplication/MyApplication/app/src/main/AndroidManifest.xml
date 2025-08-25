@@ -54,13 +54,16 @@
             android:exported="false" />
 
         <activity
-            android:name=".ClubCreateActivity"
+		android:name=".ClubCreateActivity"
             android:exported="false" />
         <activity
             android:name=".LedgerDetailActivity"
             android:exported="false" />
         <activity
             android:name=".LedgerCreateActivity"
+            android:exported="false" />
+	<activity   
+            android:name=".MemberManagementActivity"
             android:exported="false" />
 
         <activity

@@ -4,6 +4,9 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
+    <!-- 상단 헤더 (로고 영역) -->
+
+    <!-- 내용 컨테이너 (정확한 패딩과 위치) -->
     <LinearLayout
         android:id="@+id/toolbar_root"
         android:layout_width="match_parent"
@@ -141,8 +144,7 @@
             android:paddingStart="0dp"
             android:paddingEnd="0dp">
 
-            <!-- 자식 Activity가 이 공간을 채울 것이므로, 기본 include는 제거합니다. -->
-            <!-- <include layout="@layout/layout_event_detail" /> -->
+            <!-- 동적으로 레이아웃이 추가될 영역 -->
 
         </FrameLayout>
 

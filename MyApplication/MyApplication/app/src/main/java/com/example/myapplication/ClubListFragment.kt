@@ -28,8 +28,8 @@ class ClubListFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        // 이 프래그먼트가 화면에 나타날 때 게시판 버튼들이 보이도록 합니다.
-        (activity as? BaseActivity)?.showBoardButtons()
+        // 이 프래그먼트가 화면에 나타날 때 게시판 버튼들이 보이지 않도록 합니다.
+        (activity as? BaseActivity)?.hideBoardButtons()
     }
 
     override fun onCreateView(
