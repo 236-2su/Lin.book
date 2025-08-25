@@ -645,6 +645,8 @@
           <option name="screenY" value="2400" />
         </PersistentDeviceSelectionData>
         <PersistentDeviceSelectionData>
+<<<<<<< HEAD
+=======
           <option name="accessStatus">
             <list>
               <option value="EULA_NOT_ACCEPTED" />
@@ -713,6 +715,7 @@
           <option name="screenY" value="1604" />
         </PersistentDeviceSelectionData>
         <PersistentDeviceSelectionData>
+>>>>>>> 67338d36102aa0059bb1b565ba0afee247dbaddf
           <option name="api" value="31" />
           <option name="brand" value="google" />
           <option name="codename" value="oriole" />
@@ -811,6 +814,8 @@
           <option name="screenY" value="2340" />
         </PersistentDeviceSelectionData>
         <PersistentDeviceSelectionData>
+<<<<<<< HEAD
+=======
           <option name="accessStatus">
             <list>
               <option value="EULA_NOT_ACCEPTED" />
@@ -951,6 +956,7 @@
           <option name="screenY" value="2160" />
         </PersistentDeviceSelectionData>
         <PersistentDeviceSelectionData>
+>>>>>>> 67338d36102aa0059bb1b565ba0afee247dbaddf
           <option name="api" value="34" />
           <option name="brand" value="google" />
           <option name="codename" value="shiba" />
@@ -1026,6 +1032,19 @@
           <option name="screenY" value="2424" />
         </PersistentDeviceSelectionData>
         <PersistentDeviceSelectionData>
+<<<<<<< HEAD
+          <option name="api" value="36" />
+          <option name="brand" value="google" />
+          <option name="codename" value="tokay" />
+          <option name="default" value="true" />
+          <option name="id" value="tokay" />
+          <option name="labId" value="google" />
+          <option name="manufacturer" value="Google" />
+          <option name="name" value="Pixel 9" />
+          <option name="screenDensity" value="420" />
+          <option name="screenX" value="1080" />
+          <option name="screenY" value="2424" />
+=======
           <option name="accessStatus">
             <list>
               <option value="EULA_NOT_ACCEPTED" />
@@ -1058,6 +1077,7 @@
           <option name="screenDensity" value="420" />
           <option name="screenX" value="1080" />
           <option name="screenY" value="2400" />
+>>>>>>> 67338d36102aa0059bb1b565ba0afee247dbaddf
         </PersistentDeviceSelectionData>
         <PersistentDeviceSelectionData>
           <option name="api" value="34" />
@@ -1071,6 +1091,8 @@
           <option name="screenX" value="1080" />
           <option name="screenY" value="2408" />
         </PersistentDeviceSelectionData>
+<<<<<<< HEAD
+=======
         <PersistentDeviceSelectionData>
           <option name="accessStatus">
             <list>
@@ -1141,6 +1163,7 @@
           <option name="screenX" value="2032" />
           <option name="screenY" value="3048" />
         </PersistentDeviceSelectionData>
+>>>>>>> 67338d36102aa0059bb1b565ba0afee247dbaddf
       </list>
     </option>
   </component>

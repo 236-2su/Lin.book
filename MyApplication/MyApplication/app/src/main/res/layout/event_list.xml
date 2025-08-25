@@ -4,19 +4,49 @@
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
-    <!-- 섹션 타이틀 -->
-    <TextView
-        android:layout_width="wrap_content"
+    <!-- 섹션 타이틀과 버튼 -->
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="행사 장부 목록"
-        android:textSize="17.3sp"
-        android:textStyle="bold"
-        android:textColor="#333333"
+        android:orientation="horizontal"
         android:layout_marginTop="24dp"
-        android:layout_marginBottom="24dp" />
+        android:layout_marginBottom="24dp"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="행사 장부 목록"
+            android:textSize="17.3sp"
+            android:textStyle="bold"
+            android:textColor="#333333" />
+
+        <FrameLayout
+            android:id="@+id/btn_create_event"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/fab_background"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?android:attr/selectableItemBackgroundBorderless">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="+"
+                android:textColor="#FFFFFF"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+        </FrameLayout>
+
+    </LinearLayout>
 
     <!-- 아이템 1 - 파란색 -->
     <LinearLayout
+        android:id="@+id/event_item_1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginVertical="6dp"
@@ -52,6 +82,7 @@
 
     <!-- 아이템 2 - 분홍색 -->
     <LinearLayout
+        android:id="@+id/event_item_2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginVertical="6dp"
@@ -87,6 +118,7 @@
 
     <!-- 아이템 3 - 노란색 -->
     <LinearLayout
+        android:id="@+id/event_item_3"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginVertical="6dp"
@@ -122,6 +154,7 @@
 
     <!-- 아이템 4 - 초록색 -->
     <LinearLayout
+        android:id="@+id/event_item_4"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginVertical="6dp"
@@ -157,6 +190,7 @@
 
     <!-- 아이템 5 - 보라색 -->
     <LinearLayout
+        android:id="@+id/event_item_5"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginVertical="6dp"
@@ -192,6 +226,7 @@
 
     <!-- 아이템 6 - 회색 -->
     <LinearLayout
+        android:id="@+id/event_item_6"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginVertical="6dp"
@@ -227,6 +262,7 @@
 
     <!-- 아이템 7 - 연회색 -->
     <LinearLayout
+        android:id="@+id/event_item_7"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginVertical="6dp"
