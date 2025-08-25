@@ -15,6 +15,9 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        
+        // API BASE_URL 설정
+        buildConfigField("String", "BASE_URL", "\"https://54.206.122.170/\"")
     }
 
     buildTypes {
@@ -26,6 +29,12 @@ android {
             )
         }
     }
+    
+    buildFeatures {
+        buildConfig = true
+    }
+    
+    
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -56,4 +65,6 @@ dependencies {
     // 코루틴 (비동기 처리)
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
+    // ItemTouchHelper는 androidx에 포함되어 있음 (추가 라이브러리 불필요)
+    implementation("androidx.recyclerview:recyclerview:1.3.2")
 }

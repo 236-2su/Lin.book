@@ -88,6 +88,22 @@
 
     </LinearLayout>
 
+    <!-- 수정/삭제 버튼 추가 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="end"
+        android:layout_marginBottom="16dp">
+
+        <TextView
+            style="@style/ReferenceSmallButton.Edit"
+            android:text="수정하기" />
+
+        <TextView
+            style="@style/ReferenceSmallButton.Delete"
+            android:text="삭제하기" />
+    </LinearLayout>
+
     <!-- 예산 요약 섹션 (하나의 박스) -->
     <LinearLayout
         android:layout_width="match_parent"
