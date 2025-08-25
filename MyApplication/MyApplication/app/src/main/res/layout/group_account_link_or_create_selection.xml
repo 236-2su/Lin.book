@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- 안내사항 제목 섹션 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#F5F5F5"
+        android:padding="16dp"
+        android:layout_marginBottom="24dp"
+        android:orientation="vertical">
+
+        <!-- 제목 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="16dp"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="📌"
+                android:textSize="18sp"
+                android:layout_marginEnd="8dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="모임통장 안내사항"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="#333333" />
+
+        </LinearLayout>
+
+        <!-- 안내 내용 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- 첫 번째 안내사항 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="8dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="•"
+                    android:textSize="16sp"
+                    android:textColor="#666666"
+                    android:layout_marginEnd="8dp"
+                    android:layout_marginTop="2dp" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="싸피은행에서 발급받은 모임통장만 연동가능합니다."
+                    android:textSize="14sp"
+                    android:textColor="#666666"
+                    android:lineSpacingExtra="2dp" />
+
+            </LinearLayout>
+
+            <!-- 두 번째 안내사항 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="8dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="•"
+                    android:textSize="16sp"
+                    android:textColor="#666666"
+                    android:layout_marginEnd="8dp"
+                    android:layout_marginTop="2dp" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1" />
+
+            </LinearLayout>
+
+            <!-- 세 번째 안내사항 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="•"
+                    android:textSize="16sp"
+                    android:textColor="#666666"
+                    android:layout_marginEnd="8dp"
+                    android:layout_marginTop="2dp" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="싸피은행 모임통장을 개설해야하는 경우, 신분증이 필요합니다."
+                    android:textSize="14sp"
+                    android:textColor="#666666"
+                    android:lineSpacingExtra="2dp" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- 연동하기 버튼 -->
+    <LinearLayout
+        style="@style/ReferenceCardButton.Link"
+        android:layout_marginBottom="8dp">
+
+        <ImageView
+            style="@style/ReferenceIcon"
+            android:src="@drawable/connection"
+            android:layout_marginBottom="8dp"
+            android:rotation="-45" />
+
+        <TextView
+            style="@style/ReferenceLikeCommentText"
+            android:text="연동하기" />
+
+    </LinearLayout>
+
+    <!-- 개설하기 버튼 -->
+    <LinearLayout
+        style="@style/ReferenceCardButton.Create">
+
+        <ImageView
+            style="@style/ReferenceIcon"
+            android:src="@drawable/account"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            style="@style/ReferenceLikeCommentText"
+            android:text="개설하기" />
+
+    </LinearLayout>
+
+</LinearLayout>
