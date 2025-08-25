@@ -19,6 +19,7 @@ class UserSerializer(serializers.ModelSerializer):
             "name",
             "email",
             "student_number",
+            "major",
             "admission_year",
             "phone_number",
             "status",
@@ -44,6 +45,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
             "name",
             "email",
             "student_number",
+            "major",
             "admission_year",
             "phone_number",
             "status",
@@ -62,6 +64,7 @@ class UserUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
+            "major",
             "admission_year",
             "phone_number",
             "status",

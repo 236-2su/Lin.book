@@ -3,6 +3,7 @@ __pycache__/
 .git
 *.pyc
 *.log
+
 *.sqlite*
 *.sqlite3
 .data/
