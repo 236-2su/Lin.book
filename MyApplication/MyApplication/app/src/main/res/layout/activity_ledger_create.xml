@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@android:color/white"
+    android:paddingTop="24dp">
+
+    <!-- 페이지 제목 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="32dp">
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/pencil"
+            android:layout_marginEnd="12dp"
+            android:tint="#666666" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="공개장부 작성"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="#333333" />
+    </LinearLayout>
+
+    <!-- 수입/지출 선택 -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="수입/지출"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textColor="#333333"
+        android:layout_marginBottom="8dp" />
+
+    <Spinner
+        android:id="@+id/spinner_income_expense"
+        android:layout_width="match_parent"
+        android:layout_height="49dp"
+        android:background="@drawable/info_box"
+        android:padding="16dp"
+        android:layout_marginBottom="24dp" />
+
+    <!-- 영수증 등록 (선택) -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="영수증 등록 (선택)"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textColor="#333333"
+        android:layout_marginBottom="8dp" />
+
+    <EditText
+        android:id="@+id/et_receipt"
+        android:layout_width="match_parent"
+        android:layout_height="49dp"
+        android:background="@drawable/info_box"
+        android:hint="클릭하여 영수증 촬영하기"
+        android:textColorHint="#999999"
+        android:textSize="12sp"
+        android:textColor="#333333"
+        android:padding="16dp"
+        android:focusable="false"
+        android:focusableInTouchMode="false"
+        android:clickable="true"
+        android:cursorVisible="false"
+        android:inputType="none"
+        android:layout_marginBottom="24dp" />
+
+    <!-- 거래처명 -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="거래처명"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textColor="#333333"
+        android:layout_marginBottom="8dp" />
+
+    <EditText
+        android:id="@+id/et_partner_name"
+        android:layout_width="match_parent"
+        android:layout_height="49dp"
+        android:background="@drawable/info_box"
+        android:hint="거래처명을 입력하세요"
+        android:textColorHint="#999999"
+        android:textSize="12sp"
+        android:textColor="#333333"
+        android:padding="16dp"
+        android:layout_marginBottom="24dp" />
+
+    <!-- 금액 -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="금액"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textColor="#333333"
+        android:layout_marginBottom="8dp" />
+
+    <EditText
+        android:id="@+id/et_amount"
+        android:layout_width="match_parent"
+        android:layout_height="49dp"
+        android:background="@drawable/info_box"
+        android:hint="금액을 입력하세요"
+        android:textColorHint="#999999"
+        android:textSize="12sp"
+        android:textColor="#333333"
+        android:padding="16dp"
+        android:inputType="number"
+        android:layout_marginBottom="24dp" />
+
+    <!-- 거래일시 -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="거래일시"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textColor="#333333"
+        android:layout_marginBottom="8dp" />
+
+    <EditText
+        android:id="@+id/et_transaction_datetime"
+        android:layout_width="match_parent"
+        android:layout_height="49dp"
+        android:background="@drawable/info_box"
+        android:hint="날짜를 선택하고 시간을 입력하세요"
+        android:textColorHint="#999999"
+        android:textSize="12sp"
+        android:textColor="#333333"
+        android:padding="16dp"
+        android:focusable="false"
+        android:clickable="true"
+        android:layout_marginBottom="24dp" />
+
+    <!-- 결제수단 -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="결제수단"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textColor="#333333"
+        android:layout_marginBottom="8dp" />
+
+    <Spinner
+        android:id="@+id/spinner_payment_method"
+        android:layout_width="match_parent"
+        android:layout_height="49dp"
+        android:background="@drawable/info_box"
+        android:padding="16dp"
+        android:layout_marginBottom="24dp" />
+
+    <!-- 메모 (선택) -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="메모 (선택)"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textColor="#333333"
+        android:layout_marginBottom="8dp" />
+
+    <EditText
+        android:id="@+id/et_memo"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:background="@drawable/info_box"
+        android:hint="메모를 입력하세요"
+        android:textColorHint="#999999"
+        android:textSize="12sp"
+        android:textColor="#333333"
+        android:padding="16dp"
+        android:layout_marginBottom="24dp" />
+
+    <!-- 등록하기 버튼 -->
+    <Button
+        android:id="@+id/btn_register"
+        android:layout_width="match_parent"
+        android:layout_height="51dp"
+        android:text="등록하기"
+        android:textSize="16sp"
+        android:textColor="#FFFFFF"
+        android:background="@drawable/btn_register"
+        android:layout_marginBottom="24dp" />
+
+</LinearLayout>

@@ -1,12 +1,9 @@
 package com.example.myapplication
 
-import android.widget.Button
-import android.widget.TextView
-import android.widget.Switch
-import android.graphics.Color
-import android.view.View
-import android.content.Intent
-import com.example.myapplication.LedgerReportActivity
+import android.os.Bundle
+import androidx.fragment.app.Fragment
+import com.example.myapplication.LedgerListFragment
+import com.example.myapplication.ReferenceFragment
 
 class MainActivity : BaseActivity() {
 
@@ -16,15 +13,13 @@ class MainActivity : BaseActivity() {
     override fun setupContent() {
         // MainActivity 내용을 content_container에 추가
         val contentContainer = findViewById<android.widget.FrameLayout>(R.id.content_container)
-//        contentView = layoutInflater.inflate(R.layout.reference, null)
-//        contentContainer.addView(contentView)
-        
-        // MemberManagementActivity 시작 (테스트용)
-//        startActivity(Intent(this, MemberManagementActivity::class.java))
+        contentView = layoutInflater.inflate(R.layout.reference, null)
+        contentContainer.addView(contentView)
         
                            // MainActivity 로직 실행
-//                   setupMainActivityLogic()
+                   setupMainActivityLogic()
                }
+               
                private fun setupMainActivityLogic() {
 
                    // 카테고리 버튼들을 리스트에 추가 (나중에 초기화)

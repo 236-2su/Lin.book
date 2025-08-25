@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="club_categories">
+        <item>학술</item>
+        <item>체육</item>
+        <item>문화예술</item>
+        <item>봉사</item>
+        <item>창업</item>
+        <item>종교</item>
+    </string-array>
+    
+    <string-array name="ledger_types">
+        <item>수입</item>
+        <item>지출</item>
+    </string-array>
+    
+    <string-array name="ledger_categories">
+        <item>회비</item>
+        <item>소모품비</item>
+        <item>식비</item>
+        <item>교통비</item>
+        <item>기타</item>
+    </string-array>
+    
+    <string-array name="payment_methods">
+        <item>현금</item>
+        <item>카드</item>
+        <item>계좌이체</item>
+        <item>기타</item>
+    </string-array>
+</resources>

@@ -345,7 +345,7 @@
 
             <ImageView
                 style="@style/ReferenceSmallIcon"
-                android:src="@drawable/ic_heart" />
+                android:src="@drawable/ic_heart_filled" />
 
             <TextView
                 style="@style/ReferenceLikeCommentText"
@@ -446,5 +446,12 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1" />
+
+    <!-- 넘어가기 버튼 -->
+    <Button
+        android:id="@+id/btn_next_page"
+        style="@style/ReferenceRegisterButton"
+        android:layout_marginTop="16dp"
+        android:text="넘어가기" />
 
 </LinearLayout>
