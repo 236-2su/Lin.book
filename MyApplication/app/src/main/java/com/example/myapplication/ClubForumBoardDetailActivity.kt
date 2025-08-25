@@ -127,3 +127,4 @@ class ClubForumBoardDetailActivity : AppCompatActivity() {
         }
     }
 }
+

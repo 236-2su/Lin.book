@@ -90,29 +90,29 @@ class ClubForumBoardListActivity : AppCompatActivity() {
 
         fun handleResponse(response: Response, usedUrl: String) {
             val responseBody = response.body?.string()
-            android.util.Log.d("API_RESPONSE", "응답 코드: ${'$'}{response.code} (URL: ${'$'}usedUrl)")
-            android.util.Log.d("API_RESPONSE", "응답 본문: ${'$'}responseBody")
+            android.util.Log.d("API_RESPONSE", "응답 코드: ${response.code} (URL: $usedUrl)")
+            android.util.Log.d("API_RESPONSE", "응답 본문: $responseBody")
             runOnUiThread {
                 if (response.isSuccessful && responseBody != null) {
                     try {
                         val gson = Gson()
                         val type = object : TypeToken<List<BoardItem>>() {}.type
                         val boards = gson.fromJson<List<BoardItem>>(responseBody, type)
-                        android.util.Log.d("API_SUCCESS", "파싱된 게시글 수: ${'$'}{boards.size}")
+                        android.util.Log.d("API_SUCCESS", "파싱된 게시글 수: ${boards.size}")
                         val freeBoardBoards = boards.filter { it.type == "free_board" }
-                        android.util.Log.d("API_SUCCESS", "자유게시판 게시글 수: ${'$'}{freeBoardBoards.size}")
+                        android.util.Log.d("API_SUCCESS", "자유게시판 게시글 수: ${freeBoardBoards.size}")
                         boardList.clear()
                         boardList.addAll(freeBoardBoards)
                         boardAdapter.notifyDataSetChanged()
                     } catch (e: Exception) {
-                        android.util.Log.e("API_ERROR", "데이터 파싱 오류: ${'$'}{e.message}")
+                        android.util.Log.e("API_ERROR", "데이터 파싱 오류: ${e.message}")
                         Toast.makeText(this@ClubForumBoardListActivity, 
-                            "데이터 파싱 오류: ${'$'}{e.message}", Toast.LENGTH_LONG).show()
+                            "데이터 파싱 오류: ${e.message}", Toast.LENGTH_LONG).show()
                     }
                 } else {
-                    android.util.Log.e("API_ERROR", "서버 오류: ${'$'}{response.code} - ${'$'}responseBody")
+                    android.util.Log.e("API_ERROR", "서버 오류: ${response.code} - $responseBody")
                     Toast.makeText(this@ClubForumBoardListActivity, 
-                        "서버 오류: ${'$'}{response.code} - ${'$'}{responseBody ?: "응답 없음"}", Toast.LENGTH_LONG).show()
+                        "서버 오류: ${response.code} - ${responseBody ?: "응답 없음"}", Toast.LENGTH_LONG).show()
                 }
             }
         }
@@ -131,10 +131,10 @@ class ClubForumBoardListActivity : AppCompatActivity() {
                     android.util.Log.w("API_RETRY", "400 발생. 대체 URL로 재시도: $fallbackUrl")
                     client.newCall(buildRequest(fallbackUrl)).enqueue(object : Callback {
                         override fun onFailure(call: Call, e: IOException) {
-                            android.util.Log.e("API_ERROR", "재시도 네트워크 오류: ${'$'}{e.message}")
+                            android.util.Log.e("API_ERROR", "재시도 네트워크 오류: ${e.message}")
                             runOnUiThread {
                                 Toast.makeText(this@ClubForumBoardListActivity,
-                                    "재시도 네트워크 오류: ${'$'}{e.message}", Toast.LENGTH_LONG).show()
+                                    "재시도 네트워크 오류: ${e.message}", Toast.LENGTH_LONG).show()
                             }
                         }
                         override fun onResponse(call: Call, retryResponse: Response) {
@@ -148,3 +148,4 @@ class ClubForumBoardListActivity : AppCompatActivity() {
         })
     }
 }
+
