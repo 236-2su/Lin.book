@@ -144,7 +144,8 @@ class ClubListFragment : Fragment() {
         }
 
         // 1) 내 동아리 섹션 채우기 (SharedPreferences의 club_pks 기반)
-        runCatching { fillMyClubsSection(clubs) }.onFailure { /* ignore */ }
+        //    내 동아리는 카테고리 선택과 무관하게 항상 전체 목록을 기준으로 표시
+        runCatching { fillMyClubsSection(clubItems) }.onFailure { /* ignore */ }
 
         // 2) 전체 동아리 목록 채우기
         val clubListContainer = contentView.findViewById<LinearLayout>(R.id.club_list_container) ?: return
