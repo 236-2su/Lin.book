@@ -89,9 +89,20 @@ class BoardViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         serializer = BoardCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        instance = serializer.instance
-        output = BoardSerializer(instance)
+        # 수동 생성: author는 정수(user_pk)로 들어오므로, 해당 클럽의 ClubMember로 매핑
+        club = get_object_or_404(Club, pk=self.kwargs["club_pk"])
+        user_id = serializer.validated_data["author"]
+        author_member = get_object_or_404(ClubMember, club=club, user_id=user_id)
+
+        # Board 인스턴스 직접 생성
+        obj = Board.objects.create(
+            club=club,
+            author=author_member,
+            type=serializer.validated_data["type"],
+            title=serializer.validated_data["title"],
+            content=serializer.validated_data["content"],
+        )
+        output = BoardSerializer(obj)
         headers = self.get_success_headers(output.data)
         return Response(output.data, status=status.HTTP_201_CREATED, headers=headers)
 
@@ -101,10 +112,8 @@ class BoardViewSet(viewsets.ModelViewSet):
         return super().get_serializer_class()
 
     def perform_create(self, serializer):
-        club = get_object_or_404(Club, pk=self.kwargs["club_pk"])
-        user_id = serializer.validated_data["author"]
-        author_member = get_object_or_404(ClubMember, club=club, user_id=user_id)
-        serializer.save(club=club, author=author_member)
+        # create에서 직접 생성하므로 사용하지 않음
+        pass
 
     @extend_schema(
         summary="게시글 좋아요", description="게시글에 좋아요가 있으면 삭제하고, 없으면 생성합니다.", tags=["Board"]
