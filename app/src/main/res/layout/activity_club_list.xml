@@ -22,6 +22,20 @@
                 android:text="내 동아리"
                 style="@style/SectionTitleTextStyle"
                 android:layout_marginBottom="12dp"/>
+                
+            <!-- 임시 루트 페이지 이동 버튼 -->
+            <Button
+                android:id="@+id/btn_temp_root"
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:text="루트 페이지"
+                android:textSize="12sp"
+                android:layout_gravity="end"
+                android:layout_marginTop="-44dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="12dp"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"/>
 
             <!-- 내 동아리: RecyclerView + PagerSnapHelper로 한 장씩 스와이프 -->
             <androidx.recyclerview.widget.RecyclerView

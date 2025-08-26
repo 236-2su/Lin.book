@@ -53,6 +53,7 @@ class ClubListFragment : Fragment() {
         
         setupCategoryButtons()
         setupFloatingActionButton()
+        setupTempRootButton()
         Log.d(TAG, "API 호출 시작")
         fetchClubData()
     }
@@ -485,6 +486,14 @@ class ClubListFragment : Fragment() {
         }
         selectedButton?.setBackgroundResource(R.drawable.btn_selected)
         selectedButton?.setTextColor(android.graphics.Color.WHITE)
+    }
+    
+    private fun setupTempRootButton() {
+        val btnTempRoot = contentView.findViewById<android.widget.Button>(R.id.btn_temp_root)
+        btnTempRoot?.setOnClickListener {
+            // ReferenceFragment로 이동
+            (activity as? MainActivity)?.replaceFragment(ReferenceFragment())
+        }
     }
     
     private fun setupFloatingActionButton() {
