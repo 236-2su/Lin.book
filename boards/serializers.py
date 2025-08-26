@@ -21,6 +21,8 @@ class BoardSerializer(serializers.ModelSerializer):
 
 
 class BoardCreateSerializer(serializers.ModelSerializer):
+    # 생성 시에는 사용자 ID를 받아 뷰에서 ClubMember로 매핑
+    author = serializers.IntegerField(write_only=True)
     class Meta:
         model = Board
         fields = ["author", "type", "title", "content"]

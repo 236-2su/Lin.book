@@ -85,11 +85,25 @@ class BoardViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return super().get_queryset().filter(club_id=self.kwargs["club_pk"])
 
+    def create(self, request, *args, **kwargs):
+        serializer = BoardCreateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        instance = serializer.instance
+        output = BoardSerializer(instance)
+        headers = self.get_success_headers(output.data)
+        return Response(output.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def get_serializer_class(self):
+        if self.action == "create":
+            return BoardCreateSerializer
+        return super().get_serializer_class()
+
     def perform_create(self, serializer):
         club = get_object_or_404(Club, pk=self.kwargs["club_pk"])
-        author = serializer.validated_data["author"]
-        # TODO: author가 해당 club의 member인지 확인하는 로직 추가 필요
-        serializer.save(club=club, author=author)
+        user_id = serializer.validated_data["author"]
+        author_member = get_object_or_404(ClubMember, club=club, user_id=user_id)
+        serializer.save(club=club, author=author_member)
 
     @extend_schema(
         summary="게시글 좋아요",
