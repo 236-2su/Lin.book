@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 class LoginActivity : AppCompatActivity() {
 
     private lateinit var etId: EditText
+    private lateinit var etPassword: EditText
     private lateinit var tvRegister: TextView
     private lateinit var btnLogin: TextView
 
@@ -23,6 +24,7 @@ class LoginActivity : AppCompatActivity() {
 
     private fun initViews() {
         etId = findViewById(R.id.et_id)
+        etPassword = findViewById(R.id.et_password)
         tvRegister = findViewById(R.id.tv_register)
         btnLogin = findViewById(R.id.btn_login)
     }
