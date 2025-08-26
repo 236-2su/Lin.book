@@ -183,6 +183,11 @@
                     android:text="공개장부" />
 
                 <TextView
+                    android:id="@+id/btn_event_account"
+                    style="@style/ReferenceBoardButton"
+                    android:text="행사장부" />
+
+                <TextView
                     android:id="@+id/btn_meeting_account"
                     style="@style/ReferenceBoardButton"
                     android:text="모임통장" />
