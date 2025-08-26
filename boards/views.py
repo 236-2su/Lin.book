@@ -1,5 +1,6 @@
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import OpenApiExample, OpenApiResponse, extend_schema, extend_schema_view
+from drf_spectacular.utils import OpenApiExample, OpenApiResponse, extend_schema, extend_schema_view
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -106,10 +107,7 @@ class BoardViewSet(viewsets.ModelViewSet):
         serializer.save(club=club, author=author_member)
 
     @extend_schema(
-        summary="게시글 좋아요",
-        description="게시글에 좋아요가 있으면 삭제하고, 없으면 생성합니다.",
-        request=LikeCreateSerializer,
-        tags=["Board"],
+        summary="게시글 좋아요", description="게시글에 좋아요가 있으면 삭제하고, 없으면 생성합니다.", tags=["Board"]
     )
     @action(detail=True, methods=["post"])
     def like(self, request, pk=None):
@@ -196,10 +194,7 @@ class CommentsViewSet(viewsets.ModelViewSet):
         serializer.save(board=board)
 
     @extend_schema(
-        summary="댓글 좋아요",
-        description="댓글에 좋아요가 있으면 삭제하고, 없으면 생성합니다.",
-        request=LikeCreateSerializer,
-        tags=["Comments"],
+        summary="댓글 좋아요", description="댓글에 좋아요가 있으면 삭제하고, 없으면 생성합니다.", tags=["Comments"]
     )
     @action(detail=True, methods=["post"])
     def like(self, request, pk=None):

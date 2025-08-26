@@ -3,7 +3,7 @@ from rest_framework import routers
 from rest_framework_nested import routers as nested_routers
 
 from boards.views import BoardViewSet, CommentsViewSet
-from ledger.views import LedgerTransactionsViewSet, LedgerViewSet, ReceiptViewSet
+from ledger.views import EventViewSet, LedgerTransactionsViewSet, LedgerViewSet, ReceiptViewSet
 
 from .views import ClubMemberViewSet, ClubViewSet, ClubWelcomePageViewSet
 
@@ -32,6 +32,10 @@ welcome_router = nested_routers.NestedSimpleRouter(router, r"", lookup="club")
 welcome_router.register(r"welcome", ClubWelcomePageViewSet, basename="club-welcome")
 
 
+events_router = nested_routers.NestedSimpleRouter(router, r"", lookup="club")
+events_router.register(r"events", EventViewSet, basename="club-events")
+
+
 urlpatterns = [
     path("", include(router.urls)),
     path("", include(members_router.urls)),
@@ -41,4 +45,5 @@ urlpatterns = [
     path("", include(transactions_router.urls)),
     path("", include(receipts_router.urls)),
     path("", include(welcome_router.urls)),
+    path("", include(events_router.urls)),
 ]

@@ -14,6 +14,7 @@ class User(models.Model):
     name = models.CharField(max_length=20)
     email = models.EmailField(unique=True)
     student_number = models.CharField(max_length=50, unique=True, db_index=True)
+    major = models.CharField(max_length=100, blank=True)
     admission_year = models.IntegerField(validators=[MinValueValidator(1950), MaxValueValidator(date.today().year)])
     phone_number = models.CharField(
         max_length=20,

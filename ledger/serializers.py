@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Ledger, LedgerTransactions, Receipt
+from .models import Event, Ledger, LedgerTransactions, Receipt
 
 
 class LedgerSerializer(serializers.ModelSerializer):
@@ -30,4 +30,10 @@ class LedgerTransactionsSerializer(serializers.ModelSerializer):
 class LedgerTransactionCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = LedgerTransactions
-        fields = ["date", "amount", "type", "payment_method", "description", "receipt"]
+        fields = ["date_time", "amount", "type", "payment_method", "description", "receipt", "vendor", "event"]
+
+
+class EventSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Event
+        exclude = ["club"]

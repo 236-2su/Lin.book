@@ -1,10 +1,10 @@
-from django.db import transaction
+from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import OpenApiResponse, extend_schema, extend_schema_view
 from rest_framework import status, viewsets
-from rest_framework.decorators import action
-from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
+from ledger.models import Event
+from ledger.serializers import EventSerializer
 from user.models import User
 
 from .models import Club, ClubMember, ClubWelcomePage
@@ -168,44 +168,14 @@ class ClubViewSet(viewsets.ModelViewSet):
     ),
 )
 class ClubMemberViewSet(viewsets.ModelViewSet):
-    queryset = ClubMember.objects.all()
     serializer_class = ClubMemberSerializer
 
-    def perform_create(self, serializer):
-        from rest_framework.exceptions import ValidationError
-
-        if ClubMember.objects.filter(
-            user=serializer.validated_data["user"], club=serializer.validated_data["club"]
-        ).exists():
-            raise ValidationError({"detail": "이미 해당 클럽에 가입된 유저입니다."})
-        serializer.save()
-
     def get_queryset(self):
-        queryset = super().get_queryset()
-        club_pk = self.kwargs.get("club_pk")
-        if club_pk:
-            queryset = queryset.filter(club__pk=club_pk)
-        return queryset
+        return ClubMember.objects.filter(club_id=self.kwargs["club_pk"])
 
-    @action(detail=False, methods=["post"], url_path="club-login", permission_classes=[AllowAny])
-    def club_login(self, request):
-        in_ser = ClubLoginRequestSerializer(data=request.data)
-        if not in_ser.is_valid():
-            return Response(in_ser.errors, status=status.HTTP_400_BAD_REQUEST)
-        email = (in_ser.validated_data or {}).get("email")
-        club_id = (in_ser.validated_data or {}).get("club_id")
-        from user.models import User
-
-        try:
-            user = User.objects.get(email=email)
-            club_member = ClubMember.objects.get(user=user.pk, club_id=club_id)
-        except User.DoesNotExist:
-            return Response({"detail": "해당 이메일의 사용자가 존재하지 않습니다."}, status=status.HTTP_404_NOT_FOUND)
-        except ClubMember.DoesNotExist:
-            return Response({"detail": "해당 클럽에 가입된 사용자가 아닙니다."}, status=status.HTTP_404_NOT_FOUND)
-
-        out_ser = ClubLoginResponseSerializer({"pk": club_member.pk})
-        return Response(out_ser.data, status=status.HTTP_200_OK)
+    def perform_create(self, serializer):
+        club = get_object_or_404(Club, pk=self.kwargs["club_pk"])
+        serializer.save(club=club)
 
 
 @extend_schema_view(
@@ -258,4 +228,70 @@ class ClubWelcomePageViewSet(viewsets.ModelViewSet):
         club = Club.objects.get(pk=club_pk)
         if ClubWelcomePage.objects.filter(club=club).exists():
             raise ValidationError({"detail": "해당 클럽의 Welcome Page가 이미 존재합니다."})
+        serializer.save(club=club)
+
+
+@extend_schema_view(
+    list=extend_schema(
+        summary="이벤트 목록 조회",
+        description="클럽의 전체 이벤트 목록을 조회합니다.",
+        responses={200: OpenApiResponse(response=EventSerializer, description="OK")},
+        tags=["Event"],
+    ),
+    retrieve=extend_schema(
+        summary="특정 이벤트 조회",
+        description="ID로 특정 이벤트의 상세 정보를 조회합니다.",
+        responses={
+            200: OpenApiResponse(EventSerializer, description="OK"),
+            404: OpenApiResponse(description="Not Found"),
+        },
+        tags=["Event"],
+    ),
+    create=extend_schema(
+        summary="이벤트 생성",
+        description="새로운 이벤트를 생성합니다.",
+        request=EventSerializer,
+        responses={
+            201: OpenApiResponse(EventSerializer, description="Created"),
+            400: OpenApiResponse(description="Bad Request"),
+        },
+        tags=["Event"],
+    ),
+    update=extend_schema(
+        summary="이벤트 정보 전체 수정 (PUT)",
+        description="이벤트의 모든 필드를 갱신합니다.",
+        request=EventSerializer,
+        responses={
+            200: OpenApiResponse(EventSerializer, description="OK"),
+            400: OpenApiResponse(description="Bad Request"),
+            404: OpenApiResponse(description="Not Found"),
+        },
+        tags=["Event"],
+    ),
+    partial_update=extend_schema(
+        summary="이벤트 정보 부분 수정 (PATCH)",
+        description="이벤트의 일부 필드만 부분 갱신합니다.",
+        request=EventSerializer,
+        responses={
+            200: OpenApiResponse(EventSerializer, description="OK"),
+            400: OpenApiResponse(description="Bad Request"),
+            404: OpenApiResponse(description="Not Found"),
+        },
+        tags=["Event"],
+    ),
+    destroy=extend_schema(
+        summary="이벤트 삭제",
+        description="ID로 특정 이벤트를 삭제합니다.",
+        responses={204: OpenApiResponse(description="No Content"), 404: OpenApiResponse(description="Not Found")},
+        tags=["Event"],
+    ),
+)
+class EventViewSet(viewsets.ModelViewSet):
+    serializer_class = EventSerializer
+
+    def get_queryset(self):
+        return Event.objects.filter(club_id=self.kwargs["club_pk"])
+
+    def perform_create(self, serializer):
+        club = get_object_or_404(Club, pk=self.kwargs["club_pk"])
         serializer.save(club=club)
