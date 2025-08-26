@@ -44,19 +44,29 @@
 
     </LinearLayout>
 
-    <!-- 아이템 1 - 파란색 -->
-    <LinearLayout
-        android:id="@+id/event_item_1"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginVertical="6dp"
-        android:background="@drawable/color_box_blue"
-        android:orientation="vertical"
-        android:gravity="center"
-        android:padding="16dp"
-        android:foreground="?android:attr/selectableItemBackground"
-        android:clickable="true"
-        android:focusable="true">
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:id="@+id/ledger_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- 아이템 1 - 파란색 -->
+            <LinearLayout
+                android:id="@+id/event_item_1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginVertical="6dp"
+                android:background="@drawable/color_box_blue"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:padding="16dp"
+                android:foreground="?android:attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true">
 
         <TextView
             android:layout_width="match_parent"
@@ -295,5 +305,9 @@
             android:gravity="center" />
 
     </LinearLayout>
+
+        </LinearLayout>
+
+    </ScrollView>
 
 </LinearLayout>

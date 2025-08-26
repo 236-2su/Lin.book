@@ -11,6 +11,7 @@ import android.widget.Toast
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
+import android.widget.Button
 
 class LedgerEditActivity : BaseActivity() {
 
@@ -190,7 +191,7 @@ class LedgerEditActivity : BaseActivity() {
     }
 
     private fun setupSaveButton() {
-        val btnSave = contentView.findViewById<TextView>(R.id.btn_save)
+        val btnSave = contentView.findViewById<Button>(R.id.btn_save)
         btnSave.setOnClickListener {
             if (validateInput()) {
                 saveLedger()

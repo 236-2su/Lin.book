@@ -32,12 +32,13 @@ interface ApiService {
     @GET("/club/{club_pk}/ledger/{ledger_pk}/transactions/")
     fun getTransactions(
         @Path("club_pk") clubId: Int,
-        @Path("ledger_pk") ledgerId: Int
+        @Path("ledger_pk") ledgerId: Int,
+        @retrofit2.http.Query("user_pk") userPk: Int
     ): Call<List<TransactionItem>>
 
     // Java 코드에서 사용하는 API 시그니처들
     @GET("club/{club_pk}/ledger/")
-    fun getLedgerList(@Path("club_pk") clubId: Int): Call<List<Ledger>>
+    fun getLedgerList(@Path("club_pk") clubId: Int): Call<List<LedgerApiItem>>
 
     @GET("club/{club_pk}/ledger/{id}/")
     fun getLedgerDetail(

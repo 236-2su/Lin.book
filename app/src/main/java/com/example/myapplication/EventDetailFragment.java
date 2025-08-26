@@ -14,9 +14,12 @@ import androidx.fragment.app.Fragment;
 import com.example.myapplication.api.ApiClient;
 import com.example.myapplication.model.Ledger;
 import com.example.myapplication.model.Transaction;
+import com.example.myapplication.TransactionItem; // TransactionItem 임포트 추가
+import com.example.myapplication.UserManager; // UserManager 임포트 추가
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -124,23 +127,31 @@ public class EventDetailFragment extends Fragment {
     }
     
     private void loadTransactions(int clubPk, int ledgerId) {
-        ApiClient.getApiService().getTransactionList(clubPk, ledgerId).enqueue(new Callback<List<Transaction>>() {
+        // user_pk 가져오기
+        Integer userPk = UserManager.INSTANCE.getUserPk(requireContext());
+        if (userPk == null) {
+            Log.e("EventDetailFragment", "user_pk가 없습니다. 로그인이 필요합니다.");
+            return;
+        }
+        
+        ApiClient.getApiService().getTransactions(clubPk, ledgerId, userPk).enqueue(new Callback<List<TransactionItem>>() {
             @Override
-            public void onResponse(Call<List<Transaction>> call, Response<List<Transaction>> response) {
+            public void onResponse(Call<List<TransactionItem>> call, Response<List<TransactionItem>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    List<Transaction> transactions = response.body();
+                    List<TransactionItem> transactions = response.body();
                     Log.d("EventDetailFragment", "거래내역 조회 성공: " + transactions.size() + "개");
                     
                     // 거래내역 UI 업데이트
                     updateTransactionList(transactions);
+                    
                 } else {
-                    Log.e("EventDetailFragment", "거래내역 API 응답 오류: " + response.code());
+                    Log.e("EventDetailFragment", "거래내역 조회 실패: " + response.code());
                 }
             }
 
             @Override
-            public void onFailure(Call<List<Transaction>> call, Throwable t) {
-                Log.e("EventDetailFragment", "거래내역 API 호출 실패: " + t.getMessage());
+            public void onFailure(Call<List<TransactionItem>> call, Throwable t) {
+                Log.e("EventDetailFragment", "API 호출 실패: " + t.getMessage());
             }
         });
     }
@@ -206,7 +217,7 @@ public class EventDetailFragment extends Fragment {
         Log.d("EventDetailFragment", "UI 업데이트 완료");
     }
     
-    private void updateTransactionList(List<Transaction> transactions) {
+    private void updateTransactionList(List<TransactionItem> transactions) {
         View rootView = getView();
         if (rootView == null) return;
         
@@ -214,11 +225,24 @@ public class EventDetailFragment extends Fragment {
         Collections.reverse(transactions);
         
         // 전체 거래내역 저장
-        this.allTransactions = transactions;
+        this.allTransactions = new ArrayList<>(); // TransactionItem을 Transaction으로 변환
+        for (TransactionItem item : transactions) {
+            Transaction transaction = new Transaction();
+            transaction.setId(item.getId());
+            transaction.setDate(item.getDateTime());
+            transaction.setAmount(item.getAmount());
+            transaction.setType(item.getType());
+            transaction.setPaymentMethod(item.getPaymentMethod());
+            transaction.setVendor(item.getVendor());
+            transaction.setDescription(item.getDescription());
+            transaction.setLedgerId(item.getLedgerId());
+            transaction.setClubPk(item.getClubPk());
+            this.allTransactions.add(transaction);
+        }
         
         // 가장 최근 거래의 날짜로 초기 연월 설정
-        if (!transactions.isEmpty()) {
-            String recentDate = transactions.get(0).getDate();
+        if (!this.allTransactions.isEmpty()) {
+            String recentDate = this.allTransactions.get(0).getDate();
             try {
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
                 Date date = sdf.parse(recentDate);
@@ -238,11 +262,11 @@ public class EventDetailFragment extends Fragment {
         List<Transaction> filteredTransactions = filterTransactionsByMonth();
         
         // 필터링된 거래 내역 합산하여 현재 잔액 계산
-        int totalTransactions = 0;
+        long totalTransactions = 0;
         for (Transaction transaction : this.allTransactions) {  // 전체 거래내역으로 잔액 계산
             totalTransactions += transaction.getAmount();
         }
-        int currentBalance = this.totalBudget + totalTransactions;
+        long currentBalance = this.totalBudget + totalTransactions;
         
         // 현재 잔액 업데이트
         TextView currentExpenseView = rootView.findViewById(R.id.tv_current_expense);
@@ -449,7 +473,7 @@ public class EventDetailFragment extends Fragment {
         }
     }
     
-    private String formatCurrency(int amount) {
+    private String formatCurrency(long amount) {
         NumberFormat formatter = NumberFormat.getNumberInstance(Locale.KOREA);
         return formatter.format(Math.abs(amount));
     }

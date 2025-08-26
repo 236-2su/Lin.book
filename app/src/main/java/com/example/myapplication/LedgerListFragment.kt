@@ -61,7 +61,7 @@ class LedgerListFragment : Fragment() {
         ledgerAdapter.setOnItemClickListener(object : LedgerAdapter.OnItemClickListener {
             override fun onItemClick(ledger: LedgerApiItem) {
                 // 클릭된 장부의 ID를 담아 LedgerContentFragment로 교체합니다.
-                // clubId는 현재 4로 고정, ledgerId는 클릭된 아이템의 id를 사용합니다.
+                // clubId는 4로 고정, ledgerId는 클릭된 아이템의 id를 사용합니다.
                 val fragment = LedgerContentFragment.newInstance(4, ledger.id)
                 (activity as? MainActivity)?.replaceFragment(fragment)
             }
@@ -76,13 +76,17 @@ class LedgerListFragment : Fragment() {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val apiService = ApiClient.getApiService()
-                val response = apiService.getLedgerApiList(clubId).execute()
+                val response = apiService.getLedgerList(clubId).execute()
 
                 withContext(Dispatchers.Main) {
                     if (response.isSuccessful) {
                         val ledgers = response.body()
                         if (ledgers != null && ledgers.isNotEmpty()) {
                             Log.d("LedgerListFragment", "Data fetched successfully: ${ledgers.size} items")
+                            // 각 장부의 정보를 로그로 출력
+                            ledgers.forEach { ledger ->
+                                Log.d("LedgerListFragment", "Ledger ID: ${ledger.id}, Name: ${ledger.name}")
+                            }
                             ledgerAdapter.updateData(ledgers)
                         } else {
                             Log.d("LedgerListFragment", "No data found.")
