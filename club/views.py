@@ -1,7 +1,9 @@
 from django.shortcuts import get_object_or_404
-from drf_spectacular.utils import OpenApiResponse, extend_schema, extend_schema_view
+from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema, extend_schema_view
 from rest_framework import status, viewsets
+from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from ledger.models import Event
 from ledger.serializers import EventSerializer
@@ -17,6 +19,48 @@ from .serializers import (
     ClubSerializer,
     ClubWelcomePageSerializer,
 )
+from .services import similar_by_club, similar_by_text
+
+
+@extend_schema_view(
+    get=extend_schema(
+        summary="검색 추천",
+        description="검색어를 넣으면 유사한 동아리를 추천해 줍니다",
+        tags=["Club"],
+        parameters=[
+            OpenApiParameter(
+                name="query", description="Search query for club name, description, tags", required=True, type=str
+            ),
+            OpenApiParameter(name="major", description="Filter by major category", required=False, type=str),
+            OpenApiParameter(
+                name="min_members", description="Filter by minimum number of members", required=False, type=int
+            ),
+        ],
+    )
+)
+class SimilarClubsByQuery(APIView):
+    def get(self, request):
+        query = request.query_params.get("query")
+        major = request.query_params.get("major")
+        min_members = request.query_params.get("min_members")
+        if not query:
+            return Response({"detail": "query is required"}, status=400)
+        filters = {}
+        if major:
+            filters["major"] = major
+        if min_members:
+            filters["min_members"] = int(min_members)
+        data = similar_by_text(query, k=10, filters=filters)
+        return Response({"results": data})
+
+
+@extend_schema_view(
+    get=extend_schema(summary="id 추천", description="가입한 동아리를 기반으로 다른 동아리를 추천합니다", tags=["Club"])
+)
+class SimilarClubsById(APIView):
+    def get(self, request, club_id):
+        data = similar_by_club(club_id, k=10)
+        return Response({"results": data})
 
 
 @extend_schema_view(
@@ -161,8 +205,8 @@ class ClubViewSet(viewsets.ModelViewSet):
     ),
     login=extend_schema(
         summary="클럽 로그인",
-        description="username을 입력하면 클럽 pk를 반환함",
-        tags=["User"],
+        description="email을 입력하면 해당 동아리의 멤버 pk를 반환함",
+        tags=["ClubMember"],
         request=ClubLoginRequestSerializer,
         responses={200: ClubLoginResponseSerializer},
     ),
@@ -176,6 +220,19 @@ class ClubMemberViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         club = get_object_or_404(Club, pk=self.kwargs["club_pk"])
         serializer.save(club=club)
+
+    @action(detail=False, methods=["post"])
+    def login(self, request, club_pk=None):
+        serializer = ClubLoginRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        email = serializer.validated_data["email"]
+
+        try:
+            club_member = ClubMember.objects.get(club_id=club_pk, user__email=email)
+            response_serializer = ClubLoginResponseSerializer({"pk": club_member.pk})
+            return Response(response_serializer.data, status=status.HTTP_200_OK)
+        except ClubMember.DoesNotExist:
+            return Response({"detail": "Member not found in this club."}, status=status.HTTP_404_NOT_FOUND)
 
 
 @extend_schema_view(

@@ -34,6 +34,7 @@ from .utils import sync_ledger_amount
             OpenApiParameter(
                 name="club_pk", description="클럽 ID", required=True, type=int, location=OpenApiParameter.PATH
             ),
+            OpenApiParameter(name="pk", description="장부 ID", required=True, type=int, location=OpenApiParameter.PATH),
         ],
         summary="특정 장부 조회",
         description="ID로 특정 장부의 상세 정보를 조회합니다.",
@@ -63,6 +64,7 @@ from .utils import sync_ledger_amount
             OpenApiParameter(
                 name="club_pk", description="클럽 ID", required=True, type=int, location=OpenApiParameter.PATH
             ),
+            OpenApiParameter(name="pk", description="장부 ID", required=True, type=int, location=OpenApiParameter.PATH),
         ],
         summary="장부 정보 전체 수정 (PUT)",
         description="장부의 모든 필드를 갱신합니다.",
@@ -79,6 +81,7 @@ from .utils import sync_ledger_amount
             OpenApiParameter(
                 name="club_pk", description="클럽 ID", required=True, type=int, location=OpenApiParameter.PATH
             ),
+            OpenApiParameter(name="pk", description="장부 ID", required=True, type=int, location=OpenApiParameter.PATH),
         ],
         summary="장부 정보 부분 수정 (PATCH)",
         description="장부의 일부 필드만 부분 갱신합니다.",
@@ -95,6 +98,7 @@ from .utils import sync_ledger_amount
             OpenApiParameter(
                 name="club_pk", description="클럽 ID", required=True, type=int, location=OpenApiParameter.PATH
             ),
+            OpenApiParameter(name="pk", description="장부 ID", required=True, type=int, location=OpenApiParameter.PATH),
         ],
         summary="장부 삭제",
         description="ID로 특정 장부를 삭제합니다.",
@@ -117,6 +121,9 @@ class LedgerViewSet(viewsets.ModelViewSet):
     list=extend_schema(
         parameters=[
             OpenApiParameter(
+                name="club_pk", description="클럽 ID", required=True, type=int, location=OpenApiParameter.PATH
+            ),
+            OpenApiParameter(
                 name="ledger_pk", description="장부 ID", required=True, type=int, location=OpenApiParameter.PATH
             ),
         ],
@@ -128,7 +135,13 @@ class LedgerViewSet(viewsets.ModelViewSet):
     retrieve=extend_schema(
         parameters=[
             OpenApiParameter(
+                name="club_pk", description="클럽 ID", required=True, type=int, location=OpenApiParameter.PATH
+            ),
+            OpenApiParameter(
                 name="ledger_pk", description="장부 ID", required=True, type=int, location=OpenApiParameter.PATH
+            ),
+            OpenApiParameter(
+                name="pk", description="거래 내역 ID", required=True, type=int, location=OpenApiParameter.PATH
             ),
         ],
         summary="특정 거래 내역 조회",
@@ -141,6 +154,9 @@ class LedgerViewSet(viewsets.ModelViewSet):
     ),
     create=extend_schema(
         parameters=[
+            OpenApiParameter(
+                name="club_pk", description="클럽 ID", required=True, type=int, location=OpenApiParameter.PATH
+            ),
             OpenApiParameter(
                 name="ledger_pk", description="장부 ID", required=True, type=int, location=OpenApiParameter.PATH
             ),
@@ -157,7 +173,13 @@ class LedgerViewSet(viewsets.ModelViewSet):
     update=extend_schema(
         parameters=[
             OpenApiParameter(
+                name="club_pk", description="클럽 ID", required=True, type=int, location=OpenApiParameter.PATH
+            ),
+            OpenApiParameter(
                 name="ledger_pk", description="장부 ID", required=True, type=int, location=OpenApiParameter.PATH
+            ),
+            OpenApiParameter(
+                name="pk", description="거래 내역 ID", required=True, type=int, location=OpenApiParameter.PATH
             ),
         ],
         summary="거래 내역 전체 수정 (PUT)",
@@ -173,7 +195,13 @@ class LedgerViewSet(viewsets.ModelViewSet):
     partial_update=extend_schema(
         parameters=[
             OpenApiParameter(
+                name="club_pk", description="클럽 ID", required=True, type=int, location=OpenApiParameter.PATH
+            ),
+            OpenApiParameter(
                 name="ledger_pk", description="장부 ID", required=True, type=int, location=OpenApiParameter.PATH
+            ),
+            OpenApiParameter(
+                name="pk", description="거래 내역 ID", required=True, type=int, location=OpenApiParameter.PATH
             ),
         ],
         summary="거래 내역 부분 수정 (PATCH)",
@@ -189,7 +217,13 @@ class LedgerViewSet(viewsets.ModelViewSet):
     destroy=extend_schema(
         parameters=[
             OpenApiParameter(
+                name="club_pk", description="클럽 ID", required=True, type=int, location=OpenApiParameter.PATH
+            ),
+            OpenApiParameter(
                 name="ledger_pk", description="장부 ID", required=True, type=int, location=OpenApiParameter.PATH
+            ),
+            OpenApiParameter(
+                name="pk", description="거래 내역 ID", required=True, type=int, location=OpenApiParameter.PATH
             ),
         ],
         summary="거래 내역 삭제",
@@ -224,6 +258,9 @@ class LedgerTransactionsViewSet(viewsets.ModelViewSet):
     list=extend_schema(
         parameters=[
             OpenApiParameter(
+                name="club_pk", description="클럽 ID", required=True, type=int, location=OpenApiParameter.PATH
+            ),
+            OpenApiParameter(
                 name="ledger_pk", description="장부 ID", required=True, type=int, location=OpenApiParameter.PATH
             ),
         ],
@@ -235,7 +272,13 @@ class LedgerTransactionsViewSet(viewsets.ModelViewSet):
     retrieve=extend_schema(
         parameters=[
             OpenApiParameter(
+                name="club_pk", description="클럽 ID", required=True, type=int, location=OpenApiParameter.PATH
+            ),
+            OpenApiParameter(
                 name="ledger_pk", description="장부 ID", required=True, type=int, location=OpenApiParameter.PATH
+            ),
+            OpenApiParameter(
+                name="pk", description="영수증 ID", required=True, type=int, location=OpenApiParameter.PATH
             ),
         ],
         summary="특정 영수증 조회",
@@ -248,6 +291,9 @@ class LedgerTransactionsViewSet(viewsets.ModelViewSet):
     ),
     create=extend_schema(
         parameters=[
+            OpenApiParameter(
+                name="club_pk", description="클럽 ID", required=True, type=int, location=OpenApiParameter.PATH
+            ),
             OpenApiParameter(
                 name="ledger_pk", description="장부 ID", required=True, type=int, location=OpenApiParameter.PATH
             ),
@@ -264,7 +310,13 @@ class LedgerTransactionsViewSet(viewsets.ModelViewSet):
     update=extend_schema(
         parameters=[
             OpenApiParameter(
+                name="club_pk", description="클럽 ID", required=True, type=int, location=OpenApiParameter.PATH
+            ),
+            OpenApiParameter(
                 name="ledger_pk", description="장부 ID", required=True, type=int, location=OpenApiParameter.PATH
+            ),
+            OpenApiParameter(
+                name="pk", description="영수증 ID", required=True, type=int, location=OpenApiParameter.PATH
             ),
         ],
         summary="영수증 정보 전체 수정 (PUT)",
@@ -280,7 +332,13 @@ class LedgerTransactionsViewSet(viewsets.ModelViewSet):
     partial_update=extend_schema(
         parameters=[
             OpenApiParameter(
+                name="club_pk", description="클럽 ID", required=True, type=int, location=OpenApiParameter.PATH
+            ),
+            OpenApiParameter(
                 name="ledger_pk", description="장부 ID", required=True, type=int, location=OpenApiParameter.PATH
+            ),
+            OpenApiParameter(
+                name="pk", description="영수증 ID", required=True, type=int, location=OpenApiParameter.PATH
             ),
         ],
         summary="영수증 정보 부분 수정 (PATCH)",
@@ -296,7 +354,13 @@ class LedgerTransactionsViewSet(viewsets.ModelViewSet):
     destroy=extend_schema(
         parameters=[
             OpenApiParameter(
+                name="club_pk", description="클럽 ID", required=True, type=int, location=OpenApiParameter.PATH
+            ),
+            OpenApiParameter(
                 name="ledger_pk", description="장부 ID", required=True, type=int, location=OpenApiParameter.PATH
+            ),
+            OpenApiParameter(
+                name="pk", description="영수증 ID", required=True, type=int, location=OpenApiParameter.PATH
             ),
         ],
         summary="영수증 삭제",
@@ -329,6 +393,9 @@ class ReceiptViewSet(viewsets.ModelViewSet):
             OpenApiParameter(
                 name="club_pk", description="클럽 ID", required=True, type=int, location=OpenApiParameter.PATH
             ),
+            OpenApiParameter(
+                name="pk", description="이벤트 ID", required=True, type=int, location=OpenApiParameter.PATH
+            ),
         ],
         summary="특정 이벤트 조회",
         description="ID로 특정 이벤트의 상세 정보를 조회합니다.",
@@ -358,6 +425,9 @@ class ReceiptViewSet(viewsets.ModelViewSet):
             OpenApiParameter(
                 name="club_pk", description="클럽 ID", required=True, type=int, location=OpenApiParameter.PATH
             ),
+            OpenApiParameter(
+                name="pk", description="이벤트 ID", required=True, type=int, location=OpenApiParameter.PATH
+            ),
         ],
         summary="이벤트 정보 전체 수정 (PUT)",
         description="이벤트의 모든 필드를 갱신합니다.",
@@ -374,6 +444,9 @@ class ReceiptViewSet(viewsets.ModelViewSet):
             OpenApiParameter(
                 name="club_pk", description="클럽 ID", required=True, type=int, location=OpenApiParameter.PATH
             ),
+            OpenApiParameter(
+                name="pk", description="이벤트 ID", required=True, type=int, location=OpenApiParameter.PATH
+            ),
         ],
         summary="이벤트 정보 부분 수정 (PATCH)",
         description="이벤트의 일부 필드만 부분 갱신합니다.",
@@ -389,6 +462,9 @@ class ReceiptViewSet(viewsets.ModelViewSet):
         parameters=[
             OpenApiParameter(
                 name="club_pk", description="클럽 ID", required=True, type=int, location=OpenApiParameter.PATH
+            ),
+            OpenApiParameter(
+                name="pk", description="이벤트 ID", required=True, type=int, location=OpenApiParameter.PATH
             ),
         ],
         summary="이벤트 삭제",
