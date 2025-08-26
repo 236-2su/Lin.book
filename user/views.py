@@ -174,5 +174,5 @@ class UserViewSet(viewsets.ModelViewSet):
         except User.DoesNotExist:
             return Response({"detail": "해당 이메일의 사용자가 존재하지 않습니다."}, status=status.HTTP_404_NOT_FOUND)
 
-        out_ser = LoginResponseSerializer({"pk": user.pk})
+        out_ser = LoginResponseSerializer(user)
         return Response(out_ser.data, status=status.HTTP_200_OK)

@@ -58,6 +58,13 @@ class LoginRequestSerializer(serializers.Serializer):
 
 class LoginResponseSerializer(serializers.Serializer):
     pk = serializers.IntegerField()
+    club_pks = serializers.SerializerMethodField()
+
+    def get_club_pks(self, obj):
+        """
+        유저가 가입한 모든 동아리의 pk 목록을 반환합니다.
+        """
+        return list(obj.clubmember_set.values_list("club__pk", flat=True))
 
 
 class UserUpdateSerializer(serializers.ModelSerializer):
