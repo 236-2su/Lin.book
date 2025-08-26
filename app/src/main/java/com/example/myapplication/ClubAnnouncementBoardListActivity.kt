@@ -99,6 +99,15 @@ class ClubAnnouncementBoardListActivity : AppCompatActivity() {
             startActivity(intent)
             finish()
         }
+        
+        // 행사장부 버튼
+        findViewById<TextView>(R.id.btn_event_account).setOnClickListener {
+            val currentClubPk = intent?.getIntExtra(EXTRA_CLUB_PK, -1) ?: -1
+            val intent = Intent(this, ClubEventLedgerListActivity::class.java)
+            intent.putExtra(ClubEventLedgerListActivity.EXTRA_CLUB_PK, currentClubPk)
+            startActivity(intent)
+            finish()
+        }
     }
     
     private fun fetchBoardList(clubPk: Int) {

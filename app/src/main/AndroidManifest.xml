@@ -89,6 +89,10 @@
             android:name=".ClubCreateActivity"
             android:exported="false" />
 
+        <activity
+            android:name=".ClubEventLedgerListActivity"
+            android:exported="false" />
+
     </application>
 
 </manifest>
