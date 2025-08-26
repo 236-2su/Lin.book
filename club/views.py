@@ -1,6 +1,6 @@
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import OpenApiResponse, extend_schema, extend_schema_view
-from rest_framework import viewsets, status
+from rest_framework import status, viewsets
 from rest_framework.response import Response
 
 from ledger.models import Event
@@ -168,8 +168,14 @@ class ClubViewSet(viewsets.ModelViewSet):
     ),
 )
 class ClubMemberViewSet(viewsets.ModelViewSet):
-    queryset = ClubMember.objects.all()
     serializer_class = ClubMemberSerializer
+
+    def get_queryset(self):
+        return ClubMember.objects.filter(club_id=self.kwargs["club_pk"])
+
+    def perform_create(self, serializer):
+        club = get_object_or_404(Club, pk=self.kwargs["club_pk"])
+        serializer.save(club=club)
 
 
 @extend_schema_view(
