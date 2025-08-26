@@ -19,5 +19,11 @@ data class BoardItem(
     @com.google.gson.annotations.SerializedName("updated_at")
     val updated_at: String? = "",
     @com.google.gson.annotations.SerializedName("author")
-    val author: Int? = 0
+    val author: Int? = 0,
+    @com.google.gson.annotations.SerializedName("author_name")
+    val author_name: String? = null,
+    @com.google.gson.annotations.SerializedName("author_student_short")
+    val author_student_short: String? = null,
+    @com.google.gson.annotations.SerializedName("author_major")
+    val author_major: String? = null
 ) : Parcelable

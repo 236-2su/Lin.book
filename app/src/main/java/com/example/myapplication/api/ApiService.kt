@@ -65,10 +65,12 @@ interface ApiService {
         @Body body: com.example.myapplication.CommentCreateRequest
     ): Call<com.example.myapplication.CommentItem>
 
+    data class LikeRequest(val user_id: Int)
     @POST("/club/{club_pk}/boards/{id}/like/")
     fun toggleBoardLike(
         @Path("club_pk") clubId: Int,
-        @Path("id") boardId: Int
+        @Path("id") boardId: Int,
+        @Body body: LikeRequest
     ): Call<okhttp3.ResponseBody>
 
     @GET("/club/{club_pk}/boards/{id}/")
@@ -76,4 +78,8 @@ interface ApiService {
         @Path("club_pk") clubId: Int,
         @Path("id") boardId: Int
     ): Call<com.example.myapplication.BoardItem>
+
+    // 사용자 상세
+    @GET("user/{id}/")
+    fun getUserDetail(@Path("id") userId: Int): Call<com.example.myapplication.UserDetail>
 }

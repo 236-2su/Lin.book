@@ -35,7 +35,9 @@ class ClubForumBoardListActivity : AppCompatActivity() {
         
         // Floating Action Button 설정
         findViewById<com.google.android.material.floatingactionbutton.FloatingActionButton>(R.id.fab_add_post).setOnClickListener {
+            val currentClubPk = intent?.getIntExtra(EXTRA_CLUB_PK, -1) ?: -1
             val intent = Intent(this, ClubForumBoardCreateActivity::class.java)
+            intent.putExtra(EXTRA_CLUB_PK, currentClubPk)
             startActivity(intent)
         }
         

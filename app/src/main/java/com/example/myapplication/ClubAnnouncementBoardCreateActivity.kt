@@ -23,8 +23,6 @@ class ClubAnnouncementBoardCreateActivity : AppCompatActivity() {
     
     companion object {
         private const val EXTRA_CLUB_PK = "club_pk"
-        private const val PREFS_AUTH = "auth"
-        private const val KEY_USER_ID = "user_id"
     }
     
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -96,14 +94,21 @@ class ClubAnnouncementBoardCreateActivity : AppCompatActivity() {
         val url = "$baseUrl/club/$clubPk/boards/"
         val client = com.example.myapplication.api.ApiClient.createUnsafeOkHttpClient()
 
-        fun buildRequest(authorValue: Int): Request {
+        fun buildRequest(authorValue: Int, includeClub: Boolean = false): Request {
             val payload = mapOf(
                 "author" to authorValue,
                 "type" to "announcement",
                 "title" to title,
                 "content" to content
             )
-            val json = Gson().toJson(payload)
+            // club 필드가 필요한 서버(이전 배포본) 대응
+            val finalPayload = if (includeClub) {
+                val m = java.util.LinkedHashMap(payload)
+                m["club"] = clubPk
+                m
+            } else payload
+
+            val json = Gson().toJson(finalPayload)
             val mediaType = "application/json; charset=utf-8".toMediaType()
             val body: RequestBody = json.toRequestBody(mediaType)
             return Request.Builder()
@@ -115,13 +120,16 @@ class ClubAnnouncementBoardCreateActivity : AppCompatActivity() {
 
         Thread {
             try {
+                // 1차 시도: author에 user_pk 전송
+                android.util.Log.d("CreateBoard", "POST /club/$clubPk/boards author(user_pk)=$userId")
                 var response = client.newCall(buildRequest(userId)).execute()
                 var responseBody = response.body?.string()
 
-                runOnUiThread {
-                    if (response.isSuccessful) {
+                if (response.isSuccessful) {
+                    val bodyForUi = responseBody
+                    runOnUiThread {
                         try {
-                            val created = Gson().fromJson(responseBody, BoardItem::class.java)
+                            val created = Gson().fromJson(bodyForUi, BoardItem::class.java)
                             Toast.makeText(this, "게시글이 작성되었습니다.", Toast.LENGTH_SHORT).show()
                             val intent = Intent(this, ClubAnnouncementBoardDetailActivity::class.java)
                             intent.putExtra("board_item", created)
@@ -132,41 +140,56 @@ class ClubAnnouncementBoardCreateActivity : AppCompatActivity() {
                             Toast.makeText(this, "작성 성공했지만 응답 파싱에 실패했습니다.", Toast.LENGTH_LONG).show()
                             finish()
                         }
-                    } else {
-                        // BE가 여전히 ClubMember pk를 요구하는 경우를 대비해 재시도
-                        val memberPk = fetchMyClubMemberPk(client, baseUrl, clubPk, userId)
-                        if (memberPk != null) {
-                            response.close()
-                            response = client.newCall(buildRequest(memberPk)).execute()
-                            responseBody = response.body?.string()
-                            if (response.isSuccessful) {
-                                try {
-                                    val created = Gson().fromJson(responseBody, BoardItem::class.java)
-                                    Toast.makeText(this, "게시글이 작성되었습니다.", Toast.LENGTH_SHORT).show()
-                                    val intent = Intent(this, ClubAnnouncementBoardDetailActivity::class.java)
-                                    intent.putExtra("board_item", created)
-                                    intent.putExtra("club_pk", clubPk)
-                                    startActivity(intent)
-                                    finish()
-                                } catch (e: Exception) {
-                                    Toast.makeText(this, "작성 성공했지만 응답 파싱에 실패했습니다.", Toast.LENGTH_LONG).show()
-                                    finish()
-                                }
-                            } else {
-                                Toast.makeText(
-                                    this,
-                                    "등록 실패: ${response.code} - ${responseBody ?: "응답 없음"}",
-                                    Toast.LENGTH_LONG
-                                ).show()
-                            }
-                        } else {
-                            Toast.makeText(
-                                this,
-                                "등록 실패: ${response.code} - ${responseBody ?: "응답 없음"}",
-                                Toast.LENGTH_LONG
-                            ).show()
-                        }
                     }
+                    return@Thread
+                }
+
+                // 실패 시 에러 메시지 저장
+                val firstCode = response.code
+                val firstError = responseBody
+                val requireClubField = try {
+                    val parser = com.google.gson.JsonParser()
+                    val elem = parser.parse(firstError ?: "{}")
+                    elem != null && elem.isJsonObject && elem.asJsonObject.has("club")
+                } catch (_: Exception) { false }
+
+                // 2차 시도(백업): author에 ClubMember.pk 전송
+                val memberPk = fetchMyClubMemberPk(client, baseUrl, clubPk, userId)
+                if (memberPk != null) {
+                    android.util.Log.d("CreateBoard", "Retry with author(member_pk)=$memberPk includeClub=$requireClubField")
+                    response.close()
+                    response = client.newCall(buildRequest(memberPk, includeClub = requireClubField)).execute()
+                    responseBody = response.body?.string()
+
+                    if (response.isSuccessful) {
+                        val bodyForUi = responseBody
+                        runOnUiThread {
+                            try {
+                                val created = Gson().fromJson(bodyForUi, BoardItem::class.java)
+                                Toast.makeText(this, "게시글이 작성되었습니다.", Toast.LENGTH_SHORT).show()
+                                val intent = Intent(this, ClubAnnouncementBoardDetailActivity::class.java)
+                                intent.putExtra("board_item", created)
+                                intent.putExtra("club_pk", clubPk)
+                                startActivity(intent)
+                                finish()
+                            } catch (e: Exception) {
+                                Toast.makeText(this, "작성 성공했지만 응답 파싱에 실패했습니다.", Toast.LENGTH_LONG).show()
+                                finish()
+                            }
+                        }
+                        return@Thread
+                    }
+                }
+
+                // 모두 실패한 경우 UI에 에러 표시
+                val errCode = response.code
+                val errBody = responseBody
+                runOnUiThread {
+                    Toast.makeText(
+                        this,
+                        "등록 실패: ${firstCode} - ${firstError ?: ""} / 재시도: ${errCode} - ${errBody ?: ""}",
+                        Toast.LENGTH_LONG
+                    ).show()
                 }
             } catch (e: IOException) {
                 runOnUiThread {
@@ -198,7 +221,6 @@ class ClubAnnouncementBoardCreateActivity : AppCompatActivity() {
     )
 
     private fun getCurrentUserId(): Int {
-        val prefs = getSharedPreferences(PREFS_AUTH, MODE_PRIVATE)
-        return prefs.getInt(KEY_USER_ID, -1)
+        return UserManager.getUserPk(this) ?: -1
     }
 }

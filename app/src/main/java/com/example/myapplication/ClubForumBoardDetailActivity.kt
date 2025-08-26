@@ -47,14 +47,65 @@ class ClubForumBoardDetailActivity : AppCompatActivity() {
         
         // 조회수 설정
         findViewById<TextView>(R.id.tv_views).text = "조회수 ${boardItem.views}"
-        // 좋아요/댓글 수
+        // 좋아요/댓글 수 (초기 표시)
         findViewById<TextView>(R.id.tv_likes_count)?.text = (boardItem.likes ?: "0").toString()
         findViewById<TextView>(R.id.tv_comments_count)?.text = (boardItem.comments ?: "0").toString()
         
-        // 작성자 정보 설정 (실제로는 API에서 받아와야 함)
-        findViewById<TextView>(R.id.tv_author_name).text = "김자유"
-        findViewById<TextView>(R.id.tv_author_info).text = "16학번 컴퓨터공학과"
+        // 헤더 클럽명
+        val clubPk = intent.getIntExtra("club_pk", -1)
+        if (clubPk > 0) {
+            com.example.myapplication.api.ApiClient.getApiService().getClubDetail(clubPk)
+                .enqueue(object : retrofit2.Callback<com.example.myapplication.ClubItem> {
+                    override fun onResponse(
+                        call: retrofit2.Call<com.example.myapplication.ClubItem>,
+                        response: retrofit2.Response<com.example.myapplication.ClubItem>
+                    ) {
+                        response.body()?.let { club ->
+                            findViewById<TextView>(R.id.tv_club_title)?.text = club.name
+                        }
+                    }
+                    override fun onFailure(
+                        call: retrofit2.Call<com.example.myapplication.ClubItem>,
+                        t: Throwable
+                    ) { }
+                })
+        }
         findViewById<TextView>(R.id.tv_created_date).text = formatDate(boardItem.created_at)
+        refreshMeta()
+    }
+
+    private fun refreshMeta() {
+        val clubPk = intent.getIntExtra("club_pk", -1)
+        val boardId = boardItem.id
+        if (clubPk <= 0) return
+        com.example.myapplication.api.ApiClient.getApiService().getBoardDetail(clubPk, boardId)
+            .enqueue(object : retrofit2.Callback<com.example.myapplication.BoardItem> {
+                override fun onResponse(
+                    call: retrofit2.Call<com.example.myapplication.BoardItem>,
+                    response: retrofit2.Response<com.example.myapplication.BoardItem>
+                ) {
+                    val latest = response.body() ?: return
+                    findViewById<TextView>(R.id.tv_views)?.text = "조회수 ${latest.views}"
+                    findViewById<TextView>(R.id.tv_likes_count)?.text = (latest.likes ?: "0").toString()
+                    findViewById<TextView>(R.id.tv_comments_count)?.text = (latest.comments ?: "0").toString()
+                    // 작성자 표시(이름/학번/학과)
+                    if (latest.author_name != null || latest.author_student_short != null || latest.author_major != null) {
+                        val name = latest.author_name ?: "작성자"
+                        val year = latest.author_student_short ?: ""
+                        val major = latest.author_major ?: ""
+                        findViewById<TextView>(R.id.tv_author_name)?.text = name
+                        findViewById<TextView>(R.id.tv_author_info)?.text = listOfNotNull(year, major.takeIf { it.isNotBlank() })
+                            .joinToString(" ")
+                    } else {
+                        val userId = latest.author ?: 0
+                        if (userId > 0) fetchAuthorFromUserApi(userId)
+                    }
+                }
+                override fun onFailure(
+                    call: retrofit2.Call<com.example.myapplication.BoardItem>,
+                    t: Throwable
+                ) { }
+            })
     }
     
     private fun showPopupMenu(view: View) {
@@ -80,6 +131,95 @@ class ClubForumBoardDetailActivity : AppCompatActivity() {
         }
         
         popup.show()
+    }
+
+    private fun toggleLike() {
+        val clubPk = intent.getIntExtra("club_pk", -1)
+        val boardId = boardItem.id
+        if (clubPk <= 0) return
+        val api = com.example.myapplication.api.ApiClient.getApiService()
+        val userId = UserManager.getUserPk(this) ?: -1
+        val body = com.example.myapplication.api.ApiService.LikeRequest(userId)
+        api.toggleBoardLike(clubPk, boardId, body).enqueue(object : retrofit2.Callback<okhttp3.ResponseBody> {
+            override fun onResponse(
+                call: retrofit2.Call<okhttp3.ResponseBody>,
+                response: retrofit2.Response<okhttp3.ResponseBody>
+            ) {
+                if (response.isSuccessful) {
+                    // 재조회로 카운트 업데이트
+                    refreshMeta()
+                } else {
+                    Toast.makeText(this@ClubForumBoardDetailActivity, "좋아요 처리 실패", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: retrofit2.Call<okhttp3.ResponseBody>, t: Throwable) {
+                Toast.makeText(this@ClubForumBoardDetailActivity, "네트워크 오류: ${t.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
+    private fun fetchAuthorFromUserApi(idFromBoard: Int) {
+        val api = com.example.myapplication.api.ApiClient.getApiService()
+        api.getUserDetail(idFromBoard).enqueue(object : retrofit2.Callback<com.example.myapplication.UserDetail> {
+            override fun onResponse(
+                call: retrofit2.Call<com.example.myapplication.UserDetail>,
+                response: retrofit2.Response<com.example.myapplication.UserDetail>
+            ) {
+                if (response.isSuccessful && response.body() != null) {
+                    bindAuthor(response.body()!!)
+                    return
+                }
+                mapClubMemberToUserAndFetch(idFromBoard)
+            }
+            override fun onFailure(
+                call: retrofit2.Call<com.example.myapplication.UserDetail>,
+                t: Throwable
+            ) { mapClubMemberToUserAndFetch(idFromBoard) }
+        })
+    }
+
+    private fun mapClubMemberToUserAndFetch(memberIdOrUserId: Int) {
+        val clubPk = intent.getIntExtra("club_pk", -1)
+        if (clubPk <= 0) return
+        val client = com.example.myapplication.api.ApiClient.createUnsafeOkHttpClient()
+        val url = com.example.myapplication.BuildConfig.BASE_URL.trimEnd('/') + "/club/" + clubPk + "/members/"
+        val req = okhttp3.Request.Builder().url(url).get().build()
+        Thread {
+            try {
+                client.newCall(req).execute().use { resp ->
+                    if (!resp.isSuccessful) return@use
+                    val body = resp.body?.string() ?: return@use
+                    val type = object : com.google.gson.reflect.TypeToken<List<ClubAnnouncementBoardCreateActivity.ClubMemberBrief>>() {}.type
+                    val items: List<ClubAnnouncementBoardCreateActivity.ClubMemberBrief> = com.google.gson.Gson().fromJson(body, type)
+                    val match = items.firstOrNull { it.id == memberIdOrUserId } ?: return@use
+                    runOnUiThread { fetchAuthorFromUserApiStrict(match.user) }
+                }
+            } catch (_: Exception) { }
+        }.start()
+    }
+
+    private fun fetchAuthorFromUserApiStrict(userId: Int) {
+        com.example.myapplication.api.ApiClient.getApiService().getUserDetail(userId)
+            .enqueue(object : retrofit2.Callback<com.example.myapplication.UserDetail> {
+                override fun onResponse(
+                    call: retrofit2.Call<com.example.myapplication.UserDetail>,
+                    response: retrofit2.Response<com.example.myapplication.UserDetail>
+                ) { response.body()?.let { bindAuthor(it) } }
+                override fun onFailure(
+                    call: retrofit2.Call<com.example.myapplication.UserDetail>,
+                    t: Throwable
+                ) { }
+            })
+    }
+
+    private fun bindAuthor(user: com.example.myapplication.UserDetail) {
+        val twoDigit = user.student_number?.take(2)
+        val yearText = twoDigit?.let { "${it}학번" }
+        val major = user.major ?: ""
+        findViewById<TextView>(R.id.tv_author_name)?.text = user.name ?: "작성자"
+        findViewById<TextView>(R.id.tv_author_info)?.text = listOfNotNull(yearText, major.takeIf { it.isNotBlank() })
+            .joinToString(" ")
     }
     
     private fun showDeleteConfirmDialog() {

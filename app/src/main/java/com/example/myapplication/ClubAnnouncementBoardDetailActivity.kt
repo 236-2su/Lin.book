@@ -52,12 +52,97 @@ class ClubAnnouncementBoardDetailActivity : AppCompatActivity() {
             toggleLike()
         }
     }
+
+    private fun fetchAuthorFromUserApi(idFromBoard: Int) {
+        val api = com.example.myapplication.api.ApiClient.getApiService()
+        // 1차: author를 user_id로 간주하고 조회
+        api.getUserDetail(idFromBoard).enqueue(object : retrofit2.Callback<com.example.myapplication.UserDetail> {
+            override fun onResponse(
+                call: retrofit2.Call<com.example.myapplication.UserDetail>,
+                response: retrofit2.Response<com.example.myapplication.UserDetail>
+            ) {
+                if (response.isSuccessful && response.body() != null) {
+                    bindAuthor(response.body()!!)
+                    return
+                }
+                // 2차: ClubMember.id 가능성 → members에서 매핑 후 재조회
+                mapClubMemberToUserAndFetch(idFromBoard)
+            }
+            override fun onFailure(
+                call: retrofit2.Call<com.example.myapplication.UserDetail>,
+                t: Throwable
+            ) { mapClubMemberToUserAndFetch(idFromBoard) }
+        })
+    }
+
+    private fun mapClubMemberToUserAndFetch(memberIdOrUserId: Int) {
+        val clubPk = intent.getIntExtra("club_pk", -1)
+        if (clubPk <= 0) return
+        val client = com.example.myapplication.api.ApiClient.createUnsafeOkHttpClient()
+        val url = com.example.myapplication.BuildConfig.BASE_URL.trimEnd('/') + "/club/" + clubPk + "/members/"
+        val req = okhttp3.Request.Builder().url(url).get().build()
+        Thread {
+            try {
+                client.newCall(req).execute().use { resp ->
+                    if (!resp.isSuccessful) return@use
+                    val body = resp.body?.string() ?: return@use
+                    val type = object : com.google.gson.reflect.TypeToken<List<ClubAnnouncementBoardCreateActivity.ClubMemberBrief>>() {}.type
+                    val items: List<ClubAnnouncementBoardCreateActivity.ClubMemberBrief> = com.google.gson.Gson().fromJson(body, type)
+                    val match = items.firstOrNull { it.id == memberIdOrUserId } ?: return@use
+                    // 재조회: user/{id}
+                    runOnUiThread { fetchAuthorFromUserApiStrict(match.user) }
+                }
+            } catch (_: Exception) { }
+        }.start()
+    }
+
+    private fun fetchAuthorFromUserApiStrict(userId: Int) {
+        com.example.myapplication.api.ApiClient.getApiService().getUserDetail(userId)
+            .enqueue(object : retrofit2.Callback<com.example.myapplication.UserDetail> {
+                override fun onResponse(
+                    call: retrofit2.Call<com.example.myapplication.UserDetail>,
+                    response: retrofit2.Response<com.example.myapplication.UserDetail>
+                ) { response.body()?.let { bindAuthor(it) } }
+                override fun onFailure(
+                    call: retrofit2.Call<com.example.myapplication.UserDetail>,
+                    t: Throwable
+                ) { }
+            })
+    }
+
+    private fun bindAuthor(user: com.example.myapplication.UserDetail) {
+        val twoDigit = user.student_number?.take(2)
+        val yearText = twoDigit?.let { "${it}학번" }
+        val major = user.major ?: ""
+        findViewById<TextView>(R.id.tv_author_name)?.text = user.name ?: "작성자"
+        findViewById<TextView>(R.id.tv_author_info)?.text = listOfNotNull(yearText, major.takeIf { it.isNotBlank() })
+            .joinToString(" ")
+    }
     
     private fun updateUI() {
         // 기본 표시
         findViewById<TextView>(R.id.tv_title).text = boardItem.title
         findViewById<TextView>(R.id.tv_content).text = boardItem.content
         findViewById<TextView>(R.id.tv_created_date).text = formatDate(boardItem.created_at)
+        // 헤더에 클럽명 표시
+        val clubPk = intent.getIntExtra("club_pk", -1)
+        if (clubPk > 0) {
+            com.example.myapplication.api.ApiClient.getApiService().getClubDetail(clubPk)
+                .enqueue(object : retrofit2.Callback<com.example.myapplication.ClubItem> {
+                    override fun onResponse(
+                        call: retrofit2.Call<com.example.myapplication.ClubItem>,
+                        response: retrofit2.Response<com.example.myapplication.ClubItem>
+                    ) {
+                        response.body()?.let { club ->
+                            findViewById<TextView>(R.id.tv_club_title)?.text = club.name
+                        }
+                    }
+                    override fun onFailure(
+                        call: retrofit2.Call<com.example.myapplication.ClubItem>,
+                        t: Throwable
+                    ) { }
+                })
+        }
         // 서버 최신값으로 메타정보 갱신
         refreshMeta()
     }
@@ -74,8 +159,21 @@ class ClubAnnouncementBoardDetailActivity : AppCompatActivity() {
                 ) {
                     val latest = response.body() ?: return
                     findViewById<TextView>(R.id.tv_views)?.text = "조회수 ${latest.views}"
-                    // 좋아요/댓글 카운트는 메타 영역/댓글 헤더에서 별도 표시
-                    // 댓글 수는 loadComments()에서 헤더로 표시됨
+                    findViewById<TextView>(R.id.tv_likes_count)?.text = (latest.likes ?: "0").toString()
+                    findViewById<TextView>(R.id.tv_comments_count)?.text = (latest.comments ?: "0").toString()
+                    // 작성자 이름/학번/학과
+                    if (latest.author_name != null || latest.author_student_short != null || latest.author_major != null) {
+                        val name = latest.author_name ?: "작성자"
+                        val year = latest.author_student_short ?: ""
+                        val major = latest.author_major ?: ""
+                        findViewById<TextView>(R.id.tv_author_name)?.text = name
+                        findViewById<TextView>(R.id.tv_author_info)?.text = listOfNotNull(year, major.takeIf { it.isNotBlank() })
+                            .joinToString(" ")
+                    } else {
+                        // 백업: 사용자 상세 호출로 채우기
+                        val userId = latest.author ?: 0
+                        if (userId > 0) fetchAuthorFromUserApi(userId)
+                    }
                 }
                 override fun onFailure(
                     call: retrofit2.Call<com.example.myapplication.BoardItem>,
@@ -225,7 +323,9 @@ class ClubAnnouncementBoardDetailActivity : AppCompatActivity() {
         val boardId = boardItem.id
         if (clubPk <= 0) return
         val api = com.example.myapplication.api.ApiClient.getApiService()
-        api.toggleBoardLike(clubPk, boardId).enqueue(object : retrofit2.Callback<okhttp3.ResponseBody> {
+        val userId = UserManager.getUserPk(this) ?: -1
+        val body = com.example.myapplication.api.ApiService.LikeRequest(userId)
+        api.toggleBoardLike(clubPk, boardId, body).enqueue(object : retrofit2.Callback<okhttp3.ResponseBody> {
             override fun onResponse(
                 call: retrofit2.Call<okhttp3.ResponseBody>,
                 response: retrofit2.Response<okhttp3.ResponseBody>
@@ -318,12 +418,26 @@ class ClubAnnouncementBoardDetailActivity : AppCompatActivity() {
     
     private fun formatDate(dateString: String): String {
         return try {
-            val inputFormat = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSXXX", java.util.Locale.getDefault())
-            val date = inputFormat.parse(dateString)
-            val outputFormat = java.text.SimpleDateFormat("yyyy. MM. dd(E) HH:mm", java.util.Locale.KOREA)
-            outputFormat.format(date ?: java.util.Date())
+            val instant = try {
+                java.time.OffsetDateTime.parse(dateString, java.time.format.DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+                    .toInstant()
+            } catch (_: Exception) {
+                val fmt = java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS")
+                java.time.LocalDateTime.parse(dateString, fmt).atZone(java.time.ZoneOffset.UTC).toInstant()
+            }
+            val kst = instant.atZone(java.time.ZoneId.of("Asia/Seoul"))
+            kst.format(
+                java.time.format.DateTimeFormatter
+                    .ofPattern("yyyy. MM. dd(E) HH:mm")
+                    .withLocale(java.util.Locale.KOREA)
+            )
         } catch (e: Exception) {
-            dateString
+            try {
+                val inputFormat = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSXXX", java.util.Locale.getDefault())
+                val date = inputFormat.parse(dateString)
+                val outputFormat = java.text.SimpleDateFormat("yyyy. MM. dd(E) HH:mm", java.util.Locale.KOREA)
+                outputFormat.format(date ?: java.util.Date())
+            } catch (_: Exception) { dateString }
         }
     }
 }

@@ -43,16 +43,29 @@ class BoardAdapter(
     
     private fun formatDate(dateString: String): String {
         return try {
-            // ISO 8601 형식의 날짜를 파싱
-            val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSXXX", Locale.getDefault())
-            val date = inputFormat.parse(dateString)
-            
-            // 한국어 형식으로 출력
-            val outputFormat = SimpleDateFormat("yyyy년 MM월 dd일(E) HH:mm", Locale.KOREA)
-            outputFormat.format(date ?: Date())
+            // 1) 표준 ISO-8601(+09:00 또는 Z) 우선 처리
+            val instant = try {
+                java.time.OffsetDateTime.parse(dateString, java.time.format.DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+                    .toInstant()
+            } catch (_: Exception) {
+                // 2) 타임존 표기가 없는 경우(마이크로초 포함) → UTC로 간주
+                val fmt = java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS")
+                java.time.LocalDateTime.parse(dateString, fmt).atZone(java.time.ZoneOffset.UTC).toInstant()
+            }
+            val kst = instant.atZone(java.time.ZoneId.of("Asia/Seoul"))
+            kst.format(
+                java.time.format.DateTimeFormatter
+                    .ofPattern("yyyy년 MM월 dd일(E) HH:mm")
+                    .withLocale(Locale.KOREA)
+            )
         } catch (e: Exception) {
-            // 파싱 실패 시 원본 문자열 반환
-            dateString
+            // 최후 수단: 기존 포맷터 시도
+            try {
+                val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSXXX", Locale.getDefault())
+                val date = inputFormat.parse(dateString)
+                val outputFormat = SimpleDateFormat("yyyy년 MM월 dd일(E) HH:mm", Locale.KOREA)
+                outputFormat.format(date ?: Date())
+            } catch (_: Exception) { dateString }
         }
     }
 }
