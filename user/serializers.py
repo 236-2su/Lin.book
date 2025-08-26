@@ -56,6 +56,7 @@ class LoginRequestSerializer(serializers.Serializer):
 
 class LoginResponseSerializer(serializers.Serializer):
     pk = serializers.IntegerField()
+    club_pks = serializers.ListField(child=serializers.IntegerField(), required=False)
 
 
 class UserUpdateSerializer(serializers.ModelSerializer):

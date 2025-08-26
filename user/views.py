@@ -174,5 +174,10 @@ class UserViewSet(viewsets.ModelViewSet):
         except User.DoesNotExist:
             return Response({"detail": "해당 이메일의 사용자가 존재하지 않습니다."}, status=status.HTTP_404_NOT_FOUND)
 
-        out_ser = LoginResponseSerializer({"pk": user.pk})
+        # 사용자가 가입한 클럽 pk 목록을 함께 반환
+        from club.models import ClubMember
+        my_club_pks = list(
+            ClubMember.objects.filter(user=user, status="active").values_list("club_id", flat=True)
+        )
+        out_ser = LoginResponseSerializer({"pk": user.pk, "club_pks": my_club_pks})
         return Response(out_ser.data, status=status.HTTP_200_OK)
