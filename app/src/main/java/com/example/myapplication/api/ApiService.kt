@@ -12,10 +12,13 @@ import retrofit2.http.Body
 import retrofit2.http.Path
 
 interface ApiService {
-    // 로그인 API
-    @POST("auth/login/")
-    fun login(@Body loginRequest: LoginRequest): Call<LoginResponse>
-    
+    // 로그인
+    data class LoginRequest(val email: String)
+    data class LoginResponse(val pk: Int, val club_pks: List<Int>?)
+
+    @POST("user/login/")
+    fun login(@Body req: LoginRequest): Call<LoginResponse>
+
     // Kotlin에서 사용하는 API 응답 모델
     @GET("club/{club_pk}/ledger/")
     fun getLedgerApiList(@Path("club_pk") clubId: Int): Call<List<LedgerApiItem>>
