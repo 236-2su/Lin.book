@@ -25,6 +25,7 @@ class Event(models.Model):
     start_date = models.DateField()
     end_date = models.DateField()
     description = models.TextField()
+    budget = models.IntegerField()
 
 
 class LedgerTransactions(models.Model):
