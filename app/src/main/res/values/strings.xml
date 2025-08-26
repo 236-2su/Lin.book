@@ -7,20 +7,24 @@
     <string name="app_logo">YHE</string>
     <string name="app_title">동아리</string>
 
-    <!-- activity_club_create.xml 대분류 스피너 옵션 -->
+    <!-- 동아리 카테고리 -->
     <string-array name="club_categories">
         <item>학술</item>
         <item>체육</item>
         <item>봉사활동</item>
         <item>예술</item>
+        <item>종교</item>
+        <item>친목</item>
         <item>기타</item>
     </string-array>
 
-    <!-- LedgerEditActivity 스피너 배열 -->
+    <!-- 장부 타입 -->
     <string-array name="ledger_types">
         <item>수입</item>
         <item>지출</item>
     </string-array>
+
+    <!-- 결제 수단 -->
     <string-array name="payment_methods">
         <item>현금</item>
         <item>카드</item>
@@ -52,4 +56,5 @@
     <!-- 기존 텍스트들 -->
     <string name="comment_hint">댓글을 입력해주세요</string>
     <string name="register_button">등록하기</string>
+
 </resources>

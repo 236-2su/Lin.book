@@ -51,12 +51,20 @@ class TransactionAdapter(
 
             // 날짜 포맷 변경
             try {
-                val parser = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
-                val formatter = SimpleDateFormat("yyyy년 MM월 dd일 E요일 HH:mm", Locale.KOREAN)
-                val parsedDate = parser.parse(transaction.date)
-                date.text = formatter.format(parsedDate)
+                if (transaction.dateTime != null) {
+                    val parser = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
+                    val formatter = SimpleDateFormat("yyyy년 MM월 dd일 E요일 HH:mm", Locale.KOREAN)
+                    val parsedDate = parser.parse(transaction.dateTime)
+                    if (parsedDate != null) {
+                        date.text = formatter.format(parsedDate)
+                    } else {
+                        date.text = "날짜 정보 없음"
+                    }
+                } else {
+                    date.text = "날짜 정보 없음"
+                }
             } catch (e: Exception) {
-                date.text = transaction.date // 파싱 실패 시 원본 표시
+                date.text = transaction.dateTime ?: "날짜 정보 없음" // 파싱 실패 시 원본 표시
             }
 
             // 금액 포맷 변경

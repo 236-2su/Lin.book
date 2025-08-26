@@ -44,9 +44,10 @@
         android:id="@+id/spinner_income_expense"
         android:layout_width="match_parent"
         android:layout_height="49dp"
-        android:background="@drawable/info_box"
-        android:padding="16dp"
-        android:layout_marginBottom="24dp" />
+        style="@style/DropdownSpinnerStyle"
+        android:layout_marginBottom="24dp"
+        android:dropDownWidth="match_parent"
+        android:background="@drawable/spinner_background" />
 
     <!-- 영수증 등록 (선택) -->
     <TextView
@@ -65,7 +66,7 @@
         android:background="@drawable/info_box"
         android:hint="클릭하여 영수증 촬영하기"
         android:textColorHint="#999999"
-        android:textSize="12sp"
+        android:textSize="14sp"
         android:textColor="#333333"
         android:padding="16dp"
         android:focusable="false"
@@ -92,7 +93,7 @@
         android:background="@drawable/info_box"
         android:hint="거래처명을 입력하세요"
         android:textColorHint="#999999"
-        android:textSize="12sp"
+        android:textSize="14sp"
         android:textColor="#333333"
         android:padding="16dp"
         android:layout_marginBottom="24dp" />
@@ -114,7 +115,7 @@
         android:background="@drawable/info_box"
         android:hint="금액을 입력하세요"
         android:textColorHint="#999999"
-        android:textSize="12sp"
+        android:textSize="14sp"
         android:textColor="#333333"
         android:padding="16dp"
         android:inputType="number"
@@ -137,7 +138,7 @@
         android:background="@drawable/info_box"
         android:hint="날짜를 선택하고 시간을 입력하세요"
         android:textColorHint="#999999"
-        android:textSize="12sp"
+        android:textSize="14sp"
         android:textColor="#333333"
         android:padding="16dp"
         android:focusable="false"
@@ -158,15 +159,15 @@
         android:id="@+id/spinner_payment_method"
         android:layout_width="match_parent"
         android:layout_height="49dp"
-        android:background="@drawable/info_box"
-        android:padding="16dp"
-        android:layout_marginBottom="24dp" />
+        style="@style/DropdownSpinnerStyle"
+        android:layout_marginBottom="24dp"
+        android:background="@drawable/spinner_background" />
 
     <!-- 메모 (선택) -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="메모 (선택)"
+        android:text="메모"
         android:textSize="16sp"
         android:textStyle="bold"
         android:textColor="#333333"
@@ -175,13 +176,17 @@
     <EditText
         android:id="@+id/et_memo"
         android:layout_width="match_parent"
-        android:layout_height="80dp"
+        android:layout_height="wrap_content"
         android:background="@drawable/info_box"
         android:hint="메모를 입력하세요"
         android:textColorHint="#999999"
-        android:textSize="12sp"
+        android:textSize="14sp"
         android:textColor="#333333"
         android:padding="16dp"
+        android:minLines="1"
+        android:maxLines="5"
+        android:gravity="top|start"
+        android:inputType="textMultiLine|textCapSentences"
         android:layout_marginBottom="24dp" />
 
     <!-- 등록하기 버튼 -->

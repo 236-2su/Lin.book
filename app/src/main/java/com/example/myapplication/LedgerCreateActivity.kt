@@ -253,11 +253,11 @@ class LedgerCreateActivity : BaseActivity() {
     }
     
     private fun validateInputs(): Boolean {
-        // 수입/지출 선택 확인
-        val incomeExpenseSpinner = contentView.findViewById<Spinner>(R.id.spinner_income_expense)
-        val selectedPosition = incomeExpenseSpinner?.selectedItemPosition ?: 0
+        // 카테고리 타입 선택 확인
+        val categoryTypeSpinner = contentView.findViewById<Spinner>(R.id.spinner_income_expense)
+        val selectedPosition = categoryTypeSpinner?.selectedItemPosition ?: 0
         if (selectedPosition == 0) {
-            android.widget.Toast.makeText(this, "수입/지출을 선택해주세요", android.widget.Toast.LENGTH_SHORT).show()
+            android.widget.Toast.makeText(this, "카테고리 타입을 선택해주세요", android.widget.Toast.LENGTH_SHORT).show()
             return false
         }
         
@@ -295,7 +295,7 @@ class LedgerCreateActivity : BaseActivity() {
     
     private fun saveLedgerData() {
         // 입력된 데이터를 수집
-        val incomeExpenseSpinner = contentView.findViewById<Spinner>(R.id.spinner_income_expense)
+        val categoryTypeSpinner = contentView.findViewById<Spinner>(R.id.spinner_income_expense)
         val partnerName = contentView.findViewById<EditText>(R.id.et_partner_name)?.text.toString()
         val amount = contentView.findViewById<EditText>(R.id.et_amount)?.text.toString()
         val transactionDateTime = contentView.findViewById<EditText>(R.id.et_transaction_datetime)?.text.toString()
@@ -303,7 +303,7 @@ class LedgerCreateActivity : BaseActivity() {
         val memo = contentView.findViewById<EditText>(R.id.et_memo)?.text.toString()
         
         android.util.Log.d("LedgerCreate", "장부 데이터 수집:")
-        android.util.Log.d("LedgerCreate", "수입/지출: ${incomeExpenseSpinner?.selectedItem}")
+        android.util.Log.d("LedgerCreate", "카테고리 타입: ${categoryTypeSpinner?.selectedItem}")
         android.util.Log.d("LedgerCreate", "거래처명: $partnerName")
         android.util.Log.d("LedgerCreate", "금액: $amount")
         android.util.Log.d("LedgerCreate", "거래일시: $transactionDateTime")
@@ -314,11 +314,11 @@ class LedgerCreateActivity : BaseActivity() {
         sendLedgerDataToAPI(
             date = transactionDateTime,
             amount = amount,
-            type = incomeExpenseSpinner?.selectedItem.toString(),
+            type = categoryTypeSpinner?.selectedItem.toString(),
             paymentMethod = paymentMethodSpinner?.selectedItem.toString(),
             description = memo,
             receipt = if (isReceiptCaptured) "captured" else "",
-            name = partnerName
+            vendor = partnerName
         )
     }
     
@@ -338,32 +338,32 @@ class LedgerCreateActivity : BaseActivity() {
     private fun setupSpinnersFromView(contentView: android.view.View) {
         android.util.Log.d("LedgerCreate", "setupSpinnersFromView 시작")
         
-        // 수입/지출 스피너 설정
-        val incomeExpenseSpinner = contentView.findViewById<Spinner>(R.id.spinner_income_expense)
+        // 카테고리 타입 스피너 설정
+        val categoryTypeSpinner = contentView.findViewById<Spinner>(R.id.spinner_income_expense)
         
-        if (incomeExpenseSpinner != null) {
-            val incomeExpenseOptions = arrayOf("항목을 선택하세요", "수입", "지출")
+        if (categoryTypeSpinner != null) {
+            val categoryTypeOptions = arrayOf("항목을 선택하세요", "수입", "지출")
             
             // 간단한 어댑터 사용
-            val incomeExpenseAdapter = createSimpleSpinnerAdapter(incomeExpenseOptions)
+            val categoryTypeAdapter = createSimpleSpinnerAdapter(categoryTypeOptions)
             
-            incomeExpenseSpinner.adapter = incomeExpenseAdapter
+            categoryTypeSpinner.adapter = categoryTypeAdapter
             
             // 기본 선택 항목 설정 (첫 번째 항목)
-            incomeExpenseSpinner.setSelection(0)
+            categoryTypeSpinner.setSelection(0)
             
             // 스피너 클릭 이벤트 설정
-            incomeExpenseSpinner.setOnItemSelectedListener(object : android.widget.AdapterView.OnItemSelectedListener {
+            categoryTypeSpinner.setOnItemSelectedListener(object : android.widget.AdapterView.OnItemSelectedListener {
                 override fun onItemSelected(parent: android.widget.AdapterView<*>?, view: android.view.View?, position: Int, id: Long) {
-                    android.util.Log.d("LedgerCreate", "수입/지출 선택됨: position=$position, item=${incomeExpenseOptions[position]}")
+                    android.util.Log.d("LedgerCreate", "카테고리 타입 선택됨: position=$position, item=${categoryTypeOptions[position]}")
                 }
                 
                 override fun onNothingSelected(parent: android.widget.AdapterView<*>?) {
-                    android.util.Log.d("LedgerCreate", "수입/지출 아무것도 선택되지 않음")
+                    android.util.Log.d("LedgerCreate", "카테고리 타입 아무것도 선택되지 않음")
                 }
             })
         } else {
-            android.util.Log.e("LedgerCreate", "수입/지출 스피너를 찾을 수 없음!")
+            android.util.Log.e("LedgerCreate", "카테고리 타입 스피너를 찾을 수 없음!")
         }
         
         // 결제수단 스피너 설정
@@ -450,17 +450,17 @@ class LedgerCreateActivity : BaseActivity() {
     
     private fun showTimeInputDialog(year: Int, month: Int, dayOfMonth: Int) {
         val timeInputDialog = android.app.AlertDialog.Builder(this)
-            .setTitle("시간 입력")
-            .setMessage("시간을 입력해주세요 (예: 14:30)")
+            .setTitle("시간 입력 (선택사항)")
+            .setMessage("시간을 입력하거나 비워두고 날짜만 설정할 수 있습니다.\n\n시간 형식: HH:MM (예: 14:30)")
             .setView(createTimeInputView())
-            .setPositiveButton("확인") { dialog, _ ->
+            .setPositiveButton("시간 설정") { dialog, _ ->
                 val timeInputView = (dialog as android.app.AlertDialog).findViewById<EditText>(android.R.id.text1)
-                val timeText = timeInputView?.text.toString()
+                val timeText = timeInputView?.text.toString().trim()
+                
+                val selectedDate = Calendar.getInstance()
+                selectedDate.set(year, month, dayOfMonth)
                 
                 if (timeText.isNotEmpty()) {
-                    val selectedDate = Calendar.getInstance()
-                    selectedDate.set(year, month, dayOfMonth)
-                    
                     // 시간 파싱 및 설정
                     try {
                         val timeParts = timeText.split(":")
@@ -477,18 +477,33 @@ class LedgerCreateActivity : BaseActivity() {
                                 etTransactionDateTime.setText(dateTimeText)
                                 
                                 // 키보드 숨기기
-        val imm = getSystemService(android.content.Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                                val imm = getSystemService(android.content.Context.INPUT_METHOD_SERVICE) as InputMethodManager
                                 imm.hideSoftInputFromWindow(etTransactionDateTime.windowToken, 0)
                             } else {
                                 android.widget.Toast.makeText(this, "올바른 시간을 입력해주세요 (00:00 ~ 23:59)", android.widget.Toast.LENGTH_SHORT).show()
+                                return@setPositiveButton
                             }
                         } else {
                             android.widget.Toast.makeText(this, "올바른 시간 형식을 입력해주세요 (예: 14:30)", android.widget.Toast.LENGTH_SHORT).show()
+                            return@setPositiveButton
                         }
                     } catch (e: NumberFormatException) {
                         android.widget.Toast.makeText(this, "올바른 시간을 입력해주세요", android.widget.Toast.LENGTH_SHORT).show()
+                        return@setPositiveButton
                     }
+                } else {
+                    // 시간을 입력하지 않은 경우 날짜만 표시
+                    val dateTimeText = "${dateFormat.format(selectedDate.time)}"
+                    etTransactionDateTime.setText(dateTimeText)
                 }
+                dialog.dismiss()
+            }
+            .setNeutralButton("시간 없이") { dialog, _ ->
+                // 시간 없이 날짜만 설정
+                val selectedDate = Calendar.getInstance()
+                selectedDate.set(year, month, dayOfMonth)
+                val dateTimeText = "${dateFormat.format(selectedDate.time)}"
+                etTransactionDateTime.setText(dateTimeText)
                 dialog.dismiss()
             }
             .setNegativeButton("취소") { dialog, _ ->
@@ -509,7 +524,7 @@ class LedgerCreateActivity : BaseActivity() {
     
     private fun createTimeInputView(): EditText {
         val timeInput = EditText(this)
-        timeInput.hint = "시간 입력 (예: 14:30)"
+        timeInput.hint = "시간 입력 (예: 14:30) - 비워두면 시간 없이 설정"
         timeInput.inputType = android.text.InputType.TYPE_CLASS_NUMBER or android.text.InputType.TYPE_CLASS_DATETIME
         timeInput.setPadding(50, 50, 50, 50)
         return timeInput
@@ -574,36 +589,52 @@ class LedgerCreateActivity : BaseActivity() {
         paymentMethod: String,
         description: String,
         receipt: String,
-        name: String
+        vendor: String
     ) {
         android.util.Log.d("LedgerCreate", "API 호출 시작")
         
-        // 기본값 설정 (실제로는 동적으로 가져와야 함)
-        val clubPk = "1" // 임시 값
-        val ledgerPk = "1" // 임시 값
+        // user_pk 가져오기
+        val userPk = UserManager.getUserPk(this)
+        if (userPk == null) {
+            android.util.Log.e("LedgerCreate", "user_pk가 없습니다. 로그인이 필요합니다.")
+            android.widget.Toast.makeText(this@LedgerCreateActivity, "로그인이 필요합니다", android.widget.Toast.LENGTH_LONG).show()
+            return
+        }
+        
+        // club_pk는 4로 하드코딩, ledger_pk는 동적으로 가져오기
+        val clubPk = "4"
+        val ledgerPk = intent.getStringExtra("ledger_pk") ?: "10"
+        
+        android.util.Log.d("LedgerCreate", "user_pk: $userPk, club_pk: $clubPk, ledger_pk: $ledgerPk")
+        
+        // 날짜 형식을 ISO 8601 형식으로 변환
+        val isoDate = convertToISODateTime(date)
         
         val transactionData = JSONObject().apply {
-            put("date", date)
-            put("amount", amount.replace(",", "")) // 쉼표 제거
-            put("type", type)
+            put("date_time", isoDate)
+            put("amount", amount.replace(",", "").toInt()) // 쉼표 제거하고 정수로 변환
+            put("type", type) // 회비, 소모품비, 기타 등 카테고리 타입
             put("payment_method", paymentMethod)
             put("description", description)
-            put("receipt", receipt)
-            put("name", name)
+            put("receipt", if (receipt == "captured") 1 else 0) // 영수증이 있으면 1, 없으면 0
+            put("vendor", vendor)
+            put("event", 0) // 기본값 0
         }
         
         android.util.Log.d("LedgerCreate", "POST 요청 데이터: ${transactionData}")
         
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                android.util.Log.d("LedgerCreate", "API 호출 시작: http://54.206.122.170/club/$clubPk/ledger/$ledgerPk/transactions/")
+                android.util.Log.d("LedgerCreate", "API 호출 시작: https://54.206.122.170/club/$clubPk/ledger/$ledgerPk/transactions/")
                 
-                val url = URL("http://54.206.122.170/club/$clubPk/ledger/$ledgerPk/transactions/")
+                val url = URL("https://54.206.122.170/club/$clubPk/ledger/$ledgerPk/transactions/")
                 val connection = url.openConnection() as HttpURLConnection
                 
                 connection.requestMethod = "POST"
                 connection.setRequestProperty("Content-Type", "application/json")
+                connection.setRequestProperty("Accept", "application/json")
                 connection.doOutput = true
+                connection.instanceFollowRedirects = false // POST 요청에서는 리다이렉트 비활성화
                 
                 val outputStream = connection.outputStream
                 val writer = OutputStreamWriter(outputStream)
@@ -615,14 +646,22 @@ class LedgerCreateActivity : BaseActivity() {
                 android.util.Log.d("LedgerCreate", "응답 코드: $responseCode")
                 
                 withContext(Dispatchers.Main) {
-                    if (responseCode == HttpURLConnection.HTTP_OK || responseCode == HttpURLConnection.HTTP_CREATED) {
-                        android.widget.Toast.makeText(this@LedgerCreateActivity, "장부 데이터가 성공적으로 등록되었습니다!", android.widget.Toast.LENGTH_LONG).show()
-                        android.util.Log.d("LedgerCreate", "장부 데이터 등록 성공")
-                        // 성공 시 장부 리스트로 이동
-                        navigateToLedgerList()
-                    } else {
-                        android.widget.Toast.makeText(this@LedgerCreateActivity, "장부 데이터 등록에 실패했습니다. (응답 코드: $responseCode)", android.widget.Toast.LENGTH_LONG).show()
-                        android.util.Log.e("LedgerCreate", "장부 데이터 등록 실패 - 응답 코드: $responseCode")
+                    when (responseCode) {
+                        HttpURLConnection.HTTP_OK, 
+                        HttpURLConnection.HTTP_CREATED -> {
+                            android.widget.Toast.makeText(this@LedgerCreateActivity, "장부 데이터가 성공적으로 등록되었습니다!", android.widget.Toast.LENGTH_LONG).show()
+                            android.util.Log.d("LedgerCreate", "장부 데이터 등록 성공 (응답 코드: $responseCode)")
+                            // 성공 시 장부 리스트로 이동
+                            navigateToLedgerList()
+                        }
+                        HttpURLConnection.HTTP_MOVED_PERM -> {
+                            android.widget.Toast.makeText(this@LedgerCreateActivity, "서버 리다이렉트 발생. 관리자에게 문의하세요.", android.widget.Toast.LENGTH_LONG).show()
+                            android.util.Log.w("LedgerCreate", "301 리다이렉트 응답 (응답 코드: $responseCode)")
+                        }
+                        else -> {
+                            android.widget.Toast.makeText(this@LedgerCreateActivity, "장부 데이터 등록에 실패했습니다. (응답 코드: $responseCode)", android.widget.Toast.LENGTH_LONG).show()
+                            android.util.Log.e("LedgerCreate", "장부 데이터 등록 실패 - 응답 코드: $responseCode)")
+                        }
                     }
                 }
                 
@@ -634,6 +673,33 @@ class LedgerCreateActivity : BaseActivity() {
                     android.widget.Toast.makeText(this@LedgerCreateActivity, "장부 데이터 등록 중 오류가 발생했습니다: ${e.message}", android.widget.Toast.LENGTH_LONG).show()
                 }
             }
+        }
+    }
+    
+    // 날짜를 ISO 8601 형식으로 변환하는 함수
+    private fun convertToISODateTime(dateString: String): String {
+        try {
+            // "2025년 08월 26일 14:30" 형식을 파싱
+            val datePattern = "yyyy년 MM월 dd일"
+            val dateTimePattern = "yyyy년 MM월 dd일 HH:mm"
+            
+            val dateFormat = if (dateString.contains(":")) {
+                SimpleDateFormat(dateTimePattern, Locale.getDefault())
+            } else {
+                SimpleDateFormat(datePattern, Locale.getDefault())
+            }
+            
+            val date = dateFormat.parse(dateString)
+            val isoFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())
+            isoFormat.timeZone = java.util.TimeZone.getTimeZone("UTC")
+            
+            return isoFormat.format(date)
+        } catch (e: Exception) {
+            android.util.Log.e("LedgerCreate", "날짜 변환 실패: $dateString", e)
+            // 변환 실패 시 현재 시간 반환
+            val isoFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())
+            isoFormat.timeZone = java.util.TimeZone.getTimeZone("UTC")
+            return isoFormat.format(java.util.Date())
         }
     }
 }

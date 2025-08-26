@@ -12,6 +12,7 @@ import com.example.myapplication.LedgerReportActivity;
 import android.graphics.Color;
 import com.example.myapplication.LedgerListFragment;
 import com.example.myapplication.ReferenceFragment;
+import com.example.myapplication.LedgerContentFragment;
 
 public abstract class BaseActivity extends AppCompatActivity {
     
@@ -210,33 +211,56 @@ public abstract class BaseActivity extends AppCompatActivity {
                     new TextView[]{btnFreeBoard, btnPublicAccount, btnEventAccount, btnMeetingAccount, btnAiReport});
 
                 if (this instanceof MainActivity) {
-                    return;
+                    ((MainActivity) this).replaceFragment(new ReferenceFragment());
+                } else {
+                    Intent intent = new Intent(this, MainActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    startActivity(intent);
+                    overridePendingTransition(0, 0);
                 }
-                updateBoardButton(btnNotice, 
-                    new TextView[]{btnFreeBoard, btnPublicAccount, btnMeetingAccount, btnAiReport});
-                
-                // 공지사항 버튼 클릭 시 MainActivity로 이동
-                Intent intent = new Intent(this, MainActivity.class);
-                startActivity(intent);
-
-                // 페이지 전환 애니메이션 제거
-                overridePendingTransition(0, 0);
             });
         }
         
         if (btnFreeBoard != null) {
-            btnFreeBoard.setOnClickListener(v -> updateBoardButton(btnFreeBoard, 
-                new TextView[]{btnNotice, btnPublicAccount, btnMeetingAccount, btnAiReport}));
+            btnFreeBoard.setOnClickListener(v -> {
+                updateBoardButton(btnFreeBoard, 
+                    new TextView[]{btnNotice, btnPublicAccount, btnEventAccount, btnMeetingAccount, btnAiReport});
+                // TODO: FreeBoardFragment 만들어서 교체하는 로직 추가
+            });
         }
         
         if (btnPublicAccount != null) {
-            btnPublicAccount.setOnClickListener(v -> updateBoardButton(btnPublicAccount, 
-                new TextView[]{btnNotice, btnFreeBoard, btnMeetingAccount, btnAiReport}));
+            btnPublicAccount.setOnClickListener(v -> {
+                updateBoardButton(btnPublicAccount, 
+                    new TextView[]{btnNotice, btnFreeBoard, btnEventAccount, btnMeetingAccount, btnAiReport});
+                
+                if (this instanceof MainActivity) {
+                    // 장부 리스트를 거치지 않고 바로 장부 상세 내역으로 이동
+                    // club_pk = 4, ledger_pk = 10으로 지정
+                    ((MainActivity) this).replaceFragment(LedgerContentFragment.Companion.newInstance(4, 10));
+                } else {
+                    Intent intent = new Intent(this, MainActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    startActivity(intent);
+                    overridePendingTransition(0, 0);
+                }
+            });
+        }
+        
+        if (btnEventAccount != null) {
+            btnEventAccount.setOnClickListener(v -> {
+                updateBoardButton(btnEventAccount, 
+                    new TextView[]{btnNotice, btnFreeBoard, btnPublicAccount, btnMeetingAccount, btnAiReport});
+                // TODO: EventAccountFragment 만들어서 교체하는 로직 추가
+            });
         }
         
         if (btnMeetingAccount != null) {
-            btnMeetingAccount.setOnClickListener(v -> updateBoardButton(btnMeetingAccount, 
-                new TextView[]{btnNotice, btnFreeBoard, btnPublicAccount, btnAiReport}));
+            btnMeetingAccount.setOnClickListener(v -> {
+                updateBoardButton(btnMeetingAccount, 
+                    new TextView[]{btnNotice, btnFreeBoard, btnPublicAccount, btnEventAccount, btnAiReport});
+                // TODO: MeetingAccountFragment 만들어서 교체하는 로직 추가
+            });
         }
         
         if (btnAiReport != null) {
