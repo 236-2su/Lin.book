@@ -1,6 +1,5 @@
 from django.shortcuts import get_object_or_404
-from drf_spectacular.utils import OpenApiExample, OpenApiResponse, extend_schema, extend_schema_view
-from drf_spectacular.utils import OpenApiExample, OpenApiResponse, extend_schema, extend_schema_view
+from drf_spectacular.utils import OpenApiExample, OpenApiParameter, OpenApiResponse, extend_schema, extend_schema_view
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -104,6 +103,12 @@ class BoardViewSet(viewsets.ModelViewSet):
             return Response(status=status.HTTP_201_CREATED)
 
 
+@extend_schema(
+    parameters=[
+        OpenApiParameter(name="club_pk", type=int, location=OpenApiParameter.PATH, description="Club ID"),
+        OpenApiParameter(name="board_pk", type=int, location=OpenApiParameter.PATH, description="Board ID"),
+    ]
+)
 @extend_schema_view(
     list=extend_schema(
         summary="댓글 전체 목록 조회",

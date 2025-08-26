@@ -1,3 +1,4 @@
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 
@@ -60,6 +61,7 @@ class LoginResponseSerializer(serializers.Serializer):
     pk = serializers.IntegerField()
     club_pks = serializers.SerializerMethodField()
 
+    @extend_schema_field(serializers.ListField(child=serializers.IntegerField()))
     def get_club_pks(self, obj):
         """
         유저가 가입한 모든 동아리의 pk 목록을 반환합니다.

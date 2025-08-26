@@ -4,7 +4,7 @@ from langchain_community.vectorstores import FAISS
 
 from .models import Club
 
-EMBED_MODEL_NAME = "text-embedding-3-small"
+EMBED_MODEL_NAME = "jhgan/ko-sroberta-multitask"
 
 
 def build_embedding_fn():
@@ -12,7 +12,7 @@ def build_embedding_fn():
 
 
 def make_doc(club: Club) -> Document:
-    text = f"{club.name} \n 분류: {club.major_category}/{club.minor_category}\n 키워드: {', '.join(club.tags or [])}\n 설명: {club.description or ''}\n 규모: {club.member_count or 'N/A'}\n"
+    text = f"{club.name} 분류: {club.major_category}/{club.minor_category} 키워드: {', '.join(club.tags or [])} 설명: {club.description or ''} 규모: {club.member_count or 'N/A'}"
     metadata = {
         "id": str(club.id),
         "major": club.major_category,
@@ -47,10 +47,8 @@ def similar_by_text(query: str, k: int = 10, filters: Optional[Dict] = None) -> 
     for d in docs:
         m = d.metadata or {}
         if filters:
-            # 예: major 필터
             if "major" in filters and m.get("major") != filters["major"]:
                 continue
-            # 예: 규모 상한/하한
             if "min_members" in filters and (m.get("member_count") or 0) < filters["min_members"]:
                 continue
         results.append({"id": m.get("id"), "score_hint": None, "snippet": d.page_content[:180]})

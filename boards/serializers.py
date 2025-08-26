@@ -1,3 +1,4 @@
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from user.models import User
@@ -13,9 +14,11 @@ class BoardSerializer(serializers.ModelSerializer):
         model = Board
         fields = "__all__"
 
+    @extend_schema_field(serializers.IntegerField())
     def get_likes(self, obj):
         return obj.boardlikes_set.count()
 
+    @extend_schema_field(serializers.IntegerField())
     def get_comments(self, obj):
         return obj.comments_set.count()
 
@@ -49,6 +52,7 @@ class CommentsSerializer(serializers.ModelSerializer):
         model = Comments
         fields = "__all__"
 
+    @extend_schema_field(serializers.IntegerField())
     def get_likes(self, obj):
         return obj.commentlikes_set.count()
 

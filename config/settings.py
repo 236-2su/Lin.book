@@ -155,4 +155,8 @@ SPECTACULAR_SETTINGS = {
     "DESCRIPTION": "Lin.book 백엔드 API 문서",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
+    "ENUM_NAME_OVERRIDES": {
+        "ClubMemberStatusEnum": "club.models.ClubMember.CLUB_MEMBER_STATUS_CHOICES",
+        "UserStatusEnum": "user.models.User.Status",
+    },
 }

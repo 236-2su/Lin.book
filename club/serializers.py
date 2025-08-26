@@ -1,3 +1,4 @@
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from .models import Club, ClubMember, ClubWelcomePage
@@ -16,6 +17,7 @@ class ClubWelcomePageSerializer(serializers.ModelSerializer):
         model = ClubWelcomePage
         fields = ["image", "content", "short_description"]
 
+    @extend_schema_field(serializers.CharField())
     def get_short_description(self, obj):
         return obj.club.short_description
 
@@ -50,7 +52,6 @@ class ClubMemberSerializer(serializers.ModelSerializer):
 
 class ClubLoginRequestSerializer(serializers.Serializer):
     email = serializers.EmailField()
-    club_id = serializers.IntegerField()
 
 
 class ClubLoginResponseSerializer(serializers.Serializer):
