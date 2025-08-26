@@ -11,6 +11,9 @@ import android.widget.FrameLayout
 import android.widget.TextView
 import android.widget.ImageView
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.PagerSnapHelper
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -138,13 +141,122 @@ class ClubListFragment : Fragment() {
             clubItems.clear()
             clubItems.addAll(clubs)
         }
-        
+
+        // 1) 내 동아리 섹션 채우기 (SharedPreferences의 club_pks 기반)
+        runCatching { fillMyClubsSection(clubs) }.onFailure { /* ignore */ }
+
+        // 2) 전체 동아리 목록 채우기
         val clubListContainer = contentView.findViewById<LinearLayout>(R.id.club_list_container) ?: return
         clubListContainer.removeAllViews()
 
         clubs.forEach { club ->
             val clubCard = createClubCard(club)
             clubListContainer.addView(clubCard)
+        }
+    }
+
+    private fun fillMyClubsSection(clubs: List<ClubItem>) {
+        val prefs = requireContext().getSharedPreferences("auth", android.content.Context.MODE_PRIVATE)
+        val pksStr = prefs.getString("club_pks", null) ?: return
+        val pkList = pksStr.split(',').mapNotNull { it.trim().toIntOrNull() }
+        if (pkList.isEmpty()) return
+
+        val myClubs = clubs.filter { pkList.contains(it.id) }
+        val rv = contentView.findViewById<RecyclerView>(R.id.my_club_recycler) ?: return
+        rv.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+        if (rv.onFlingListener == null) {
+            PagerSnapHelper().attachToRecyclerView(rv)
+        }
+        rv.adapter = object : RecyclerView.Adapter<MyClubVH>() {
+            override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyClubVH {
+                val v = createMyClubCardView(parent)
+                return MyClubVH(v)
+            }
+            override fun getItemCount(): Int = myClubs.size
+            override fun onBindViewHolder(holder: MyClubVH, position: Int) {
+                bindMyClubCard(holder.itemView as LinearLayout, myClubs[position])
+            }
+        }
+    }
+
+    private class MyClubVH(view: View) : RecyclerView.ViewHolder(view)
+
+    private fun createMyClubCardView(parent: ViewGroup): View {
+        val card = LinearLayout(parent.context).apply {
+            // 아래 일반 동아리 카드와 동일 폭/마진 적용
+            layoutParams = RecyclerView.LayoutParams(
+                RecyclerView.LayoutParams.MATCH_PARENT,
+                RecyclerView.LayoutParams.WRAP_CONTENT
+            ).apply { setMargins(4.dpToPx(), 4.dpToPx(), 4.dpToPx(), 16.dpToPx()) }
+            orientation = LinearLayout.VERTICAL
+            setBackgroundResource(R.drawable.card_box_light_blue)
+            setPadding(60, 40, 60, 40)
+        }
+        // 내부 컨테이너(뷰홀더 바인딩 시 채움)
+        card.addView(LinearLayout(parent.context).apply {
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+            orientation = LinearLayout.HORIZONTAL
+        })
+        return card
+    }
+
+    private fun bindMyClubCard(root: LinearLayout, club: ClubItem) {
+        root.removeAllViews()
+        val row = LinearLayout(requireContext()).apply {
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+            orientation = LinearLayout.HORIZONTAL
+        }
+        val info = LinearLayout(requireContext()).apply {
+            layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT).apply { weight = 1f }
+            orientation = LinearLayout.VERTICAL
+        }
+        val hashtags = TextView(requireContext()).apply {
+            text = club.hashtags
+            setTextColor(android.graphics.Color.parseColor("#2457C5"))
+            textSize = 12f
+        }
+        val name = TextView(requireContext()).apply {
+            text = club.name
+            setTextColor(android.graphics.Color.BLACK)
+            textSize = 18f
+            setTypeface(null, android.graphics.Typeface.BOLD)
+        }
+        val deptLoc = TextView(requireContext()).apply {
+            text = "${club.department} / ${club.location}"
+            setTextColor(android.graphics.Color.parseColor("#666666"))
+            textSize = 13f
+        }
+        info.addView(hashtags)
+        info.addView(name)
+        info.addView(deptLoc)
+
+        val image = androidx.cardview.widget.CardView(requireContext()).apply {
+            layoutParams = LinearLayout.LayoutParams(100.dpToPx(), 80.dpToPx())
+            radius = 4f
+            cardElevation = 0f
+            addView(ImageView(requireContext()).apply {
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.MATCH_PARENT
+                )
+                setImageResource(R.drawable.club)
+                scaleType = ImageView.ScaleType.CENTER_CROP
+            })
+        }
+        row.addView(info)
+        row.addView(image)
+        root.addView(row)
+
+        root.setOnClickListener {
+            val intent = Intent(activity, ClubAnnouncementBoardListActivity::class.java)
+            intent.putExtra("club_pk", club.id)
+            startActivity(intent)
         }
     }
 
