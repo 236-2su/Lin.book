@@ -64,6 +64,7 @@ class LoginActivity : AppCompatActivity() {
                             val pks = body.club_pks ?: emptyList()
                             getSharedPreferences("auth", MODE_PRIVATE)
                                 .edit()
+                                .putInt("user_id", body.pk)
                                 .putString("club_pks", pks.joinToString(","))
                                 .apply()
 

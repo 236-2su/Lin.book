@@ -28,38 +28,15 @@
         android:gravity="center"
         android:layout_marginBottom="24dp" />
 
-    <!-- 버튼 영역 -->
-    <LinearLayout
+    <!-- 버튼 영역: 단일 삭제 버튼(풀폭) -->
+    <Button
+        android:id="@+id/btn_delete"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center">
-
-        <!-- 취소 버튼 -->
-        <Button
-            android:id="@+id/btn_cancel"
-            android:layout_width="0dp"
-            android:layout_height="48dp"
-            android:layout_weight="1"
-            android:layout_marginEnd="8dp"
-            android:text="취소"
-            android:textSize="16sp"
-            android:backgroundTint="#9E9E9E"
-            android:textColor="@android:color/white" />
-
-        <!-- 삭제 버튼 -->
-        <Button
-            android:id="@+id/btn_delete"
-            android:layout_width="0dp"
-            android:layout_height="48dp"
-            android:layout_weight="1"
-            android:layout_marginStart="8dp"
-            android:text="삭제"
-            android:textSize="16sp"
-            android:backgroundTint="#F44336"
-            android:textColor="@android:color/white" />
-
-    </LinearLayout>
+        android:layout_height="48dp"
+        android:text="삭제"
+        android:textSize="16sp"
+        android:backgroundTint="#F44336"
+        android:textColor="@android:color/white" />
 
 </LinearLayout>
 

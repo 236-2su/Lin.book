@@ -10,6 +10,7 @@ import android.widget.PopupMenu
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import android.util.Log
 
 class ClubForumBoardDetailActivity : AppCompatActivity() {
     
@@ -37,6 +38,12 @@ class ClubForumBoardDetailActivity : AppCompatActivity() {
         // UI 업데이트
         updateUI()
     }
+
+    override fun onResume() {
+        super.onResume()
+        // 수정 화면에서 돌아왔을 때 최신 메타정보 반영
+        refreshMeta()
+    }
     
     private fun updateUI() {
         // 제목 설정
@@ -47,14 +54,381 @@ class ClubForumBoardDetailActivity : AppCompatActivity() {
         
         // 조회수 설정
         findViewById<TextView>(R.id.tv_views).text = "조회수 ${boardItem.views}"
-        // 좋아요/댓글 수
+        // 좋아요/댓글 수 (초기 표시)
         findViewById<TextView>(R.id.tv_likes_count)?.text = (boardItem.likes ?: "0").toString()
         findViewById<TextView>(R.id.tv_comments_count)?.text = (boardItem.comments ?: "0").toString()
         
-        // 작성자 정보 설정 (실제로는 API에서 받아와야 함)
-        findViewById<TextView>(R.id.tv_author_name).text = "김자유"
-        findViewById<TextView>(R.id.tv_author_info).text = "16학번 컴퓨터공학과"
+        // 헤더 클럽명
+        val clubPk = intent.getIntExtra("club_pk", -1)
+        if (clubPk > 0) {
+            com.example.myapplication.api.ApiClient.getApiService().getClubDetail(clubPk)
+                .enqueue(object : retrofit2.Callback<com.example.myapplication.ClubItem> {
+                    override fun onResponse(
+                        call: retrofit2.Call<com.example.myapplication.ClubItem>,
+                        response: retrofit2.Response<com.example.myapplication.ClubItem>
+                    ) {
+                        response.body()?.let { club ->
+                            findViewById<TextView>(R.id.tv_club_title)?.text = club.name
+                        }
+                    }
+                    override fun onFailure(
+                        call: retrofit2.Call<com.example.myapplication.ClubItem>,
+                        t: Throwable
+                    ) { }
+                })
+        }
         findViewById<TextView>(R.id.tv_created_date).text = formatDate(boardItem.created_at)
+        refreshMeta()
+        // 댓글 로드
+        loadComments()
+        // 댓글 전송
+        findViewById<android.widget.ImageButton>(R.id.btn_send_comment)?.setOnClickListener {
+            sendComment()
+        }
+    }
+
+    private fun refreshMeta() {
+        val clubPk = intent.getIntExtra("club_pk", -1)
+        val boardId = boardItem.id
+        if (clubPk <= 0) return
+        com.example.myapplication.api.ApiClient.getApiService().getBoardDetail(clubPk, boardId)
+            .enqueue(object : retrofit2.Callback<com.example.myapplication.BoardItem> {
+                override fun onResponse(
+                    call: retrofit2.Call<com.example.myapplication.BoardItem>,
+                    response: retrofit2.Response<com.example.myapplication.BoardItem>
+                ) {
+                    val latest = response.body() ?: return
+                    // 제목/내용 포함 최신 데이터로 갱신
+                    findViewById<TextView>(R.id.tv_title)?.text = latest.title
+                    findViewById<TextView>(R.id.tv_content)?.text = latest.content
+                    findViewById<TextView>(R.id.tv_views)?.text = "조회수 ${latest.views}"
+                    findViewById<TextView>(R.id.tv_likes_count)?.text = (latest.likes ?: "0").toString()
+                    findViewById<TextView>(R.id.tv_comments_count)?.text = (latest.comments ?: "0").toString()
+                    // 로컬 상태도 최신으로 유지
+                    boardItem = latest
+                    // 작성자 표시(이름/학번/학과)
+                    if (latest.author_name != null || latest.author_student_short != null || latest.author_major != null) {
+                        val name = latest.author_name ?: "작성자"
+                        val year = latest.author_student_short ?: ""
+                        val major = latest.author_major ?: ""
+                        findViewById<TextView>(R.id.tv_author_name)?.text = name
+                        findViewById<TextView>(R.id.tv_author_info)?.text = listOfNotNull(year, major.takeIf { it.isNotBlank() })
+                            .joinToString(" ")
+                    } else {
+                        val userId = latest.author ?: 0
+                        if (userId > 0) fetchAuthorFromUserApi(userId)
+                    }
+                }
+                override fun onFailure(
+                    call: retrofit2.Call<com.example.myapplication.BoardItem>,
+                    t: Throwable
+                ) { }
+            })
+    }
+
+    private fun loadComments() {
+        val clubPk = intent.getIntExtra("club_pk", -1)
+        val boardId = boardItem.id
+        if (clubPk <= 0) return
+        // 내 ClubMember.pk를 조회해 작성자 판별을 보정
+        fetchMyClubMemberPk(clubPk, UserManager.getUserPk(this) ?: -1) { myMemberPk ->
+        com.example.myapplication.api.ApiClient.getApiService()
+            .getComments(clubPk, boardId)
+            .enqueue(object : retrofit2.Callback<List<com.example.myapplication.CommentItem>> {
+                override fun onResponse(
+                    call: retrofit2.Call<List<com.example.myapplication.CommentItem>>,
+                    response: retrofit2.Response<List<com.example.myapplication.CommentItem>>
+                ) {
+                    val comments = response.body() ?: emptyList()
+                    findViewById<android.widget.TextView>(R.id.tv_comment_header)?.text = "댓글(${comments.size})"
+                    val container = findViewById<android.widget.LinearLayout>(R.id.comments_container)
+                    container?.removeAllViews()
+                    val myUserPk = UserManager.getUserPk(this@ClubForumBoardDetailActivity) ?: -1
+                    comments.forEach { comment ->
+                        val row = android.widget.LinearLayout(this@ClubForumBoardDetailActivity).apply {
+                            orientation = android.widget.LinearLayout.HORIZONTAL
+                            layoutParams = android.widget.LinearLayout.LayoutParams(
+                                android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
+                                android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
+                            ).apply { setMargins(0, 0, 0, 16) }
+                            gravity = android.view.Gravity.TOP
+                        }
+
+                        val avatar = android.widget.ImageView(this@ClubForumBoardDetailActivity).apply {
+                            layoutParams = android.widget.LinearLayout.LayoutParams(44, 44)
+                            setImageResource(R.drawable.account)
+                        }
+                        row.addView(avatar)
+
+                        val right = android.widget.LinearLayout(this@ClubForumBoardDetailActivity).apply {
+                            orientation = android.widget.LinearLayout.VERTICAL
+                            layoutParams = android.widget.LinearLayout.LayoutParams(0, android.widget.LinearLayout.LayoutParams.WRAP_CONTENT, 1f).apply {
+                                setMargins(12, 0, 0, 0)
+                            }
+                        }
+
+                        val metaRow = android.widget.LinearLayout(this@ClubForumBoardDetailActivity).apply {
+                            orientation = android.widget.LinearLayout.HORIZONTAL
+                            layoutParams = android.widget.LinearLayout.LayoutParams(
+                                android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
+                                android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
+                            )
+                            gravity = android.view.Gravity.CENTER_VERTICAL
+                        }
+                        val authorName = android.widget.TextView(this@ClubForumBoardDetailActivity).apply {
+                            text = (comment.author_name ?: "작성자 #${comment.author}")
+                            setTextColor(android.graphics.Color.BLACK)
+                            setTypeface(null, android.graphics.Typeface.BOLD)
+                            textSize = 16f
+                        }
+                        val authorInfo = android.widget.TextView(this@ClubForumBoardDetailActivity).apply {
+                            text = (comment.author_major ?: "")
+                            textSize = 12f
+                            setPadding(8, 0, 0, 0)
+                        }
+                        metaRow.addView(authorName)
+                        metaRow.addView(authorInfo)
+
+                        val spacer = android.view.View(this@ClubForumBoardDetailActivity).apply {
+                            layoutParams = android.widget.LinearLayout.LayoutParams(0, 1).apply { weight = 1f }
+                        }
+                        metaRow.addView(spacer)
+
+                        // 작성자일 경우 수정/삭제 버튼 (user_pk 또는 member_pk 매칭)
+                        val isMine = (comment.author == myUserPk) || (myMemberPk != null && comment.author == myMemberPk)
+                        if (isMine) {
+                            val editBtn = android.widget.TextView(this@ClubForumBoardDetailActivity).apply {
+                                text = "수정"
+                                setTextColor(android.graphics.Color.parseColor("#1976D2"))
+                                textSize = 14f
+                                setPadding(0, 0, 16, 0)
+                                setOnClickListener {
+                                    val input = findViewById<android.widget.EditText>(R.id.et_comment)
+                                    input?.setText(comment.content)
+                                    input?.setSelection(input.text?.length ?: 0)
+                                    input?.requestFocus()
+                                    input?.post {
+                                        val imm = getSystemService(android.content.Context.INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager
+                                        imm.showSoftInput(input, android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT)
+                                    }
+                                    input?.tag = comment.id // 편집 대상 표시
+                                }
+                            }
+                            metaRow.addView(editBtn)
+
+                            val deleteBtn = android.widget.TextView(this@ClubForumBoardDetailActivity).apply {
+                                text = "삭제"
+                                setTextColor(android.graphics.Color.parseColor("#D32F2F"))
+                                textSize = 14f
+                                setPadding(0, 0, 16, 0)
+                                setOnClickListener {
+                                    showCommentDeleteConfirm(comment.id)
+                                }
+                            }
+                            metaRow.addView(deleteBtn)
+                        }
+
+                        val likeIcon = android.widget.ImageView(this@ClubForumBoardDetailActivity).apply {
+                            layoutParams = android.widget.LinearLayout.LayoutParams(24, 24)
+                            setPadding(8, 8, 8, 8)
+                            isClickable = true
+                            isFocusable = true
+                            setImageResource(R.drawable.like_img)
+                            setOnClickListener { toggleCommentLike(comment) }
+                        }
+                        val likeCount = android.widget.TextView(this@ClubForumBoardDetailActivity).apply {
+                            text = (comment.likes ?: 0).toString()
+                            textSize = 14f
+                            setPadding(6, 0, 0, 0)
+                        }
+                        metaRow.addView(likeIcon)
+                        metaRow.addView(likeCount)
+
+                        right.addView(metaRow)
+                        val createdAtView = android.widget.TextView(this@ClubForumBoardDetailActivity).apply {
+                            text = formatDate(comment.created_at)
+                            textSize = 14f
+                        }
+                        val contentView = android.widget.TextView(this@ClubForumBoardDetailActivity).apply {
+                            text = comment.content
+                            textSize = 16f
+                            setPadding(0, 4, 0, 0)
+                        }
+                        right.addView(createdAtView)
+                        right.addView(contentView)
+                        row.addView(right)
+                        container?.addView(row)
+                    }
+                }
+
+                override fun onFailure(
+                    call: retrofit2.Call<List<com.example.myapplication.CommentItem>>,
+                    t: Throwable
+                ) { }
+            })
+        }
+    }
+
+    private fun sendComment() {
+        val clubPk = intent.getIntExtra("club_pk", -1)
+        val boardId = boardItem.id
+        if (clubPk <= 0) return
+        val input = findViewById<android.widget.EditText>(R.id.et_comment)
+        val content = input.text?.toString()?.trim().orEmpty()
+        if (content.isEmpty()) {
+            Toast.makeText(this, "댓글 내용을 입력하세요.", Toast.LENGTH_SHORT).show()
+            return
+        }
+        val api = com.example.myapplication.api.ApiClient.getApiService()
+        val authorId = UserManager.getUserPk(this) ?: 0
+        val editingId = (input.tag as? Int)
+        if (editingId != null) {
+            // 수정 호출
+            val body = com.example.myapplication.CommentCreateRequest(content = content, board = boardId, author = authorId)
+            api.updateComment(clubPk, boardId, editingId, body)
+                .enqueue(object : retrofit2.Callback<com.example.myapplication.CommentItem> {
+                    override fun onResponse(
+                        call: retrofit2.Call<com.example.myapplication.CommentItem>,
+                        response: retrofit2.Response<com.example.myapplication.CommentItem>
+                    ) {
+                        if (response.isSuccessful) {
+                            input.setText("")
+                            input.tag = null
+                            loadComments()
+                            refreshMeta()
+                        } else {
+                            Toast.makeText(this@ClubForumBoardDetailActivity, "댓글 수정 실패", Toast.LENGTH_LONG).show()
+                        }
+                    }
+                    override fun onFailure(
+                        call: retrofit2.Call<com.example.myapplication.CommentItem>,
+                        t: Throwable
+                    ) { Toast.makeText(this@ClubForumBoardDetailActivity, "네트워크 오류: ${t.message}", Toast.LENGTH_LONG).show() }
+                })
+            return
+        }
+        // 신규 등록
+        val body = com.example.myapplication.CommentCreateRequest(content = content, board = boardId, author = authorId)
+        api.postComment(clubPk, boardId, body)
+            .enqueue(object : retrofit2.Callback<com.example.myapplication.CommentItem> {
+                override fun onResponse(
+                    call: retrofit2.Call<com.example.myapplication.CommentItem>,
+                    response: retrofit2.Response<com.example.myapplication.CommentItem>
+                ) {
+                    if (response.isSuccessful) {
+                        input.setText("")
+                        loadComments()
+                        refreshMeta()
+                    } else {
+                        android.util.Log.w("Comment", "post fail code=${response.code()} body=${response.errorBody()?.string()} - try memberPk")
+                        fetchMyClubMemberPk(clubPk, authorId) { memberPk ->
+                            if (memberPk == null) {
+                                Toast.makeText(this@ClubForumBoardDetailActivity, "댓글 등록 실패", Toast.LENGTH_LONG).show()
+                                return@fetchMyClubMemberPk
+                            }
+                            val retryBody = com.example.myapplication.CommentCreateRequest(content = content, board = boardId, author = memberPk)
+                            api.postComment(clubPk, boardId, retryBody)
+                                .enqueue(object : retrofit2.Callback<com.example.myapplication.CommentItem> {
+                                    override fun onResponse(
+                                        call: retrofit2.Call<com.example.myapplication.CommentItem>,
+                                        response: retrofit2.Response<com.example.myapplication.CommentItem>
+                                    ) {
+                                        if (response.isSuccessful) {
+                                            input.setText("")
+                                            loadComments()
+                                            refreshMeta()
+                                        } else {
+                                            Toast.makeText(this@ClubForumBoardDetailActivity, "댓글 등록 실패", Toast.LENGTH_LONG).show()
+                                        }
+                                    }
+                                    override fun onFailure(
+                                        call: retrofit2.Call<com.example.myapplication.CommentItem>,
+                                        t: Throwable
+                                    ) { Toast.makeText(this@ClubForumBoardDetailActivity, "네트워크 오류: ${t.message}", Toast.LENGTH_LONG).show() }
+                                })
+                        }
+                    }
+                }
+
+                override fun onFailure(
+                    call: retrofit2.Call<com.example.myapplication.CommentItem>,
+                    t: Throwable
+                ) {
+                    Toast.makeText(this@ClubForumBoardDetailActivity, "네트워크 오류: ${t.message}", Toast.LENGTH_LONG).show()
+                }
+            })
+    }
+
+    private fun toggleCommentLike(comment: com.example.myapplication.CommentItem) {
+        val clubPk = intent.getIntExtra("club_pk", -1)
+        val boardId = boardItem.id
+        if (clubPk <= 0) return
+        val api = com.example.myapplication.api.ApiClient.getApiService()
+        val authorId = UserManager.getUserPk(this) ?: 0
+        val body = com.example.myapplication.CommentCreateRequest(content = comment.content, board = boardId, author = authorId)
+        android.util.Log.d("CommentLike", "POST /club/${clubPk}/boards/${boardId}/comments/${comment.id}/like/")
+        api.likeComment(clubPk, boardId, comment.id, body)
+            .enqueue(object : retrofit2.Callback<com.example.myapplication.CommentItem> {
+                override fun onResponse(
+                    call: retrofit2.Call<com.example.myapplication.CommentItem>,
+                    response: retrofit2.Response<com.example.myapplication.CommentItem>
+                ) {
+                    if (response.isSuccessful) {
+                        loadComments()
+                        refreshMeta()
+                    } else {
+                        android.util.Log.e("CommentLike", "fail code=${response.code()} body=${response.errorBody()?.string()}")
+                        Toast.makeText(this@ClubForumBoardDetailActivity, "댓글 좋아요 실패", Toast.LENGTH_SHORT).show()
+                    }
+                }
+                override fun onFailure(
+                    call: retrofit2.Call<com.example.myapplication.CommentItem>,
+                    t: Throwable
+                ) {
+                    android.util.Log.e("CommentLike", "network error: ${t.message}")
+                }
+            })
+    }
+
+    private fun showCommentDeleteConfirm(commentId: Int) {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_delete_confirm, null)
+        val dialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .create()
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.window?.setGravity(android.view.Gravity.BOTTOM)
+        dialog.window?.attributes?.windowAnimations = R.style.Animation_Dialog
+        dialog.setCanceledOnTouchOutside(true)
+        dialogView.findViewById<Button>(R.id.btn_delete).setOnClickListener {
+            deleteComment(commentId)
+            dialog.dismiss()
+        }
+        dialog.show()
+    }
+
+    private fun deleteComment(commentId: Int) {
+        val clubPk = intent.getIntExtra("club_pk", -1)
+        val boardId = boardItem.id
+        if (clubPk <= 0) return
+        com.example.myapplication.api.ApiClient.getApiService().deleteComment(clubPk, boardId, commentId)
+            .enqueue(object : retrofit2.Callback<okhttp3.ResponseBody> {
+                override fun onResponse(
+                    call: retrofit2.Call<okhttp3.ResponseBody>,
+                    response: retrofit2.Response<okhttp3.ResponseBody>
+                ) {
+                    if (response.isSuccessful) {
+                        Toast.makeText(this@ClubForumBoardDetailActivity, "댓글이 삭제되었습니다.", Toast.LENGTH_SHORT).show()
+                        loadComments()
+                        refreshMeta()
+                    } else {
+                        Toast.makeText(this@ClubForumBoardDetailActivity, "댓글 삭제 실패", Toast.LENGTH_SHORT).show()
+                    }
+                }
+                override fun onFailure(
+                    call: retrofit2.Call<okhttp3.ResponseBody>,
+                    t: Throwable
+                ) { }
+            })
     }
     
     private fun showPopupMenu(view: View) {
@@ -81,6 +455,114 @@ class ClubForumBoardDetailActivity : AppCompatActivity() {
         
         popup.show()
     }
+
+    private fun toggleLike() {
+        val clubPk = intent.getIntExtra("club_pk", -1)
+        val boardId = boardItem.id
+        if (clubPk <= 0) return
+        val api = com.example.myapplication.api.ApiClient.getApiService()
+        val userId = UserManager.getUserPk(this) ?: -1
+        val body = com.example.myapplication.api.ApiService.LikeRequest(userId)
+        api.toggleBoardLike(clubPk, boardId, body).enqueue(object : retrofit2.Callback<okhttp3.ResponseBody> {
+            override fun onResponse(
+                call: retrofit2.Call<okhttp3.ResponseBody>,
+                response: retrofit2.Response<okhttp3.ResponseBody>
+            ) {
+                if (response.isSuccessful) {
+                    // 재조회로 카운트 업데이트
+                    refreshMeta()
+                } else {
+                    Toast.makeText(this@ClubForumBoardDetailActivity, "좋아요 처리 실패", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: retrofit2.Call<okhttp3.ResponseBody>, t: Throwable) {
+                Toast.makeText(this@ClubForumBoardDetailActivity, "네트워크 오류: ${t.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
+    private fun fetchAuthorFromUserApi(idFromBoard: Int) {
+        val api = com.example.myapplication.api.ApiClient.getApiService()
+        api.getUserDetail(idFromBoard).enqueue(object : retrofit2.Callback<com.example.myapplication.UserDetail> {
+            override fun onResponse(
+                call: retrofit2.Call<com.example.myapplication.UserDetail>,
+                response: retrofit2.Response<com.example.myapplication.UserDetail>
+            ) {
+                if (response.isSuccessful && response.body() != null) {
+                    bindAuthor(response.body()!!)
+                    return
+                }
+                mapClubMemberToUserAndFetch(idFromBoard)
+            }
+            override fun onFailure(
+                call: retrofit2.Call<com.example.myapplication.UserDetail>,
+                t: Throwable
+            ) { mapClubMemberToUserAndFetch(idFromBoard) }
+        })
+    }
+
+    private fun mapClubMemberToUserAndFetch(memberIdOrUserId: Int) {
+        val clubPk = intent.getIntExtra("club_pk", -1)
+        if (clubPk <= 0) return
+        val client = com.example.myapplication.api.ApiClient.createUnsafeOkHttpClient()
+        val url = com.example.myapplication.BuildConfig.BASE_URL.trimEnd('/') + "/club/" + clubPk + "/members/"
+        val req = okhttp3.Request.Builder().url(url).get().build()
+        Thread {
+            try {
+                client.newCall(req).execute().use { resp ->
+                    if (!resp.isSuccessful) return@use
+                    val body = resp.body?.string() ?: return@use
+                    val type = object : com.google.gson.reflect.TypeToken<List<ClubAnnouncementBoardCreateActivity.ClubMemberBrief>>() {}.type
+                    val items: List<ClubAnnouncementBoardCreateActivity.ClubMemberBrief> = com.google.gson.Gson().fromJson(body, type)
+                    val match = items.firstOrNull { it.id == memberIdOrUserId } ?: return@use
+                    runOnUiThread { fetchAuthorFromUserApiStrict(match.user) }
+                }
+            } catch (_: Exception) { }
+        }.start()
+    }
+
+    private fun fetchMyClubMemberPk(clubPk: Int, userId: Int, cb: (Int?) -> Unit) {
+        val client = com.example.myapplication.api.ApiClient.createUnsafeOkHttpClient()
+        val baseUrl = com.example.myapplication.BuildConfig.BASE_URL.trimEnd('/')
+        val listUrl = "$baseUrl/club/$clubPk/members/"
+        val req = okhttp3.Request.Builder().url(listUrl).get().build()
+        Thread {
+            try {
+                client.newCall(req).execute().use { resp ->
+                    if (!resp.isSuccessful) { runOnUiThread { cb(null) }; return@use }
+                    val body = resp.body?.string()
+                    val type = object : com.google.gson.reflect.TypeToken<List<ClubAnnouncementBoardCreateActivity.ClubMemberBrief>>() {}.type
+                    val items: List<ClubAnnouncementBoardCreateActivity.ClubMemberBrief> = com.google.gson.Gson().fromJson(body, type)
+                    val id = items.firstOrNull { it.user == userId }?.id
+                    runOnUiThread { cb(id) }
+                }
+            } catch (_: Exception) { runOnUiThread { cb(null) } }
+        }.start()
+    }
+
+    private fun fetchAuthorFromUserApiStrict(userId: Int) {
+        com.example.myapplication.api.ApiClient.getApiService().getUserDetail(userId)
+            .enqueue(object : retrofit2.Callback<com.example.myapplication.UserDetail> {
+                override fun onResponse(
+                    call: retrofit2.Call<com.example.myapplication.UserDetail>,
+                    response: retrofit2.Response<com.example.myapplication.UserDetail>
+                ) { response.body()?.let { bindAuthor(it) } }
+                override fun onFailure(
+                    call: retrofit2.Call<com.example.myapplication.UserDetail>,
+                    t: Throwable
+                ) { }
+            })
+    }
+
+    private fun bindAuthor(user: com.example.myapplication.UserDetail) {
+        val twoDigit = user.student_number?.take(2)
+        val yearText = twoDigit?.let { "${it}학번" }
+        val major = user.major ?: ""
+        findViewById<TextView>(R.id.tv_author_name)?.text = user.name ?: "작성자"
+        findViewById<TextView>(R.id.tv_author_info)?.text = listOfNotNull(yearText, major.takeIf { it.isNotBlank() })
+            .joinToString(" ")
+    }
     
     private fun showDeleteConfirmDialog() {
         val dialogView = layoutInflater.inflate(R.layout.dialog_delete_confirm, null)
@@ -97,11 +579,9 @@ class ClubForumBoardDetailActivity : AppCompatActivity() {
         
         // 애니메이션 설정 (아래에서 위로 올라오는 효과)
         dialog.window?.attributes?.windowAnimations = R.style.Animation_Dialog
-        
-        // 취소 버튼
-        dialogView.findViewById<Button>(R.id.btn_cancel).setOnClickListener {
-            dialog.dismiss()
-        }
+
+        // 바깥 영역 터치 시 취소되도록
+        dialog.setCanceledOnTouchOutside(true)
         
         // 삭제 버튼
         dialogView.findViewById<Button>(R.id.btn_delete).setOnClickListener {
@@ -114,9 +594,34 @@ class ClubForumBoardDetailActivity : AppCompatActivity() {
     }
     
     private fun deleteBoard() {
-        // TODO: API 호출하여 게시글 삭제
-        Toast.makeText(this, "게시글이 삭제되었습니다.", Toast.LENGTH_SHORT).show()
-        finish()
+        val clubPk = intent.getIntExtra("club_pk", -1)
+        val boardId = boardItem.id
+        if (clubPk <= 0 || boardId <= 0) {
+            Toast.makeText(this, "잘못된 요청입니다.", Toast.LENGTH_SHORT).show()
+            return
+        }
+        Log.d("BoardDelete", "request start: DELETE /club/${clubPk}/boards/${boardId}/")
+        val api = com.example.myapplication.api.ApiClient.getApiService()
+        api.deleteBoard(clubPk, boardId).enqueue(object : retrofit2.Callback<okhttp3.ResponseBody> {
+            override fun onResponse(
+                call: retrofit2.Call<okhttp3.ResponseBody>,
+                response: retrofit2.Response<okhttp3.ResponseBody>
+            ) {
+                if (response.isSuccessful) {
+                    Log.d("BoardDelete", "success code=${response.code()}")
+                    Toast.makeText(this@ClubForumBoardDetailActivity, "게시글이 삭제되었습니다.", Toast.LENGTH_SHORT).show()
+                    setResult(RESULT_OK)
+                    finish()
+                } else {
+                    Log.e("BoardDelete", "failed code=${response.code()} body=${response.errorBody()?.string()}")
+                    Toast.makeText(this@ClubForumBoardDetailActivity, "삭제 실패", Toast.LENGTH_SHORT).show()
+                }
+            }
+            override fun onFailure(call: retrofit2.Call<okhttp3.ResponseBody>, t: Throwable) {
+                Log.e("BoardDelete", "network failure: ${t.message}")
+                Toast.makeText(this@ClubForumBoardDetailActivity, "네트워크 오류: ${t.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
     }
     
     private fun formatDate(dateString: String): String {

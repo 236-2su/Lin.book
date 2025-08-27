@@ -6,7 +6,9 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 data class CommentItem(
     val id: Int,
-    val likes: String?,
+    val likes: Int?,
+    val author_name: String?,
+    val author_major: String?,
     val content: String,
     val created_at: String,
     val updated_at: String,

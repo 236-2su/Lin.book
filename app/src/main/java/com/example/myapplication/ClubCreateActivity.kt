@@ -186,9 +186,10 @@ class ClubCreateActivity : BaseActivity() {
 
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                Log.d("ClubCreateActivity", "API 호출 시작: http://13.211.124.186/club")
+                val baseUrl = com.example.myapplication.BuildConfig.BASE_URL.trimEnd('/')
+                Log.d("ClubCreateActivity", "API 호출 시작: $baseUrl/club")
                 
-                val url = URL("http://13.211.124.186/club")
+                val url = URL("$baseUrl/club")
                 val connection = url.openConnection() as HttpURLConnection
                 
                 connection.requestMethod = "POST"

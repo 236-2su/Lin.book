@@ -12,6 +12,8 @@ import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Body
 import retrofit2.http.Path
+import retrofit2.http.DELETE
+import retrofit2.http.PUT
 
 interface ApiService {
     // 로그인
@@ -73,10 +75,38 @@ interface ApiService {
         @Body body: com.example.myapplication.CommentCreateRequest
     ): Call<com.example.myapplication.CommentItem>
 
+    // 댓글 수정
+    @PUT("/club/{club_pk}/boards/{board_pk}/comments/{id}/")
+    fun updateComment(
+        @Path("club_pk") clubId: Int,
+        @Path("board_pk") boardId: Int,
+        @Path("id") commentId: Int,
+        @Body body: com.example.myapplication.CommentCreateRequest
+    ): Call<com.example.myapplication.CommentItem>
+
+    // 댓글 삭제
+    @DELETE("/club/{club_pk}/boards/{board_pk}/comments/{id}/")
+    fun deleteComment(
+        @Path("club_pk") clubId: Int,
+        @Path("board_pk") boardId: Int,
+        @Path("id") commentId: Int
+    ): Call<okhttp3.ResponseBody>
+
+    // 댓글 좋아요
+    @POST("/club/{club_pk}/boards/{board_pk}/comments/{id}/like/")
+    fun likeComment(
+        @Path("club_pk") clubId: Int,
+        @Path("board_pk") boardId: Int,
+        @Path("id") commentId: Int,
+        @Body body: com.example.myapplication.CommentCreateRequest
+    ): Call<com.example.myapplication.CommentItem>
+
+    data class LikeRequest(val user_id: Int)
     @POST("/club/{club_pk}/boards/{id}/like/")
     fun toggleBoardLike(
         @Path("club_pk") clubId: Int,
-        @Path("id") boardId: Int
+        @Path("id") boardId: Int,
+        @Body body: LikeRequest
     ): Call<okhttp3.ResponseBody>
 
     @GET("/club/{club_pk}/boards/{id}/")
@@ -84,4 +114,15 @@ interface ApiService {
         @Path("club_pk") clubId: Int,
         @Path("id") boardId: Int
     ): Call<com.example.myapplication.BoardItem>
+
+    // 게시글 삭제
+    @DELETE("/club/{club_pk}/boards/{id}/")
+    fun deleteBoard(
+        @Path("club_pk") clubId: Int,
+        @Path("id") boardId: Int
+    ): Call<okhttp3.ResponseBody>
+
+    // 사용자 상세
+    @GET("user/{id}/")
+    fun getUserDetail(@Path("id") userId: Int): Call<com.example.myapplication.UserDetail>
 }
