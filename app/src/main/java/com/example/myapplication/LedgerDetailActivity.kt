@@ -146,7 +146,7 @@ class LedgerDetailActivity : BaseActivity() {
 
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val url = URL("http://54.206.122.170/club/$clubPk/ledger/$ledgerPk/transactions/$transactionId/")
+                val url = URL("http://13.211.124.186/club/$clubPk/ledger/$ledgerPk/transactions/$transactionId/")
                 val connection = url.openConnection() as HttpURLConnection
                 
                 connection.requestMethod = "DELETE"
