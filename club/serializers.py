@@ -5,6 +5,8 @@ from .models import Club, ClubMember, ClubWelcomePage
 
 
 class ClubSerializer(serializers.ModelSerializer):
+    image = serializers.ImageField(use_url=True, required=False)
+
     class Meta:
         model = Club
         fields = "__all__"

@@ -135,6 +135,7 @@ ex) `{"name": "test club", ..., "admin": 1}`""",
 class ClubViewSet(viewsets.ModelViewSet):
     queryset = Club.objects.all()
     serializer_class = ClubSerializer
+    parser_classes = (MultiPartParser, FormParser)
 
     def create(self, request, *args, **kwargs):
         data = request.data.copy()
