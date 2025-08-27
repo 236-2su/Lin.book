@@ -14,6 +14,10 @@ import retrofit2.http.Body
 import retrofit2.http.Path
 import retrofit2.http.DELETE
 import retrofit2.http.PUT
+import retrofit2.http.FormUrlEncoded
+import retrofit2.http.Field
+import retrofit2.http.PATCH
+import retrofit2.http.FieldMap
 
 interface ApiService {
     // 로그인
@@ -32,6 +36,46 @@ interface ApiService {
     
     @GET("club/{id}/")
     fun getClubDetail(@Path("id") clubId: Int): Call<ClubItem>
+    @retrofit2.http.Headers(
+        "Content-Type: application/json",
+        "Accept: application/json"
+    )
+    @PUT("club/{id}/")
+    fun updateClub(@Path("id") clubId: Int, @Body body: ClubUpdateRequest): Call<ClubItem>
+
+    // 일부 서버에서 JSON 파서를 허용하지 않는 경우를 대비한 폼 인코딩 버전
+    @FormUrlEncoded
+    @PUT("club/{id}/")
+    fun updateClubForm(
+        @Path("id") clubId: Int,
+        @Field("name") name: String,
+        @Field("department") department: String,
+        @Field("major_category") majorCategory: String,
+        @Field("minor_category") minorCategory: String,
+        @Field("description") description: String,
+        @Field("hashtags") hashtags: String,
+        @Field("location") location: String,
+        @Field("short_description") shortDescription: String,
+    ): Call<ClubItem>
+
+    // 부분 수정 (PATCH) - 변경된 필드만 전송
+    @FormUrlEncoded
+    @PATCH("club/{id}/")
+    fun patchClubForm(
+        @Path("id") clubId: Int,
+        @FieldMap fields: Map<String, String>,
+    ): Call<ClubItem>
+
+    data class ClubUpdateRequest(
+        val name: String,
+        val department: String,
+        val major_category: String,
+        val minor_category: String,
+        val description: String,
+        val hashtags: String,
+        val location: String,
+        val short_description: String
+    )
     
     @GET("/club/{club_pk}/ledger/{ledger_pk}/transactions/")
     fun getTransactions(
