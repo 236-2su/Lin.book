@@ -394,7 +394,7 @@ class ReceiptViewSet(viewsets.ModelViewSet):
                 name="club_pk", description="클럽 ID", required=True, type=int, location=OpenApiParameter.PATH
             ),
             OpenApiParameter(
-                name="pk", description="이벤트 ID", required=True, type=int, location=OpenApiParameter.PATH
+                name="event_pk", description="이벤트 ID", required=True, type=int, location=OpenApiParameter.PATH
             ),
         ],
         summary="특정 이벤트 조회",
@@ -426,7 +426,7 @@ class ReceiptViewSet(viewsets.ModelViewSet):
                 name="club_pk", description="클럽 ID", required=True, type=int, location=OpenApiParameter.PATH
             ),
             OpenApiParameter(
-                name="pk", description="이벤트 ID", required=True, type=int, location=OpenApiParameter.PATH
+                name="event_pk", description="이벤트 ID", required=True, type=int, location=OpenApiParameter.PATH
             ),
         ],
         summary="이벤트 정보 전체 수정 (PUT)",
@@ -445,7 +445,7 @@ class ReceiptViewSet(viewsets.ModelViewSet):
                 name="club_pk", description="클럽 ID", required=True, type=int, location=OpenApiParameter.PATH
             ),
             OpenApiParameter(
-                name="pk", description="이벤트 ID", required=True, type=int, location=OpenApiParameter.PATH
+                name="event_pk", description="이벤트 ID", required=True, type=int, location=OpenApiParameter.PATH
             ),
         ],
         summary="이벤트 정보 부분 수정 (PATCH)",
@@ -464,7 +464,7 @@ class ReceiptViewSet(viewsets.ModelViewSet):
                 name="club_pk", description="클럽 ID", required=True, type=int, location=OpenApiParameter.PATH
             ),
             OpenApiParameter(
-                name="pk", description="이벤트 ID", required=True, type=int, location=OpenApiParameter.PATH
+                name="event_pk", description="이벤트 ID", required=True, type=int, location=OpenApiParameter.PATH
             ),
         ],
         summary="이벤트 삭제",
@@ -475,6 +475,7 @@ class ReceiptViewSet(viewsets.ModelViewSet):
 )
 class EventViewSet(viewsets.ModelViewSet):
     serializer_class = EventSerializer
+    lookup_url_kwarg = "event_pk"
 
     def get_queryset(self):
         return Event.objects.filter(club_id=self.kwargs["club_pk"])

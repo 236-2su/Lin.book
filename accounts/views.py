@@ -3,8 +3,9 @@ from datetime import date, datetime
 
 import requests
 from django.shortcuts import get_object_or_404
-from drf_spectacular.utils import OpenApiResponse, extend_schema, extend_schema_view
+from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema, extend_schema_view
 from rest_framework import status, viewsets
+from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
@@ -17,6 +18,7 @@ from .serializers import (
     AccountResponseSerializer,
     AccountUpdateRequestSerializer,
 )
+from .services import create_account, get_account_balance, get_transaction_history
 
 
 @extend_schema_view(
@@ -57,49 +59,76 @@ from .serializers import (
 class AccountsViewSet(viewsets.ModelViewSet):
     queryset = Accounts.objects.select_related("user")
     serializer_class = AccountInternalSerializer
+    lookup_url_kwarg = "accounts_id"
 
     def get_queryset(self):
         return super().get_queryset().filter(user_id=self.kwargs["user_pk"])
 
     def perform_create(self, serializer):
         user = get_object_or_404(User, pk=self.kwargs["user_pk"])
-        now_date = str(date.today().strftime("%Y%m%d"))
-        now_time = str(datetime.now().strftime("%H%M%S"))
-
-        def format_to_eight_digits(num):
-            s = str(num)
-            return s.zfill(8) if len(s) < 8 else s[-8:]
-
-        last_account = Accounts.objects.last()
-        last_pk = last_account.pk if last_account else 0
 
         try:
-            response = requests.post(
-                "https://finopenapi.ssafy.io/ssafy/api/v1/edu/demandDeposit/createDemandDepositAccount",
-                json={
-                    "Header": {
-                        "apiName": "createDemandDepositAccount",
-                        "transmissionDate": now_date,
-                        "transmissionTime": now_time,
-                        "institutionCode": "00100",
-                        "fintechAppNo": "001",
-                        "apiServiceCode": "createDemandDepositAccount",
-                        "institutionTransactionUniqueNo": f"{now_date}{now_time[:4]}{format_to_eight_digits(last_pk + 2)}",
-                        "apiKey": os.getenv("FINAPI_SECRET"),
-                        "userKey": user.user_key,
-                    },
-                    "accountTypeUniqueNo": "001-1-2d2921541edf42",
-                },
+            account_no = create_account(user)
+        except ValidationError as e:
+            raise e
+
+        serializer.save(user=user, code=account_no, amount=0)
+
+    @extend_schema(
+        summary="계좌 잔액 조회",
+        description="특정 계좌의 잔액을 외부 API를 통해 조회합니다.",
+        responses={200: OpenApiResponse(description="External API response body")},
+        tags=["Accounts"],
+    )
+    @action(detail=True, methods=["get"])
+    def balance(self, request, accounts_id=None, user_pk=None):
+        account = self.get_object()
+        try:
+            balance_data = get_account_balance(account.user, account.code)
+            return Response(balance_data)
+        except ValidationError as e:
+            return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
+
+    @extend_schema(
+        summary="계좌 거래 내역 조회",
+        description="특정 계좌의 거래 내역을 외부 API를 통해 조회합니다. 날짜를 미입력시 기본으로 최근 1년의 데이터를 조회합니다.",
+        parameters=[
+            OpenApiParameter(name="startDate", description="조회시작일자 (YYYYMMDD)", required=False, type=str),
+            OpenApiParameter(name="endDate", description="조회종료일자 (YYYYMMDD)", required=False, type=str),
+            OpenApiParameter(
+                name="transactionType",
+                description="거래구분 (M:입금, D:출금, A:전체), 미입력시 기본값 A",
+                required=False,
+                type=str,
+            ),
+            OpenApiParameter(
+                name="orderByType",
+                description="정렬순서 (ASC:오름차순, DESC:내림차순), 미입력시 기본값 DESC",
+                required=False,
+                type=str,
+            ),
+        ],
+        responses={200: OpenApiResponse(description="External API response body")},
+        tags=["Accounts"],
+    )
+    @action(detail=True, methods=["get"])
+    def history(self, request, accounts_id=None, user_pk=None):
+        account = self.get_object()
+
+        start_date = request.query_params.get("startDate")
+        end_date = request.query_params.get("endDate")
+        transaction_type = request.query_params.get("transactionType", "A")
+        order_by = request.query_params.get("orderByType", "DESC")
+
+        try:
+            history_data = get_transaction_history(
+                user=account.user,
+                account_no=account.code,
+                start_date=start_date,
+                end_date=end_date,
+                transaction_type=transaction_type,
+                order_by=order_by,
             )
-            response.raise_for_status()
-
-        except requests.exceptions.RequestException as e:
-            raise ValidationError({"error": str(e)})
-
-        payload = response.json()
-        code = payload.get("REC", {}).get("accountNo")
-
-        if not code:
-            raise ValidationError({"error": "Failed to retrieve account number from external API."})
-
-        serializer.save(user=user, code=code, amount=0)
+            return Response(history_data)
+        except ValidationError as e:
+            return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
