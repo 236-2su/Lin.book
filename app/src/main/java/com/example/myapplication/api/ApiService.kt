@@ -3,6 +3,7 @@ package com.example.myapplication.api
 import com.example.myapplication.LedgerApiItem
 import com.example.myapplication.ClubItem
 import com.example.myapplication.EventItem
+import com.example.myapplication.EventCreateRequest
 import com.example.myapplication.TransactionItem
 import com.example.myapplication.model.Ledger
 import com.example.myapplication.model.Transaction
@@ -43,6 +44,9 @@ interface ApiService {
     
     @GET("club/{club_pk}/events/")
     fun getEventList(@Path("club_pk") clubId: Int): Call<List<EventItem>>
+    
+    @POST("club/{club_pk}/events/")
+    fun createEvent(@Path("club_pk") clubId: Int, @Body request: EventCreateRequest): Call<EventItem>
 
     @GET("club/{club_pk}/ledger/{id}/")
     fun getLedgerDetail(

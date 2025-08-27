@@ -21,7 +21,6 @@
             android:layout_marginBottom="24dp"
             android:layout_gravity="center_vertical">
 
-
             <Button
                 android:id="@+id/btn_back"
                 android:layout_width="24dp"
@@ -111,26 +110,13 @@
         </LinearLayout>
 
 
-        <!-- 행사장부 목록 -->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rv_ledger_list"
+        <!-- 행사 생성 폼 -->
+        <include 
+            layout="@layout/event_create"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:scrollbars="none"
-            android:layout_marginTop="24dp"/>
+            android:layout_marginTop="16dp"/>
     </LinearLayout>
 
-    <!-- Floating Action Button -->
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab_add_ledger"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="24dp"
-        android:src="@drawable/ic_add"
-        app:backgroundTint="#1976D2"
-        app:tint="#FFFFFF"
-        app:fabSize="normal" />
-    
 </FrameLayout>

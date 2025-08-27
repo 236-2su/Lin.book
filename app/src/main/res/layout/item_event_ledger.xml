@@ -3,6 +3,7 @@
     style="@style/ReferenceLightBlueCardBox"
     android:layout_marginBottom="8dp"
     android:orientation="vertical"
+    android:gravity="center"
     android:clickable="true"
     android:focusable="true">
 
@@ -11,10 +12,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text=""
-        android:textSize="16sp"
+        android:textSize="20sp"
         android:textColor="@android:color/black"
         android:textStyle="bold"
-        android:layout_marginBottom="4dp" />
+        android:layout_marginBottom="4dp"
+        android:gravity="center" />
 
     <TextView
         android:id="@+id/tv_event_period"
@@ -22,6 +24,7 @@
         android:layout_height="wrap_content"
         android:text=""
         android:textSize="14sp"
-        android:textColor="@color/black" />
+        android:textColor="@color/black"
+        android:gravity="center" />
 
 </LinearLayout>

@@ -625,9 +625,9 @@ class LedgerCreateActivity : BaseActivity() {
         
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                android.util.Log.d("LedgerCreate", "API 호출 시작: https://54.206.122.170/club/$clubPk/ledger/$ledgerPk/transactions/")
+                android.util.Log.d("LedgerCreate", "API 호출 시작: https://13.211.124.186/club/$clubPk/ledger/$ledgerPk/transactions/")
                 
-                val url = URL("https://54.206.122.170/club/$clubPk/ledger/$ledgerPk/transactions/")
+                val url = URL("https://13.211.124.186/club/$clubPk/ledger/$ledgerPk/transactions/")
                 val connection = url.openConnection() as HttpURLConnection
                 
                 connection.requestMethod = "POST"

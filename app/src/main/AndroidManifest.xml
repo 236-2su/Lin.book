@@ -92,6 +92,10 @@
         <activity
             android:name=".ClubEventLedgerListActivity"
             android:exported="false" />
+        
+        <activity
+            android:name=".EventCreateActivity"
+            android:exported="false" />
 
     </application>
 

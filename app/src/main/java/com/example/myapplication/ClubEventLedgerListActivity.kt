@@ -54,7 +54,9 @@ class ClubEventLedgerListActivity : AppCompatActivity() {
 
         // FAB 클릭 리스너
         findViewById<com.google.android.material.floatingactionbutton.FloatingActionButton>(R.id.fab_add_ledger).setOnClickListener {
-            // TODO: 행사 생성 페이지로 이동
+            val intent = Intent(this, EventCreateActivity::class.java)
+            intent.putExtra(EventCreateActivity.EXTRA_CLUB_PK, clubPk)
+            startActivity(intent)
         }
     }
 

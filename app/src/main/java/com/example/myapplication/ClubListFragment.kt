@@ -114,7 +114,7 @@ class ClubListFragment : Fragment() {
         // ... (이하 로직은 ClubListActivity와 동일)
         try {
             val client = ApiClient.createUnsafeOkHttpClient()
-            val request = Request.Builder().url("http://54.206.122.170/club/").build()
+            val request = Request.Builder().url("http://13.211.124.186/club/").build()
             val response = client.newCall(request).execute()
             
             if (response.isSuccessful) {
