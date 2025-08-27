@@ -202,17 +202,7 @@ class ClubForumBoardDetailActivity : AppCompatActivity() {
                                 setTextColor(android.graphics.Color.parseColor("#1976D2"))
                                 textSize = 14f
                                 setPadding(0, 0, 16, 0)
-                                setOnClickListener {
-                                    val input = findViewById<android.widget.EditText>(R.id.et_comment)
-                                    input?.setText(comment.content)
-                                    input?.setSelection(input.text?.length ?: 0)
-                                    input?.requestFocus()
-                                    input?.post {
-                                        val imm = getSystemService(android.content.Context.INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager
-                                        imm.showSoftInput(input, android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT)
-                                    }
-                                    input?.tag = comment.id // 편집 대상 표시
-                                }
+                                setOnClickListener { showCommentEditDialog(comment.id, comment.content, comment.author) }
                             }
                             metaRow.addView(editBtn)
 
@@ -229,7 +219,7 @@ class ClubForumBoardDetailActivity : AppCompatActivity() {
                         }
 
                         val likeIcon = android.widget.ImageView(this@ClubForumBoardDetailActivity).apply {
-                            layoutParams = android.widget.LinearLayout.LayoutParams(24, 24)
+                            layoutParams = android.widget.LinearLayout.LayoutParams(100, 100)
                             setPadding(8, 8, 8, 8)
                             isClickable = true
                             isFocusable = true
@@ -365,13 +355,13 @@ class ClubForumBoardDetailActivity : AppCompatActivity() {
         if (clubPk <= 0) return
         val api = com.example.myapplication.api.ApiClient.getApiService()
         val authorId = UserManager.getUserPk(this) ?: 0
-        val body = com.example.myapplication.CommentCreateRequest(content = comment.content, board = boardId, author = authorId)
+        val body = com.example.myapplication.api.ApiService.LikeRequest(authorId)
         android.util.Log.d("CommentLike", "POST /club/${clubPk}/boards/${boardId}/comments/${comment.id}/like/")
         api.likeComment(clubPk, boardId, comment.id, body)
-            .enqueue(object : retrofit2.Callback<com.example.myapplication.CommentItem> {
+            .enqueue(object : retrofit2.Callback<okhttp3.ResponseBody> {
                 override fun onResponse(
-                    call: retrofit2.Call<com.example.myapplication.CommentItem>,
-                    response: retrofit2.Response<com.example.myapplication.CommentItem>
+                    call: retrofit2.Call<okhttp3.ResponseBody>,
+                    response: retrofit2.Response<okhttp3.ResponseBody>
                 ) {
                     if (response.isSuccessful) {
                         loadComments()
@@ -382,7 +372,7 @@ class ClubForumBoardDetailActivity : AppCompatActivity() {
                     }
                 }
                 override fun onFailure(
-                    call: retrofit2.Call<com.example.myapplication.CommentItem>,
+                    call: retrofit2.Call<okhttp3.ResponseBody>,
                     t: Throwable
                 ) {
                     android.util.Log.e("CommentLike", "network error: ${t.message}")
@@ -428,6 +418,61 @@ class ClubForumBoardDetailActivity : AppCompatActivity() {
                     call: retrofit2.Call<okhttp3.ResponseBody>,
                     t: Throwable
                 ) { }
+            })
+    }
+
+    private fun showCommentEditDialog(commentId: Int, oldContent: String, authorFieldFromComment: Int?) {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_comment_edit, null)
+        val dialog = android.app.AlertDialog.Builder(this)
+            .setView(dialogView)
+            .create()
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.window?.setGravity(android.view.Gravity.BOTTOM)
+        dialog.window?.attributes?.windowAnimations = R.style.Animation_Dialog
+        dialog.setCanceledOnTouchOutside(true)
+
+        val input = dialogView.findViewById<android.widget.EditText>(R.id.et_edit_comment)
+        input.setText(oldContent)
+        input.setSelection(input.text?.length ?: 0)
+
+        dialogView.findViewById<android.widget.Button>(R.id.btn_confirm_edit).setOnClickListener {
+            val content = input.text?.toString()?.trim().orEmpty()
+            if (content.isBlank()) {
+                android.widget.Toast.makeText(this, "내용을 입력하세요.", android.widget.Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            updateComment(commentId, content, authorFieldFromComment)
+            dialog.dismiss()
+        }
+        dialog.show()
+    }
+
+    private fun updateComment(commentId: Int, newContent: String, authorFieldFromComment: Int?) {
+        val clubPk = intent.getIntExtra("club_pk", -1)
+        val boardId = boardItem.id
+        if (clubPk <= 0) return
+        val api = com.example.myapplication.api.ApiClient.getApiService()
+        val authorIdForPut = authorFieldFromComment ?: 0
+        val body = com.example.myapplication.CommentCreateRequest(content = newContent, board = boardId, author = authorIdForPut)
+        api.updateComment(clubPk, boardId, commentId, body)
+            .enqueue(object : retrofit2.Callback<com.example.myapplication.CommentItem> {
+                override fun onResponse(
+                    call: retrofit2.Call<com.example.myapplication.CommentItem>,
+                    response: retrofit2.Response<com.example.myapplication.CommentItem>
+                ) {
+                    if (response.isSuccessful) {
+                        loadComments()
+                        refreshMeta()
+                    } else {
+                        android.widget.Toast.makeText(this@ClubForumBoardDetailActivity, "댓글 수정 실패", android.widget.Toast.LENGTH_LONG).show()
+                    }
+                }
+                override fun onFailure(
+                    call: retrofit2.Call<com.example.myapplication.CommentItem>,
+                    t: Throwable
+                ) {
+                    android.widget.Toast.makeText(this@ClubForumBoardDetailActivity, "네트워크 오류: ${t.message}", android.widget.Toast.LENGTH_LONG).show()
+                }
             })
     }
     
@@ -626,12 +671,26 @@ class ClubForumBoardDetailActivity : AppCompatActivity() {
     
     private fun formatDate(dateString: String): String {
         return try {
-            val inputFormat = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSXXX", java.util.Locale.getDefault())
-            val date = inputFormat.parse(dateString)
-            val outputFormat = java.text.SimpleDateFormat("yyyy. MM. dd(E) HH:mm", java.util.Locale.KOREA)
-            outputFormat.format(date ?: java.util.Date())
+            val instant = try {
+                java.time.OffsetDateTime.parse(dateString, java.time.format.DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+                    .toInstant()
+            } catch (_: Exception) {
+                val fmt = java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS")
+                java.time.LocalDateTime.parse(dateString, fmt).atZone(java.time.ZoneOffset.UTC).toInstant()
+            }
+            val kst = instant.atZone(java.time.ZoneId.of("Asia/Seoul"))
+            kst.format(
+                java.time.format.DateTimeFormatter
+                    .ofPattern("yyyy. MM. dd(E) HH:mm")
+                    .withLocale(java.util.Locale.KOREA)
+            )
         } catch (e: Exception) {
-            dateString
+            try {
+                val inputFormat = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSXXX", java.util.Locale.getDefault())
+                val date = inputFormat.parse(dateString)
+                val outputFormat = java.text.SimpleDateFormat("yyyy. MM. dd(E) HH:mm", java.util.Locale.KOREA)
+                outputFormat.format(date ?: java.util.Date())
+            } catch (_: Exception) { dateString }
         }
     }
 }
