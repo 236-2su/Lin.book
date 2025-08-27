@@ -8,13 +8,40 @@ import androidx.recyclerview.widget.RecyclerView
 
 data class Member(
     val id: Int,
+    val userId: Int,
     val name: String,
-    val role: String,
+    val role: String,  // "leader" or "member" from API
+    val status: String, // "active" or "waiting"
     val department: String,
-    val studentId: String,
+    val studentNumber: String,
     val phone: String,
     val joinDate: String,
     val isMe: Boolean = false
+)
+
+// API Response 모델들
+data class MemberResponse(
+    val id: Int,
+    val status: String,
+    val role: String,
+    val joined_at: String,
+    val amount_fee: Int,
+    val paid_fee: Int,
+    val club: Int,
+    val user: Int
+)
+
+data class UserResponse(
+    val id: Int,
+    val name: String,
+    val email: String,
+    val student_number: String,
+    val major: String,
+    val admission_year: Int,
+    val phone_number: String,
+    val status: String,
+    val profile_url_image: String,
+    val user_key: String
 )
 
 class MemberAdapter(
@@ -33,13 +60,13 @@ class MemberAdapter(
 
         fun bind(member: Member) {
             memberName.text = member.name
-            memberInfo.text = "${member.department} / ${member.studentId}"
+            memberInfo.text = "${member.department} / ${member.studentNumber}"
             memberPhone.text = member.phone
             joinDate.text = "가입일: ${member.joinDate}"
 
             // 역할에 따른 배지 스타일 설정
             when (member.role) {
-                "회장" -> {
+                "leader" -> {
                     if (member.isMe) {
                         roleBadge.text = "Me"
                         roleBadge.setBackgroundResource(R.drawable.btn_me_selected)
@@ -50,12 +77,7 @@ class MemberAdapter(
                         roleBadge.setTextColor(android.graphics.Color.parseColor("#333333"))
                     }
                 }
-                "부회장" -> {
-                    roleBadge.text = "부회장"
-                    roleBadge.setBackgroundResource(R.drawable.btn_vice_president)
-                    roleBadge.setTextColor(android.graphics.Color.parseColor("#333333"))
-                }
-                "일반" -> {
+                "member" -> {
                     roleBadge.text = "일반"
                     roleBadge.setBackgroundResource(R.drawable.btn_general)
                     roleBadge.setTextColor(android.graphics.Color.parseColor("#333333"))

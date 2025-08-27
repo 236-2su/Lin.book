@@ -59,7 +59,10 @@ class ClubAnnouncementBoardListActivity : AppCompatActivity() {
 
         // 멤버 버튼: 멤버 리스트 화면으로 이동
         findViewById<androidx.appcompat.widget.AppCompatImageButton>(R.id.btn_member)?.setOnClickListener {
+            val clubPk = intent?.getIntExtra(EXTRA_CLUB_PK, -1) ?: -1
             val intent = Intent(this, MemberManagementActivity::class.java)
+            intent.putExtra(MemberManagementActivity.EXTRA_CLUB_PK, clubPk)
+            // TODO: 현재 사용자의 PK를 SharedPreferences나 다른 방법으로 전달
             startActivity(intent)
         }
         

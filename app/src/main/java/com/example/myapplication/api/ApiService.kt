@@ -125,4 +125,12 @@ interface ApiService {
     // 사용자 상세
     @GET("user/{id}/")
     fun getUserDetail(@Path("id") userId: Int): Call<com.example.myapplication.UserDetail>
+
+    // 멤버 목록 조회
+    @GET("club/{club_pk}/members/")
+    fun getClubMembers(@Path("club_pk") clubId: Int): Call<List<com.example.myapplication.MemberResponse>>
+
+    // 사용자 목록 조회
+    @GET("user/")
+    fun getUserList(): Call<List<com.example.myapplication.UserResponse>>
 }

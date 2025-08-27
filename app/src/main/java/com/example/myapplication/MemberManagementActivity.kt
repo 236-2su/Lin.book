@@ -1,25 +1,50 @@
 package com.example.myapplication
 
 import android.os.Bundle
+import android.util.Log
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.myapplication.api.ApiClient
 import com.google.android.material.snackbar.Snackbar
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 class MemberManagementActivity : AppCompatActivity() {
     
     private lateinit var recyclerView: RecyclerView
     private lateinit var memberAdapter: MemberAdapter
     private val members = mutableListOf<Member>()
+    private var clubPk: Int = -1
+    private var currentUserPk: Int = -1
+
+    companion object {
+        const val EXTRA_CLUB_PK = "club_pk"
+        const val EXTRA_USER_PK = "user_pk"
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.member_management)
 
+        // Intent에서 club_pk와 user_pk 받기
+        clubPk = intent.getIntExtra(EXTRA_CLUB_PK, -1)
+        currentUserPk = intent.getIntExtra(EXTRA_USER_PK, -1)
+
+        if (clubPk == -1) {
+            Toast.makeText(this, "동아리 정보를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
+            finish()
+            return
+        }
+
         setupRecyclerView()
         setupSwipeToDelete()
-        loadSampleData()
+        loadMembersFromApi()
     }
 
     private fun setupRecyclerView() {
@@ -52,15 +77,105 @@ class MemberManagementActivity : AppCompatActivity() {
         itemTouchHelper.attachToRecyclerView(recyclerView)
     }
 
-    private fun loadSampleData() {
-        members.addAll(
-            listOf(
-                Member(1, "김쌔피", "회장", "컴퓨터공학과", "2313545", "010-0000-0000", "2023년 03월 02일", isMe = true),
-                Member(2, "김철수", "부회장", "소프트웨어공학과", "2023124", "010-0000-0000", "2024년 04월 27일"),
-                Member(3, "윤예진", "일반", "인공지능융합학과", "2023256", "010-0000-0000", "2025년 03월 27일")
-            )
-        )
-        memberAdapter.notifyDataSetChanged()
+    private fun loadMembersFromApi() {
+        val apiService = ApiClient.getApiService()
+        
+        // 1단계: 멤버 목록 조회
+        apiService.getClubMembers(clubPk).enqueue(object : Callback<List<MemberResponse>> {
+            override fun onResponse(
+                call: Call<List<MemberResponse>>,
+                response: Response<List<MemberResponse>>
+            ) {
+                if (response.isSuccessful) {
+                    val memberList = response.body() ?: emptyList()
+                    
+                    // active 멤버만 필터링
+                    val activeMembers = memberList.filter { it.status == "active" }
+                    
+                    if (activeMembers.isEmpty()) {
+                        Toast.makeText(this@MemberManagementActivity, "멤버가 없습니다.", Toast.LENGTH_SHORT).show()
+                        return
+                    }
+                    
+                    // 2단계: 사용자 정보 조회
+                    loadUserDetails(activeMembers)
+                } else {
+                    Log.e("API_ERROR", "멤버 목록 조회 실패: ${response.code()}")
+                    Toast.makeText(this@MemberManagementActivity, "멤버 목록을 불러올 수 없습니다.", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<List<MemberResponse>>, t: Throwable) {
+                Log.e("API_ERROR", "네트워크 오류: ${t.message}")
+                Toast.makeText(this@MemberManagementActivity, "네트워크 오류가 발생했습니다.", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
+    private fun loadUserDetails(memberResponses: List<MemberResponse>) {
+        val apiService = ApiClient.getApiService()
+        
+        apiService.getUserList().enqueue(object : Callback<List<UserResponse>> {
+            override fun onResponse(
+                call: Call<List<UserResponse>>,
+                response: Response<List<UserResponse>>
+            ) {
+                if (response.isSuccessful) {
+                    val userList = response.body() ?: emptyList()
+                    
+                    // 멤버와 사용자 정보 매칭
+                    members.clear()
+                    
+                    for (memberResponse in memberResponses) {
+                        val user = userList.find { it.id == memberResponse.user }
+                        if (user != null) {
+                            val member = Member(
+                                id = memberResponse.id,
+                                userId = memberResponse.user,
+                                name = user.name,
+                                role = memberResponse.role,
+                                status = memberResponse.status,
+                                department = user.major,
+                                studentNumber = user.student_number,
+                                phone = user.phone_number,
+                                joinDate = formatDate(memberResponse.joined_at),
+                                isMe = (memberResponse.user == currentUserPk)
+                            )
+                            members.add(member)
+                        }
+                    }
+                    
+                    // role 순서대로 정렬 (leader 먼저, 그 다음 member)
+                    members.sortBy { 
+                        when(it.role) {
+                            "leader" -> 0
+                            else -> 1
+                        }
+                    }
+                    
+                    memberAdapter.notifyDataSetChanged()
+                } else {
+                    Log.e("API_ERROR", "사용자 목록 조회 실패: ${response.code()}")
+                    Toast.makeText(this@MemberManagementActivity, "사용자 정보를 불러올 수 없습니다.", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<List<UserResponse>>, t: Throwable) {
+                Log.e("API_ERROR", "네트워크 오류: ${t.message}")
+                Toast.makeText(this@MemberManagementActivity, "네트워크 오류가 발생했습니다.", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
+    private fun formatDate(dateString: String): String {
+        return try {
+            val inputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+            val outputFormat = SimpleDateFormat("yyyy년 MM월 dd일", Locale.KOREAN)
+            val date = inputFormat.parse(dateString)
+            outputFormat.format(date ?: return dateString)
+        } catch (e: Exception) {
+            dateString
+        }
     }
 
     private fun showDeletedSnackbar(member: Member) {
