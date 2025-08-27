@@ -12,7 +12,7 @@ from .serializers import (
     MonthlyLedgerStatsResponseSerializer,
     YearlyLedgerStatsResponseSerializer,
 )
-from .services import monthly_ledger_stats, yearly_ledger_stats
+from .services import generate_similar_clubs_yearly_report, monthly_ledger_stats, yearly_ledger_stats
 
 
 class MonthlyReportView(APIView):
@@ -123,3 +123,22 @@ class YearlyReportView(APIView):
         report_data = yearly_ledger_stats(ledger_id=ledger_pk, year=year)
         serializer = YearlyLedgerStatsResponseSerializer(report_data)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class SimilarClubsYearlyReportView(APIView):
+    @extend_schema(
+        summary="유사 동아리 연간 보고서 생성",
+        description="특정 동아리와 유사한 동아리 2개의 연간 보고서를 함께 생성하고 결과를 반환합니다.",
+        request=None,
+        parameters=[
+            OpenApiParameter("club_id", int, OpenApiParameter.PATH, description="기준 동아리 ID"),
+            OpenApiParameter("year", int, OpenApiParameter.PATH, description="조회할 년도"),
+        ],
+        responses={201: OpenApiResponse(description="Created")},
+        tags=["LedgerReport"],
+    )
+    def post(self, request, club_id: int, year: int):
+        reports = generate_similar_clubs_yearly_report(club_id=club_id, year=year)
+        if "error" in reports:
+            return Response(reports, status=status.HTTP_404_NOT_FOUND)
+        return Response(reports, status=status.HTTP_201_CREATED)

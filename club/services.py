@@ -69,7 +69,7 @@ def similar_by_text(
     return results
 
 
-def similar_by_club(club_id: str, k: int = 10) -> List[Dict]:
+def similar_by_club(club_id: str, k: int = 2) -> List[Dict]:
     club = Club.objects.get(id=club_id)
     query = make_doc(club).page_content
     return similar_by_text(query, k=k, filters={"major": club.major_category}, exclude_id=str(club_id))
