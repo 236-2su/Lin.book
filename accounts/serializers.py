@@ -8,10 +8,15 @@ from .models import Accounts, AccountTransactions
 class AccountResponseSerializer(serializers.ModelSerializer):
     """Serializer for displaying account details in responses."""
 
+    user_name = serializers.SerializerMethodField()
+
     class Meta:
         model = Accounts
-        fields = ["id", "user", "amount", "code", "created_at"]
+        fields = ["id", "user", "amount", "code", "created_at", "user_name"]
         read_only_fields = fields
+
+    def get_user_name(self, obj):
+        return obj.user.name
 
 
 class AccountCreateRequestSerializer(serializers.Serializer):

@@ -101,11 +101,20 @@ def get_account_balance(user: User, account_no: str):
 
 
 def get_transaction_history(
-    user: User, account_no: str, start_date: str, end_date: str, transaction_type: str = "A", order_by: str = "DESC"
+    user: User,
+    account_no: str,
+    start_date: str = None,
+    end_date: str = None,
+    transaction_type: str = "A",
+    order_by: str = "DESC",
 ):
     """
     Calls the external API to inquire transaction history.
     """
+    if end_date is None:
+        end_date = date.today().strftime("%Y%m%d")
+    if start_date is None:
+        start_date = (date.today() - timedelta(days=365)).strftime("%Y%m%d")
     api_name = "inquireTransactionHistoryList"
     url = "https://finopenapi.ssafy.io/ssafy/api/v1/edu/demandDeposit/inquireTransactionHistoryList"
     data = {
@@ -116,6 +125,8 @@ def get_transaction_history(
         "transactionType": transaction_type,
         "orderByType": order_by,
     }
+    print(f"요청 진행... url: {url}")
+    print(data)
 
     payload = _make_request(url, data)
     return payload.get("REC", {})

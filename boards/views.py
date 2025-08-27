@@ -158,7 +158,7 @@ class BoardViewSet(viewsets.ModelViewSet):
     ),
     retrieve=extend_schema(
         summary="특정 댓글 조회",
-        description="ID로 특정 댓글의 상세 정보를 조회합니다.",
+        description="comment_pk로 특정 댓글의 상세 정보를 조회합니다.",
         responses={
             200: OpenApiResponse(CommentsSerializer, description="OK"),
             404: OpenApiResponse(description="Not Found"),
@@ -199,7 +199,7 @@ class BoardViewSet(viewsets.ModelViewSet):
     ),
     destroy=extend_schema(
         summary="댓글 삭제",
-        description="ID로 특정 댓글을 삭제합니다.",
+        description="comment_pk로 특정 댓글을 삭제합니다.",
         responses={204: OpenApiResponse(description="No Content"), 404: OpenApiResponse(description="Not Found")},
         tags=["Comments"],
     ),
@@ -207,6 +207,7 @@ class BoardViewSet(viewsets.ModelViewSet):
 class CommentsViewSet(viewsets.ModelViewSet):
     queryset = Comments.objects.select_related("author__user")
     serializer_class = CommentsSerializer
+    lookup_url_kwarg = "comment_pk"
 
     def get_queryset(self):
         return super().get_queryset().filter(board_id=self.kwargs["board_pk"])
@@ -216,10 +217,17 @@ class CommentsViewSet(viewsets.ModelViewSet):
         serializer.save(board=board)
 
     @extend_schema(
-        summary="댓글 좋아요", description="댓글에 좋아요가 있으면 삭제하고, 없으면 생성합니다.", tags=["Comments"]
+        summary="댓글 좋아요",
+        description="댓글에 좋아요가 있으면 삭제하고, 없으면 생성합니다. request body에 user_id가 필요합니다.",
+        tags=["Comments"],
+        request=LikeCreateSerializer,
+        responses={
+            201: OpenApiResponse(description="Like created."),
+            204: OpenApiResponse(description="Like removed. No content."),
+        },
     )
     @action(detail=True, methods=["post"])
-    def like(self, request, pk=None):
+    def like(self, request, comment_pk=None):
         serializer = LikeCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user_id = serializer.validated_data["user_id"]

@@ -3,6 +3,7 @@ from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema, extend_schema_view
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
+from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -134,6 +135,7 @@ ex) `{"name": "test club", ..., "admin": 1}`""",
 class ClubViewSet(viewsets.ModelViewSet):
     queryset = Club.objects.all()
     serializer_class = ClubSerializer
+    parser_classes = (MultiPartParser, FormParser)
 
     def create(self, request, *args, **kwargs):
         data = request.data.copy()
@@ -293,6 +295,7 @@ class ClubMemberViewSet(viewsets.ModelViewSet):
 class ClubWelcomePageViewSet(viewsets.ModelViewSet):
     queryset = ClubWelcomePage.objects.all()
     serializer_class = ClubWelcomePageSerializer
+    parser_classes = (MultiPartParser, FormParser)
 
     def get_queryset(self):
         queryset = super().get_queryset()
