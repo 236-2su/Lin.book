@@ -62,6 +62,15 @@ class ClubAnnouncementBoardListActivity : AppCompatActivity() {
             val intent = Intent(this, MemberManagementActivity::class.java)
             startActivity(intent)
         }
+
+        // 설정 버튼: 동아리 정보 수정 화면으로 이동
+        findViewById<androidx.appcompat.widget.AppCompatImageButton>(R.id.btn_settings)?.setOnClickListener {
+            val updateIntent = Intent(this, ClubUpdateActivity::class.java)
+            // 현재 액티비티의 intent에서 club_pk를 가져와 전달
+            val currentClubPk = this.intent?.getIntExtra(EXTRA_CLUB_PK, -1) ?: -1
+            updateIntent.putExtra("club_pk", currentClubPk)
+            startActivity(updateIntent)
+        }
         
         // RecyclerView 설정
         recyclerView = findViewById(R.id.rv_board_list)
@@ -113,6 +122,14 @@ class ClubAnnouncementBoardListActivity : AppCompatActivity() {
             intent.putExtra(ClubEventLedgerListActivity.EXTRA_CLUB_PK, currentClubPk)
             startActivity(intent)
             finish()
+        }
+
+        // 모임통장 버튼
+        findViewById<TextView>(R.id.btn_meeting_account).setOnClickListener {
+            val currentClubPk = intent?.getIntExtra(EXTRA_CLUB_PK, -1) ?: -1
+            val intent = Intent(this, AccountHistoryActivity::class.java)
+            intent.putExtra("club_pk", currentClubPk)
+            startActivity(intent)
         }
     }
     
@@ -247,7 +264,8 @@ class ClubAnnouncementBoardListActivity : AppCompatActivity() {
     private fun bindClubHeader(club: com.example.myapplication.ClubItem) {
         findViewById<TextView>(R.id.tv_club_title)?.text = club.name
         findViewById<TextView>(R.id.tv_welcome)?.text = "🎇 Welcome"
-        findViewById<TextView>(R.id.tv_club_description)?.text = club.description
+        // Welcome 아래 설명은 short_description으로 표시
+        findViewById<TextView>(R.id.tv_club_description)?.text = club.shortDescription
         // 커버 이미지가 API에 없다면 기본 이미지를 유지
     }
 }

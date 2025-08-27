@@ -85,6 +85,14 @@ class ClubForumBoardListActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.btn_free_board).setOnClickListener {
             // 이미 자유게시판 화면이므로 아무것도 하지 않음
         }
+
+        // 모임통장 버튼 → 통장 내역 화면
+        findViewById<TextView>(R.id.btn_meeting_account)?.setOnClickListener {
+            val clubPk = intent?.getIntExtra(EXTRA_CLUB_PK, -1) ?: -1
+            val intent = Intent(this, AccountHistoryActivity::class.java)
+            intent.putExtra("club_pk", clubPk)
+            startActivity(intent)
+        }
     }
     
     private fun fetchBoardList(clubPk: Int) {

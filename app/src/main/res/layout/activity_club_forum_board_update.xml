@@ -128,38 +128,6 @@
                         android:textSize="16sp" />
                 </LinearLayout>
 
-                <!-- 게시글 첨부파일 -->
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="첨부파일"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:textColor="@android:color/black"
-                    android:layout_marginBottom="12dp" />
-
-                <!-- 첨부파일 입력 영역 -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:paddingHorizontal="8dp"
-                    android:paddingVertical="6dp"
-                    android:background="@drawable/board_input_box"
-                    android:layout_marginBottom="12dp">
-
-                    <EditText
-                        android:id="@+id/et_file"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:hint="눌러서 파일 첨부하기"
-                        android:background="@android:color/transparent"
-                        android:padding="8dp"
-                        android:textSize="16sp" />
-                </LinearLayout>
-
                 <Button
                     android:id="@+id/btn_submit"
                     android:layout_width="match_parent"

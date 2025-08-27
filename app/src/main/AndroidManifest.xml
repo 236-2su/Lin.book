@@ -101,6 +101,14 @@
             android:name=".MemberManagementActivity"
             android:exported="false" />
 
+        <activity
+            android:name=".AccountHistoryActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ClubUpdateActivity"
+            android:exported="false" />
+
     </application>
 
 </manifest>
