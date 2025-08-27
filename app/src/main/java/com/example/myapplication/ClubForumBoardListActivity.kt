@@ -85,6 +85,15 @@ class ClubForumBoardListActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.btn_free_board).setOnClickListener {
             // 이미 자유게시판 화면이므로 아무것도 하지 않음
         }
+        
+        // AI 리포트 버튼
+        findViewById<TextView>(R.id.btn_ai_report).setOnClickListener {
+            val currentClubPk = intent?.getIntExtra(EXTRA_CLUB_PK, -1) ?: -1
+            val intent = Intent(this, LedgerReportActivity::class.java)
+            intent.putExtra("club_id", currentClubPk)
+            startActivity(intent)
+            finish()
+        }
     }
     
     private fun fetchBoardList(clubPk: Int) {

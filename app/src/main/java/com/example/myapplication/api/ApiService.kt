@@ -125,4 +125,68 @@ interface ApiService {
     // 사용자 상세
     @GET("user/{id}/")
     fun getUserDetail(@Path("id") userId: Int): Call<com.example.myapplication.UserDetail>
+
+    // AI 리포트 관련 API
+    // 월간 리포트 생성
+    @POST("report/clubs/{club_pk}/ledgers/{ledger_pk}/reports/monthly/")
+    fun createMonthlyReport(
+        @Path("club_pk") clubId: Int,
+        @Path("ledger_pk") ledgerId: Int,
+        @retrofit2.http.Query("year") year: Int,
+        @retrofit2.http.Query("month") month: Int
+    ): Call<AIReportResponse>
+
+    // 연간 리포트 생성
+    @POST("report/clubs/{club_pk}/ledgers/{ledger_pk}/reports/yearly/")
+    fun createYearlyReport(
+        @Path("club_pk") clubId: Int,
+        @Path("ledger_pk") ledgerId: Int,
+        @retrofit2.http.Query("year") year: Int
+    ): Call<AIReportResponse>
+
+    // 유사 동아리 비교 리포트 생성
+    @POST("report/similar-clubs/club/{club_id}/year/{year}/")
+    fun createSimilarClubsReport(
+        @Path("club_id") clubId: Int,
+        @Path("year") year: Int
+    ): Call<AIReportResponse>
+    
+    // 월간 리포트 목록 조회
+    @GET("report/clubs/{club_pk}/ledgers/{ledger_pk}/reports/monthly/")
+    fun getMonthlyReports(
+        @Path("club_pk") clubId: Int,
+        @Path("ledger_pk") ledgerId: Int,
+        @retrofit2.http.Query("year") year: Int,
+        @retrofit2.http.Query("month") month: Int
+    ): Call<List<BackendReportItem>>
+    
+    // 연간 리포트 목록 조회
+    @GET("report/clubs/{club_pk}/ledgers/{ledger_pk}/reports/yearly/")
+    fun getYearlyReports(
+        @Path("club_pk") clubId: Int,
+        @Path("ledger_pk") ledgerId: Int,
+        @retrofit2.http.Query("year") year: Int
+    ): Call<List<BackendReportItem>>
+
+    // 백엔드 실제 응답 구조 (리포트 생성 시)
+    data class AIReportResponse(
+        val ledger_id: Int,
+        val club_id: Int,
+        val year: Int,
+        val month: Int?,
+        val period: Map<String, String>?,
+        val summary: Map<String, Int>,
+        val by_type: List<Map<String, Any>>,
+        val by_payment_method: List<Map<String, Any>>,
+        val by_event: List<Map<String, Any>>,
+        val daily_series: List<Map<String, Any>>?
+    )
+    
+    // 백엔드 저장된 리포트 데이터 클래스
+    data class BackendReportItem(
+        val id: Int,
+        val ledger: Int,
+        val title: String,
+        val content: Map<String, Any> // JSONField는 Map으로 받음
+    )
 }

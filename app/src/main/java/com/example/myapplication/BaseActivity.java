@@ -166,6 +166,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         btnEventAccount = findViewById(R.id.btn_event_account);
         btnMeetingAccount = findViewById(R.id.btn_meeting_account);
         btnAiReport = findViewById(R.id.btn_ai_report);
+        android.util.Log.d("BaseActivity", "btnAiReport 초기화: " + (btnAiReport != null ? "성공" : "실패"));
         
         // 초기 상태: 공지사항 버튼이 선택된 상태로 시작
         if (btnNotice != null) {
@@ -265,28 +266,57 @@ public abstract class BaseActivity extends AppCompatActivity {
         
         if (btnAiReport != null) {
             btnAiReport.setOnClickListener(v -> {
-                // 이미 현재 페이지인 경우 아무것도 하지 않음
-                if (this instanceof LedgerReportActivity) {
-                    return;
+                android.util.Log.d("BaseActivity", "=== AI 리포트 버튼 클릭됨 ===");
+                android.util.Log.d("BaseActivity", "현재 Activity: " + this.getClass().getSimpleName());
+                
+                // 간단한 Toast로 클릭 확인
+                android.widget.Toast.makeText(this, "AI 리포트 로딩 중...", android.widget.Toast.LENGTH_SHORT).show();
+                
+                try {
+                    // AI 리포트 버튼 클릭 시 바로 이동
+                    Intent intent = new Intent(this, LedgerReportActivity.class);
+                    
+                    // 현재 동아리 ID가 있다면 전달 (선택적)
+                    if (getCurrentClubId() > 0) {
+                        intent.putExtra("club_id", getCurrentClubId());
+                        android.util.Log.d("BaseActivity", "클럽 ID 전달: " + getCurrentClubId());
+                    }
+                    
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    
+                    android.util.Log.d("BaseActivity", "Intent 생성 완료, startActivity 호출");
+                    startActivity(intent);
+                    android.util.Log.d("BaseActivity", "startActivity 호출 완료");
+                    
+                } catch (Exception e) {
+                    android.util.Log.e("BaseActivity", "AI 리포트 이동 중 오류 발생", e);
+                    android.widget.Toast.makeText(this, "AI 리포트 화면으로 이동할 수 없습니다", android.widget.Toast.LENGTH_SHORT).show();
                 }
-
-                updateBoardButton(btnAiReport, 
-                    new TextView[]{btnNotice, btnFreeBoard, btnPublicAccount, btnEventAccount, btnMeetingAccount});
-                
-                // 스크롤 위치 저장
-                saveBoardButtonScrollPosition();
-
-                // AI 리포트 버튼 클릭 시 ledger_report로 이동
-                Intent intent = new Intent(this, LedgerReportActivity.class);
-                
-                // 현재 스크롤 위치를 Intent에 추가
-                intent.putExtra("scroll_position", getCurrentBoardScrollPosition());
-                startActivity(intent);
-                
-                // 페이지 전환 애니메이션 제거
-                overridePendingTransition(0, 0);
             });
+            android.util.Log.d("BaseActivity", "AI 리포트 버튼 리스너 설정 완료");
+        } else {
+            android.util.Log.e("BaseActivity", "btnAiReport가 null입니다!");
         }
+    }
+    
+    // 현재 클럽 ID를 가져오는 메서드 (서브클래스에서 오버라이드 가능)
+    protected int getCurrentClubId() {
+        // Intent에서 클럽 ID를 가져오려고 시도 (여러 가능한 키 확인)
+        int clubId = getIntent().getIntExtra("club_pk", -1);
+        if (clubId <= 0) {
+            clubId = getIntent().getIntExtra("club_id", -1);
+        }
+        if (clubId <= 0) {
+            clubId = getIntent().getIntExtra("EXTRA_CLUB_PK", -1);
+        }
+        
+        android.util.Log.d("BaseActivity", "getCurrentClubId 호출됨");
+        android.util.Log.d("BaseActivity", "  - club_pk: " + getIntent().getIntExtra("club_pk", -1));
+        android.util.Log.d("BaseActivity", "  - club_id: " + getIntent().getIntExtra("club_id", -1));
+        android.util.Log.d("BaseActivity", "  - EXTRA_CLUB_PK: " + getIntent().getIntExtra("EXTRA_CLUB_PK", -1));
+        android.util.Log.d("BaseActivity", "  - 최종 반환값: " + clubId);
+        
+        return clubId > 0 ? clubId : 0;
     }
     
     // 게시판 버튼 상태를 업데이트하는 메서드
