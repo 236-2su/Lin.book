@@ -6,6 +6,8 @@ from typing import Optional
 from django.db.models import Case, IntegerField, Sum, Value, When
 from django.db.models.functions import TruncDate
 
+from club.models import Club
+from club.services import similar_by_club
 from ledger.models import Event, Ledger, LedgerTransactions  # 기존 앱의 모델 사용
 
 from .models import LedgerReports
@@ -203,3 +205,50 @@ def yearly_ledger_stats(
     LedgerReports.objects.create(ledger=ledger, title=final_title, content=stats_dict)
 
     return stats_dict
+
+
+def generate_similar_clubs_yearly_report(club_id: int, year: int):
+    """
+    주어진 동아리와 유사한 동아리 2개의 연간 보고서를 함께 생성하고 반환합니다.
+    """
+    # 1. 원본 동아리 및 유사 동아리 ID 가져오기
+    try:
+        original_club = Club.objects.get(pk=club_id)
+    except Club.DoesNotExist:
+        return {"error": f"Club with id {club_id} not found."}
+
+    similar_clubs_raw = similar_by_club(club_id=str(club_id), k=2)
+    similar_club_ids = [int(c["id"]) for c in similar_clubs_raw]
+
+    all_club_ids = [club_id] + similar_club_ids
+    all_reports = {"original_club_report": {}, "similar_club_reports": []}
+
+    # 2. 각 동아리의 연간 보고서 생성
+    for c_id in all_club_ids:
+        try:
+            # 각 동아리에는 하나의 대표 장부(Ledger)만 있다고 가정합니다.
+            # 만약 여러 개일 경우, 어떤 장부를 선택할지에 대한 로직이 필요합니다.
+            ledger = Ledger.objects.get(club_id=c_id)
+            report = yearly_ledger_stats(ledger_id=ledger.id, year=year)
+
+            if c_id == club_id:
+                all_reports["original_club_report"] = report
+            else:
+                all_reports["similar_club_reports"].append(report)
+
+        except Ledger.DoesNotExist:
+            # 해당 동아리에 장부가 없는 경우, 보고서에 없음을 표시
+            report_data = {"club_id": c_id, "year": year, "error": "Ledger not found for this club."}
+            if c_id == club_id:
+                all_reports["original_club_report"] = report_data
+            else:
+                all_reports["similar_club_reports"].append(report_data)
+        except Exception as e:
+            # 기타 예외 처리
+            report_data = {"club_id": c_id, "year": year, "error": str(e)}
+            if c_id == club_id:
+                all_reports["original_club_report"] = report_data
+            else:
+                all_reports["similar_club_reports"].append(report_data)
+
+    return all_reports

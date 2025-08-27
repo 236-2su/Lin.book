@@ -1,3 +1,4 @@
+from django.db import transaction
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema, extend_schema_view
 from rest_framework import status, viewsets
@@ -24,6 +25,7 @@ from .services import similar_by_club, similar_by_text
 
 @extend_schema_view(
     get=extend_schema(
+        operation_id="club_similar_by_query_retrieve",
         summary="검색 추천",
         description="검색어를 넣으면 유사한 동아리를 추천해 줍니다",
         tags=["Club"],
@@ -39,6 +41,8 @@ from .services import similar_by_club, similar_by_text
     )
 )
 class SimilarClubsByQuery(APIView):
+    serializer_class = ClubSerializer
+
     def get(self, request):
         query = request.query_params.get("query")
         major = request.query_params.get("major")
@@ -55,9 +59,16 @@ class SimilarClubsByQuery(APIView):
 
 
 @extend_schema_view(
-    get=extend_schema(summary="id 추천", description="가입한 동아리를 기반으로 다른 동아리를 추천합니다", tags=["Club"])
+    get=extend_schema(
+        operation_id="club_similar_by_id_retrieve",
+        summary="id 추천",
+        description="가입한 동아리를 기반으로 다른 동아리를 추천합니다",
+        tags=["Club"],
+    )
 )
 class SimilarClubsById(APIView):
+    serializer_class = ClubSerializer
+
     def get(self, request, club_id):
         data = similar_by_club(club_id, k=10)
         return Response({"results": data})
@@ -233,6 +244,18 @@ class ClubMemberViewSet(viewsets.ModelViewSet):
             return Response(response_serializer.data, status=status.HTTP_200_OK)
         except ClubMember.DoesNotExist:
             return Response({"detail": "Member not found in this club."}, status=status.HTTP_404_NOT_FOUND)
+
+    @extend_schema(
+        summary="가입 대기 중인 클럽 멤버 목록 조회",
+        description="가입 대기 중인 클럽 멤버 목록을 조회합니다.",
+        responses={200: ClubMemberSerializer(many=True)},
+        tags=["ClubMember"],
+    )
+    @action(detail=False, methods=["get"])
+    def waiting(self, request, club_pk=None):
+        waiting_members = self.get_queryset().filter(status="waiting")
+        serializer = self.get_serializer(waiting_members, many=True)
+        return Response(serializer.data)
 
 
 @extend_schema_view(

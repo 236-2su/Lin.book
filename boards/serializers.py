@@ -9,6 +9,8 @@ from .models import AttachedFiles, Board, BoardLikes, CommentLikes, Comments
 class BoardSerializer(serializers.ModelSerializer):
     likes = serializers.SerializerMethodField()
     comments = serializers.SerializerMethodField()
+    author_name = serializers.SerializerMethodField()
+    author_major = serializers.SerializerMethodField()
 
     class Meta:
         model = Board
@@ -21,6 +23,14 @@ class BoardSerializer(serializers.ModelSerializer):
     @extend_schema_field(serializers.IntegerField())
     def get_comments(self, obj):
         return obj.comments_set.count()
+
+    @extend_schema_field(serializers.CharField())
+    def get_author_name(self, obj):
+        return obj.author.user.name
+
+    @extend_schema_field(serializers.CharField())
+    def get_author_major(self, obj):
+        return obj.author.user.major
 
 
 class BoardCreateSerializer(serializers.ModelSerializer):
@@ -49,6 +59,8 @@ class LikeCreateSerializer(serializers.Serializer):
 
 class CommentsSerializer(serializers.ModelSerializer):
     likes = serializers.SerializerMethodField()
+    author_name = serializers.SerializerMethodField()
+    author_major = serializers.SerializerMethodField()
 
     class Meta:
         model = Comments
@@ -57,6 +69,14 @@ class CommentsSerializer(serializers.ModelSerializer):
     @extend_schema_field(serializers.IntegerField())
     def get_likes(self, obj):
         return obj.commentlikes_set.count()
+
+    @extend_schema_field(serializers.CharField())
+    def get_author_name(self, obj):
+        return obj.author.user.name
+
+    @extend_schema_field(serializers.CharField())
+    def get_author_major(self, obj):
+        return obj.author.user.major
 
 
 class CommentLikesSerializer(serializers.ModelSerializer):
