@@ -92,14 +92,14 @@ interface ApiService {
         @Path("id") commentId: Int
     ): Call<okhttp3.ResponseBody>
 
-    // 댓글 좋아요
+    // 댓글 좋아요 (백엔드 스펙: { user_id })
     @POST("/club/{club_pk}/boards/{board_pk}/comments/{id}/like/")
     fun likeComment(
         @Path("club_pk") clubId: Int,
         @Path("board_pk") boardId: Int,
         @Path("id") commentId: Int,
-        @Body body: com.example.myapplication.CommentCreateRequest
-    ): Call<com.example.myapplication.CommentItem>
+        @Body body: LikeRequest
+    ): Call<okhttp3.ResponseBody>
 
     data class LikeRequest(val user_id: Int)
     @POST("/club/{club_pk}/boards/{id}/like/")

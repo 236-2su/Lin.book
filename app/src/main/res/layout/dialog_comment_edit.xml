@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="@drawable/dialog_background">
+
+    <TextView
+        android:id="@+id/tv_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="댓글 수정"
+        android:textStyle="bold"
+        android:textSize="18sp"
+        android:textColor="@android:color/black"
+        android:layout_marginBottom="12dp" />
+
+    <EditText
+        android:id="@+id/et_edit_comment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="96dp"
+        android:gravity="top|start"
+        android:background="@drawable/comment_input_background"
+        android:padding="12dp"
+        android:textSize="16sp"
+        android:hint="댓글 내용을 입력하세요" />
+
+    <Button
+        android:id="@+id/btn_confirm_edit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="수정하기"
+        android:textAllCaps="false"
+        android:layout_marginTop="12dp"
+        android:background="@drawable/btn_confirm_background"
+        android:textColor="@android:color/white" />
+
+</LinearLayout>
+
+
