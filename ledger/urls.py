@@ -5,6 +5,7 @@ from rest_framework_nested import routers as nested_routers
 from .views import LedgerTransactionsViewSet, LedgerViewSet, ReceiptViewSet
 
 router = routers.SimpleRouter()
+router.lookup_value_regex = r"\d+"
 router.register(r"", LedgerViewSet, basename="ledger")
 
 ledgers_router = nested_routers.NestedSimpleRouter(router, r"", lookup="ledger")

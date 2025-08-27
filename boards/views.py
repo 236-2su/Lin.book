@@ -79,7 +79,7 @@ class BoardViewSet(viewsets.ModelViewSet):
            forum(자유게시판)
     """
 
-    queryset = Board.objects.select_related("author")
+    queryset = Board.objects.select_related("author__user")
     serializer_class = BoardSerializer
 
     @extend_schema(
@@ -165,7 +165,7 @@ class BoardViewSet(viewsets.ModelViewSet):
     ),
 )
 class CommentsViewSet(viewsets.ModelViewSet):
-    queryset = Comments.objects.select_related("author")
+    queryset = Comments.objects.select_related("author__user")
     serializer_class = CommentsSerializer
 
     def get_queryset(self):

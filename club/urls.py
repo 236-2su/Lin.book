@@ -8,6 +8,7 @@ from ledger.views import EventViewSet, LedgerTransactionsViewSet, LedgerViewSet,
 from .views import ClubMemberViewSet, ClubViewSet, ClubWelcomePageViewSet, SimilarClubsById, SimilarClubsByQuery
 
 router = routers.SimpleRouter()
+router.lookup_value_regex = r"\d+"
 router.register(r"", ClubViewSet, basename="club")
 
 members_router = nested_routers.NestedSimpleRouter(router, r"", lookup="club")
