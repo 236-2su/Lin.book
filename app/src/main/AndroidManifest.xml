@@ -54,6 +54,10 @@
             android:exported="false" />
 
         <activity
+            android:name=".AIReportDetailActivity"
+            android:exported="false" />
+
+        <activity
             android:name=".ClubAnnouncementBoardListActivity"
             android:exported="false" />
 

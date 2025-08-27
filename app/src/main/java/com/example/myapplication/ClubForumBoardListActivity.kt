@@ -93,6 +93,15 @@ class ClubForumBoardListActivity : AppCompatActivity() {
             intent.putExtra("club_pk", clubPk)
             startActivity(intent)
         }
+        
+        // AI 리포트 버튼
+        findViewById<TextView>(R.id.btn_ai_report).setOnClickListener {
+            val currentClubPk = intent?.getIntExtra(EXTRA_CLUB_PK, -1) ?: -1
+            val intent = Intent(this, LedgerReportActivity::class.java)
+            intent.putExtra("club_id", currentClubPk)
+            startActivity(intent)
+            finish()
+        }
     }
     
     private fun fetchBoardList(clubPk: Int) {

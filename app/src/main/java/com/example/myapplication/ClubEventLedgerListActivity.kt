@@ -81,6 +81,14 @@ class ClubEventLedgerListActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.btn_event_account).setOnClickListener {
             // 현재 페이지
         }
+        
+        // AI 리포트 버튼
+        findViewById<TextView>(R.id.btn_ai_report).setOnClickListener {
+            val intent = Intent(this, LedgerReportActivity::class.java)
+            intent.putExtra("club_id", clubPk)
+            startActivity(intent)
+            finish()
+        }
     }
 
     private fun loadEventList(clubPk: Int) {
