@@ -23,6 +23,7 @@ class Club(models.Model):
     created_at = models.DateField(auto_now_add=True)
     location = models.TextField()
     short_description = models.TextField()
+    image = models.ImageField(upload_to="club/", null=True, blank=True)
 
 
 class ClubWelcomePage(models.Model):
