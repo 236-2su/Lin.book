@@ -83,7 +83,14 @@ class BoardViewSet(viewsets.ModelViewSet):
     serializer_class = BoardSerializer
 
     @extend_schema(
-        summary="게시글 좋아요", description="게시글에 좋아요가 있으면 삭제하고, 없으면 생성합니다.", tags=["Board"]
+        summary="게시글 좋아요",
+        description="게시글에 좋아요가 있으면 삭제하고, 없으면 생성합니다.",
+        tags=["Board"],
+        request=LikeCreateSerializer,
+        responses={
+            201: BoardLikesSerializer,
+            204: OpenApiResponse(description="Like removed. No content."),
+        },
     )
     @action(detail=True, methods=["post"])
     def like(self, request, pk=None):
@@ -99,8 +106,9 @@ class BoardViewSet(viewsets.ModelViewSet):
             like.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         except BoardLikes.DoesNotExist:
-            BoardLikes.objects.create(board=board, user=user)
-            return Response(status=status.HTTP_201_CREATED)
+            like = BoardLikes.objects.create(board=board, user=user)
+            serializer = BoardLikesSerializer(like)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 @extend_schema(
