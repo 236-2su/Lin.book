@@ -1,0 +1,328 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- 메인 콘텐츠 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        android:padding="16dp">
+
+        <!-- 뒤로가기 버튼 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="24dp"
+            android:layout_gravity="center_vertical">
+
+
+            <Button
+                android:id="@+id/btn_back"
+                android:layout_width="24dp"
+                android:layout_height="48dp"
+                android:minWidth="0dp"
+                android:minHeight="0dp"
+                android:padding="0dp"
+                android:backgroundTint="#FFFFFF"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:text="&lt;"
+                android:textColor="@android:color/darker_gray"
+                android:textSize="16sp"
+                android:fontFamily="sans-serif-light"
+                android:clickable="true"
+                android:focusable="true" />
+
+            <ImageView
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@drawable/logo" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/tv_club_title"
+                android:text=""
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:textColor="@android:color/black"
+                android:layout_marginStart="8dp"/>
+        </LinearLayout>
+
+        <!-- 게시판 버튼 영역 -->
+
+        <LinearLayout
+            android:id="@+id/board_buttons_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#FFFFFF"
+            android:orientation="vertical">
+
+            <!-- 게시판 버튼들 -->
+            <HorizontalScrollView
+                android:id="@+id/board_buttons_scroll_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scrollbars="none">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/btn_notice"
+                        style="@style/ReferenceBoardButton"
+                        android:text="공지사항" />
+
+                    <TextView
+                        android:id="@+id/btn_free_board"
+                        style="@style/ReferenceBoardButton"
+                        android:text="자유게시판" />
+
+                    <TextView
+                        android:id="@+id/btn_public_account"
+                        style="@style/ReferenceBoardButton"
+                        android:text="공개장부" />
+
+                    <TextView
+                        android:id="@+id/btn_event_account"
+                        style="@style/ReferenceCategoryButton.Selected"
+                        android:text="행사장부" />
+
+                    <TextView
+                        android:id="@+id/btn_meeting_account"
+                        style="@style/ReferenceBoardButton"
+                        android:text="모임통장" />
+
+                    <TextView
+                        android:id="@+id/btn_ai_report"
+                        style="@style/ReferenceBoardButton"
+                        android:text="AI 리포트" />
+
+                </LinearLayout>
+            </HorizontalScrollView>
+        </LinearLayout>
+
+
+        <!-- 행사 상세 내역 스크롤 뷰 -->
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:scrollbars="none"
+            android:layout_marginTop="24dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <!-- 상단 행사 정보 카드 (동적으로 설정될 부분) -->
+                <LinearLayout
+                    android:id="@+id/event_info_card"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginVertical="16dp"
+                    android:background="@drawable/color_box_blue"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:id="@+id/tv_event_title"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text=""
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:textColor="#333333"
+                        android:layout_marginBottom="3.3dp"
+                        android:maxLines="2"
+                        android:ellipsize="end"
+                        android:gravity="center" />
+
+                    <TextView
+                        android:id="@+id/tv_event_period"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text=""
+                        android:textSize="12sp"
+                        android:textColor="#666666"
+                        android:gravity="center" />
+
+                </LinearLayout>
+
+                <!-- 월별 네비게이션 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="16dp">
+
+                    <Button
+                        android:id="@+id/btn_prev_month"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:text="&lt;"
+                        android:textSize="18sp"
+                        android:textColor="#666666"
+                        android:background="@null" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="center">
+
+                        <TextView
+                            android:id="@+id/tv_year"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="2025년"
+                            android:textSize="10.7sp"
+                            android:textColor="#666666" />
+
+                        <TextView
+                            android:id="@+id/tv_current_month"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="08월"
+                            android:textSize="21sp"
+                            android:textStyle="bold"
+                            android:textColor="#333333" />
+
+                    </LinearLayout>
+
+                    <Button
+                        android:id="@+id/btn_next_month"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:text="&gt;"
+                        android:textSize="18sp"
+                        android:textColor="#666666"
+                        android:background="@null" />
+
+                </LinearLayout>
+
+                <!-- 수정/삭제 버튼 추가 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="end"
+                    android:layout_marginBottom="16dp">
+
+                    <TextView
+                        android:id="@+id/btn_edit"
+                        style="@style/ReferenceSmallButton.Edit"
+                        android:text="수정하기" />
+
+                    <TextView
+                        android:id="@+id/btn_delete"
+                        style="@style/ReferenceSmallButton.Delete"
+                        android:text="삭제하기" />
+                </LinearLayout>
+
+                <!-- 예산 요약 섹션 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:background="@drawable/color_box_gray"
+                    android:orientation="horizontal"
+                    android:padding="16dp">
+
+                    <!-- 총 예산 -->
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="center">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="총 예산"
+                            android:textSize="12sp"
+                            android:textColor="#666666"
+                            android:layout_marginBottom="3.3dp" />
+
+                        <TextView
+                            android:id="@+id/tv_total_budget"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0원"
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            android:textColor="#333333" />
+
+                    </LinearLayout>
+
+                    <!-- 구분선 -->
+                    <View
+                        android:layout_width="1dp"
+                        android:layout_height="match_parent"
+                        android:background="#E0E0E0" />
+
+                    <!-- 현재 지출 -->
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="center">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="현재 지출"
+                            android:textSize="12sp"
+                            android:textColor="#666666"
+                            android:layout_marginBottom="3.3dp" />
+
+                        <TextView
+                            android:id="@+id/tv_current_expense"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0원"
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            android:textColor="#FF0000" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <!-- 거래 내역 리스트 (RecyclerView로 변경) -->
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rv_transaction_list"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:nestedScrollingEnabled="false"/>
+
+            </LinearLayout>
+
+        </ScrollView>
+    </LinearLayout>
+
+    <!-- Floating Action Button -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab_add_transaction"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="24dp"
+        android:src="@drawable/ic_add"
+        app:backgroundTint="#1976D2"
+        app:tint="#FFFFFF"
+        app:fabSize="normal" />
+    
+</FrameLayout>
