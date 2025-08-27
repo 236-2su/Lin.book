@@ -18,6 +18,8 @@ class BoardAdapter(
         val titleText: TextView = itemView.findViewById(R.id.tv_title)
         val contentText: TextView = itemView.findViewById(R.id.tv_content)
         val viewsText: TextView = itemView.findViewById(R.id.tv_views)
+        val likesText: TextView = itemView.findViewById(R.id.tv_likes_count)
+        val commentsText: TextView = itemView.findViewById(R.id.tv_comments_count)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BoardViewHolder {
@@ -33,6 +35,8 @@ class BoardAdapter(
         holder.titleText.text = board.title
         holder.contentText.text = board.content
         holder.viewsText.text = "조회수 ${board.views}"
+        holder.likesText.text = (board.likes ?: "0").toString()
+        holder.commentsText.text = (board.comments ?: "0").toString()
         
         holder.itemView.setOnClickListener {
             onItemClick(board)
