@@ -23,11 +23,27 @@
             android:gravity="center_vertical"
             android:layout_marginBottom="8dp">
 
-            <!-- 배지 -->
-            <TextView
-                android:id="@+id/roleBadge"
-                style="@style/ReferenceSmallButton.General"
-                android:text="일반" />
+            <!-- 배지들을 담는 LinearLayout -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+                
+                <!-- Me 배지 (본인인 경우만 표시) -->
+                <TextView
+                    android:id="@+id/meBadge"
+                    style="@style/ReferenceSmallButton.Me"
+                    android:text="Me"
+                    android:layout_marginEnd="6dp"
+                    android:visibility="gone" />
+                
+                <!-- 역할 배지 (회장/일반) -->
+                <TextView
+                    android:id="@+id/roleBadge"
+                    style="@style/ReferenceSmallButton.General"
+                    android:text="일반" />
+            </LinearLayout>
 
             <View
                 android:layout_width="0dp"

@@ -50,6 +50,7 @@ class MemberAdapter(
 ) : RecyclerView.Adapter<MemberAdapter.MemberViewHolder>() {
 
     class MemberViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        private val meBadge: TextView = itemView.findViewById(R.id.meBadge)
         private val roleBadge: TextView = itemView.findViewById(R.id.roleBadge)
         private val memberName: TextView = itemView.findViewById(R.id.memberName)
         private val memberInfo: TextView = itemView.findViewById(R.id.memberInfo)
@@ -64,23 +65,24 @@ class MemberAdapter(
             memberPhone.text = member.phone
             joinDate.text = "가입일: ${member.joinDate}"
 
-            // 역할에 따른 배지 스타일 설정
+            // Me 배지 표시 여부
+            if (member.isMe) {
+                meBadge.visibility = View.VISIBLE
+            } else {
+                meBadge.visibility = View.GONE
+            }
+
+            // 역할에 따른 배지 텍스트 설정
             when (member.role) {
                 "leader" -> {
-                    if (member.isMe) {
-                        roleBadge.text = "Me"
-                        roleBadge.setBackgroundResource(R.drawable.btn_me_selected)
-                        roleBadge.setTextColor(android.graphics.Color.WHITE)
-                    } else {
-                        roleBadge.text = "회장"
-                        roleBadge.setBackgroundResource(R.drawable.btn_vice_president)
-                        roleBadge.setTextColor(android.graphics.Color.parseColor("#333333"))
-                    }
+                    roleBadge.text = "회장"
+                    // TODO: 회장 스타일 적용 (btn_president 드로어블 필요)
+                    // roleBadge.setBackgroundResource(R.drawable.btn_president)
                 }
                 "member" -> {
                     roleBadge.text = "일반"
-                    roleBadge.setBackgroundResource(R.drawable.btn_general)
-                    roleBadge.setTextColor(android.graphics.Color.parseColor("#333333"))
+                    // TODO: 일반 스타일 적용 (btn_general 드로어블 필요)
+                    // roleBadge.setBackgroundResource(R.drawable.btn_general)
                 }
             }
 

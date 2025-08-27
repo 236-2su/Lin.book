@@ -41,6 +41,8 @@ class ClubMemberManagementActivity : AppCompatActivity() {
         // Intent에서 club_pk와 user_pk 받기
         clubPk = intent.getIntExtra(EXTRA_CLUB_PK, -1)
         currentUserPk = intent.getIntExtra(EXTRA_USER_PK, -1)
+        
+        Log.d("MEMBER_DEBUG", "받은 clubPk: $clubPk, currentUserPk: $currentUserPk")
 
         if (clubPk == -1) {
             Toast.makeText(this, "동아리 정보를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
@@ -197,6 +199,9 @@ class ClubMemberManagementActivity : AppCompatActivity() {
                     for (memberResponse in memberResponses) {
                         val user = userList.find { it.id == memberResponse.user }
                         if (user != null) {
+                            val isCurrentUser = (memberResponse.user == currentUserPk)
+                            Log.d("MEMBER_DEBUG", "멤버: ${user.name}, userId: ${memberResponse.user}, currentUserPk: $currentUserPk, isMe: $isCurrentUser")
+                            
                             val member = Member(
                                 id = memberResponse.id,
                                 userId = memberResponse.user,
@@ -207,17 +212,18 @@ class ClubMemberManagementActivity : AppCompatActivity() {
                                 studentNumber = user.student_number,
                                 phone = user.phone_number,
                                 joinDate = formatDate(memberResponse.joined_at),
-                                isMe = (memberResponse.user == currentUserPk)
+                                isMe = isCurrentUser
                             )
                             members.add(member)
                         }
                     }
                     
-                    // role 순서대로 정렬 (leader 먼저, 그 다음 member)
+                    // 정렬 순서: 본인(isMe) -> 회장(leader) -> 일반(member)
                     members.sortBy { 
-                        when(it.role) {
-                            "leader" -> 0
-                            else -> 1
+                        when {
+                            it.isMe -> 0                    // 본인이 최우선 (최상단)
+                            it.role == "leader" -> 1        // 회장이 두 번째
+                            else -> 2                        // 일반 멤버가 세 번째
                         }
                     }
                     
