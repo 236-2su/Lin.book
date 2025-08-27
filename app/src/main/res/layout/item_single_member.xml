@@ -4,7 +4,8 @@
     android:layout_height="wrap_content"
     android:layout_marginBottom="16dp"
     android:orientation="horizontal"
-    android:padding="20dp"
+    android:paddingTop="20dp"
+    android:paddingBottom="20dp"
     android:gravity="center_vertical">
 
     <!-- 왼쪽 영역: 구성원 정보 -->

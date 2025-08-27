@@ -133,4 +133,8 @@ interface ApiService {
     // 사용자 목록 조회
     @GET("user/")
     fun getUserList(): Call<List<com.example.myapplication.UserResponse>>
+
+    // 가입 대기 멤버 목록 조회
+    @GET("club/{club_pk}/members/waiting/")
+    fun getWaitingMembers(@Path("club_pk") clubId: Int): Call<List<com.example.myapplication.MemberResponse>>
 }
