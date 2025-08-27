@@ -5,6 +5,9 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import android.util.Log
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.RequestBody.Companion.toRequestBody
 
 class ClubForumBoardUpdateActivity : AppCompatActivity() {
     
@@ -74,10 +77,55 @@ class ClubForumBoardUpdateActivity : AppCompatActivity() {
     private fun updateBoard() {
         val title = etTitle.text.toString().trim()
         val content = etContent.text.toString().trim()
-        
-        // TODO: API 호출하여 게시글 수정
-        Toast.makeText(this, "게시글이 수정되었습니다.", Toast.LENGTH_SHORT).show()
-        finish()
+        val clubPk = boardItem.club
+        val boardId = boardItem.id
+        if (clubPk <= 0 || boardId <= 0) {
+            Toast.makeText(this, "동아리/게시글 정보가 없습니다.", Toast.LENGTH_LONG).show()
+            return
+        }
+
+        val baseUrl = BuildConfig.BASE_URL.trimEnd('/')
+        val url = "$baseUrl/club/$clubPk/boards/$boardId/"
+        val client = com.example.myapplication.api.ApiClient.createUnsafeOkHttpClient()
+
+        val payload = mapOf(
+            "title" to title,
+            "content" to content
+        )
+        val json = com.google.gson.Gson().toJson(payload)
+        val mediaType = "application/json; charset=utf-8".toMediaType()
+        val body: okhttp3.RequestBody = json.toRequestBody(mediaType)
+        val req = okhttp3.Request.Builder()
+            .url(url)
+            .patch(body)
+            .addHeader("Content-Type", "application/json")
+            .build()
+
+        Log.d("BoardUpdate", "PATCH /club/$clubPk/boards/$boardId title=${title.length} content=${content.length}")
+        Thread {
+            try {
+                client.newCall(req).execute().use { resp ->
+                    val respBody = resp.body?.string()
+                    if (resp.isSuccessful) {
+                        runOnUiThread {
+                            Toast.makeText(this, "게시글이 수정되었습니다.", Toast.LENGTH_SHORT).show()
+                            setResult(RESULT_OK)
+                            finish()
+                        }
+                    } else {
+                        Log.e("BoardUpdate", "fail code=${resp.code} body=${respBody}")
+                        runOnUiThread {
+                            Toast.makeText(this, "수정 실패: ${resp.code}", Toast.LENGTH_LONG).show()
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("BoardUpdate", "network error: ${e.message}")
+                runOnUiThread {
+                    Toast.makeText(this, "네트워크 오류: ${e.message}", Toast.LENGTH_LONG).show()
+                }
+            }
+        }.start()
     }
 }
 

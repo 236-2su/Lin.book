@@ -52,6 +52,8 @@ class ClubForumBoardListActivity : AppCompatActivity() {
             // 아이템 클릭 시 상세 페이지로 이동
             val intent = Intent(this, ClubForumBoardDetailActivity::class.java)
             intent.putExtra("board_item", boardItem)
+            val currentClubPk = this.intent?.getIntExtra(EXTRA_CLUB_PK, -1) ?: -1
+            intent.putExtra("club_pk", currentClubPk)
             startActivity(intent)
         }
         
@@ -60,6 +62,12 @@ class ClubForumBoardListActivity : AppCompatActivity() {
         // API 호출
         val clubPk = intent?.getIntExtra(EXTRA_CLUB_PK, -1) ?: -1
         fetchClubDetail(clubPk)
+        fetchBoardList(clubPk)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        val clubPk = intent?.getIntExtra(EXTRA_CLUB_PK, -1) ?: -1
         fetchBoardList(clubPk)
     }
     
@@ -107,9 +115,10 @@ class ClubForumBoardListActivity : AppCompatActivity() {
                         val boards = gson.fromJson<List<BoardItem>>(responseBody, type)
                         android.util.Log.d("API_SUCCESS", "파싱된 게시글 수: ${boards.size}")
                         val freeBoardBoards = boards.filter { it.type == "forum" && it.club == clubPk }
-                        android.util.Log.d("API_SUCCESS", "자유게시판 게시글 수: ${freeBoardBoards.size}")
+                        val sorted = freeBoardBoards.sortedByDescending { parseBoardDate(it.updated_at ?: it.created_at) }
+                        android.util.Log.d("API_SUCCESS", "자유게시판 게시글 수: ${sorted.size}")
                         boardList.clear()
-                        boardList.addAll(freeBoardBoards)
+                        boardList.addAll(sorted)
                         boardAdapter.notifyDataSetChanged()
                     } catch (e: Exception) {
                         android.util.Log.e("API_ERROR", "데이터 파싱 오류: ${e.message}")
@@ -153,6 +162,31 @@ class ClubForumBoardListActivity : AppCompatActivity() {
                 }
             }
         })
+    }
+
+    private fun parseBoardDate(dateString: String?): Long {
+        if (dateString.isNullOrBlank()) return 0L
+        return try {
+            // 우선 ISO_OFFSET_DATE_TIME 시도 (예: 2025-08-20T10:25:00.000000+09:00)
+            val instant = try {
+                java.time.OffsetDateTime.parse(
+                    dateString,
+                    java.time.format.DateTimeFormatter.ISO_OFFSET_DATE_TIME
+                ).toInstant()
+            } catch (_: Exception) {
+                // 백업: 마이크로초 포함 패턴
+                val fmt = java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS")
+                java.time.LocalDateTime.parse(dateString.substring(0, 26), fmt)
+                    .atZone(java.time.ZoneOffset.UTC)
+                    .toInstant()
+            }
+            instant.toEpochMilli()
+        } catch (_: Exception) {
+            try {
+                val input = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSXXX", java.util.Locale.getDefault())
+                input.parse(dateString)?.time ?: 0L
+            } catch (_: Exception) { 0L }
+        }
     }
 
     private fun fetchClubDetail(clubPk: Int) {

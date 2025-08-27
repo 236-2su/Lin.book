@@ -56,6 +56,12 @@ class ClubAnnouncementBoardListActivity : AppCompatActivity() {
                 android.widget.Toast.makeText(this, "동아리 URL이 저장되었습니다.", android.widget.Toast.LENGTH_SHORT).show()
             }
         }
+
+        // 멤버 버튼: 멤버 리스트 화면으로 이동
+        findViewById<androidx.appcompat.widget.AppCompatImageButton>(R.id.btn_member)?.setOnClickListener {
+            val intent = Intent(this, MemberManagementActivity::class.java)
+            startActivity(intent)
+        }
         
         // RecyclerView 설정
         recyclerView = findViewById(R.id.rv_board_list)
@@ -65,7 +71,7 @@ class ClubAnnouncementBoardListActivity : AppCompatActivity() {
             // 아이템 클릭 시 상세 페이지로 이동
             val intent = Intent(this, ClubAnnouncementBoardDetailActivity::class.java)
             intent.putExtra("board_item", boardItem)
-            val currentClubPk = intent?.getIntExtra(EXTRA_CLUB_PK, -1) ?: -1
+            val currentClubPk = this.intent?.getIntExtra(EXTRA_CLUB_PK, -1) ?: -1
             intent.putExtra("club_pk", currentClubPk)
             startActivity(intent)
         }
@@ -133,9 +139,10 @@ class ClubAnnouncementBoardListActivity : AppCompatActivity() {
                         val boards = gson.fromJson<List<BoardItem>>(responseBody, type)
                         android.util.Log.d("API_SUCCESS", "파싱된 게시글 수: ${boards.size}")
                         val announcementBoards = boards.filter { it.type == "announcement" && it.club == clubPk }
-                        android.util.Log.d("API_SUCCESS", "공지사항 게시글 수: ${announcementBoards.size}")
+                        val sorted = announcementBoards.sortedByDescending { parseBoardDate(it.updated_at ?: it.created_at) }
+                        android.util.Log.d("API_SUCCESS", "공지사항 게시글 수: ${sorted.size}")
                         boardList.clear()
-                        boardList.addAll(announcementBoards)
+                        boardList.addAll(sorted)
                         boardAdapter.notifyDataSetChanged()
                     } catch (e: Exception) {
                         android.util.Log.e("API_ERROR", "데이터 파싱 오류: ${e.message}")
@@ -179,6 +186,29 @@ class ClubAnnouncementBoardListActivity : AppCompatActivity() {
                 }
             }
         })
+    }
+
+    private fun parseBoardDate(dateString: String?): Long {
+        if (dateString.isNullOrBlank()) return 0L
+        return try {
+            val instant = try {
+                java.time.OffsetDateTime.parse(
+                    dateString,
+                    java.time.format.DateTimeFormatter.ISO_OFFSET_DATE_TIME
+                ).toInstant()
+            } catch (_: Exception) {
+                val fmt = java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS")
+                java.time.LocalDateTime.parse(dateString.substring(0, 26), fmt)
+                    .atZone(java.time.ZoneOffset.UTC)
+                    .toInstant()
+            }
+            instant.toEpochMilli()
+        } catch (_: Exception) {
+            try {
+                val input = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSXXX", java.util.Locale.getDefault())
+                input.parse(dateString)?.time ?: 0L
+            } catch (_: Exception) { 0L }
+        }
     }
 
     private fun fetchClubDetail(clubPk: Int) {
