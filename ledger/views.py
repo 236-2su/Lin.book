@@ -125,12 +125,9 @@ class LedgerViewSet(viewsets.ModelViewSet):
             OpenApiParameter(
                 name="club_pk", description="클럽 ID", required=True, type=int, location=OpenApiParameter.PATH
             ),
-            OpenApiParameter(
-                name="ledger_pk", description="장부 ID", required=True, type=int, location=OpenApiParameter.PATH
-            ),
         ],
-        summary="특정 장부의 거래 내역 목록 조회",
-        description="특정 장부에 속한 거래 내역 목록을 조회합니다.",
+        summary="클럽의 첫번째 장부의 거래 내역 목록 조회",
+        description="클럽의 첫번째 장부에 속한 거래 내역 목록을 조회합니다.",
         responses={200: OpenApiResponse(response=LedgerTransactionsSerializer, description="OK")},
         tags=["LedgerTransactions"],
     ),
@@ -238,6 +235,12 @@ class LedgerTransactionsViewSet(viewsets.ModelViewSet):
     serializer_class = LedgerTransactionsSerializer
 
     def get_queryset(self):
+        if self.action == "list":
+            club_pk = self.kwargs.get("club_pk")
+            ledger = Ledger.objects.filter(club_id=club_pk).first()
+            if ledger:
+                return LedgerTransactions.objects.filter(ledger_id=ledger.pk)
+            return LedgerTransactions.objects.none()
         return LedgerTransactions.objects.filter(ledger_id=self.kwargs["ledger_pk"])
 
     def perform_create(self, serializer):
