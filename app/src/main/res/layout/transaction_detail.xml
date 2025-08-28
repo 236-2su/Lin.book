@@ -268,93 +268,11 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="댓글(1)"
+            android:text="댓글"
             android:textSize="16sp"
             android:textColor="#333333"
             android:textStyle="bold"
             android:layout_marginBottom="16dp" />
-
-                 <!-- 댓글 목록 -->
-         <LinearLayout
-             android:id="@+id/comment_container"
-             android:layout_width="match_parent"
-             android:layout_height="wrap_content"
-             android:orientation="vertical"
-             android:layout_marginBottom="16dp">
-
-             <!-- 댓글 아이템 -->
-             <LinearLayout
-                 android:layout_width="match_parent"
-                 android:layout_height="wrap_content"
-                 android:orientation="horizontal"
-                 android:padding="16dp"
-                 android:layout_marginBottom="12dp">
-
-                 <!-- 댓글 내용 (왼쪽) -->
-                 <LinearLayout
-                     android:layout_width="0dp"
-                     android:layout_height="wrap_content"
-                     android:layout_weight="1"
-                     android:orientation="vertical">
-
-                     <!-- 이름과 학과 (한 줄에) -->
-                     <TextView
-                         android:id="@+id/tv_comment_author"
-                         android:layout_width="wrap_content"
-                         android:layout_height="wrap_content"
-                         android:text="이재익 15학번 기계공학"
-                         android:textSize="14sp"
-                         android:textColor="#333333"
-                         android:textStyle="bold"
-                         android:layout_marginBottom="4dp" />
-
-                     <!-- 날짜 -->
-                     <TextView
-                         android:id="@+id/tv_comment_date"
-                         android:layout_width="wrap_content"
-                         android:layout_height="wrap_content"
-                         android:text="2025.08.19(화) 02:33"
-                         android:textSize="12sp"
-                         android:textColor="#666666"
-                         android:layout_marginBottom="8dp" />
-
-                     <!-- 댓글 내용 -->
-                     <TextView
-                         android:id="@+id/tv_comment_content"
-                         android:layout_width="match_parent"
-                         android:layout_height="wrap_content"
-                         android:text="청소 용품 잘 사용하고 있어요!"
-                         android:textSize="14sp"
-                         android:textColor="#333333" />
-                 </LinearLayout>
-
-                 <!-- 좋아요 하트 (오른쪽) -->
-                 <LinearLayout
-                     android:layout_width="wrap_content"
-                     android:layout_height="wrap_content"
-                     android:orientation="horizontal"
-                     android:gravity="center_vertical"
-                     android:layout_marginStart="16dp">
-
-                     <ImageView
-                         android:id="@+id/iv_heart"
-                         android:layout_width="20dp"
-                         android:layout_height="20dp"
-                         android:src="@drawable/ic_heart_outline"
-                         android:clickable="true"
-                         android:focusable="true"
-                         android:layout_marginEnd="4dp" />
-
-                     <TextView
-                         android:id="@+id/tv_like_count"
-                         android:layout_width="wrap_content"
-                         android:layout_height="wrap_content"
-                         android:text="1"
-                         android:textSize="12sp"
-                         android:textColor="#666666" />
-                 </LinearLayout>
-             </LinearLayout>
-         </LinearLayout>
 
         <!-- 댓글 입력 -->
         <LinearLayout

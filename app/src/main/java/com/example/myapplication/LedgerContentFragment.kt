@@ -72,6 +72,9 @@ class LedgerContentFragment : Fragment() {
             ledgerId = it.getInt(ARG_LEDGER_ID)
         }
     }
+    
+    // clubId를 반환하는 메서드 (MainActivity에서 이모티콘 버튼 클릭 시 사용)
+    fun getClubPk(): Int = clubId
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,

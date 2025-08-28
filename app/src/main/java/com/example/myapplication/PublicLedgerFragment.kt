@@ -44,12 +44,17 @@ class PublicLedgerFragment : Fragment() {
     companion object {
         private const val ARG_CLUB_PK = "club_pk"
         private const val ARG_LEDGER_PK = "ledger_pk"
+        private const val ARG_TRANSACTIONS = "transactions"
 
-        fun newInstance(clubPk: Int, ledgerPk: Int): PublicLedgerFragment {
+        fun newInstance(clubPk: Int, ledgerPk: Int, transactions: List<TransactionItem>? = null): PublicLedgerFragment {
             val fragment = PublicLedgerFragment()
             val args = Bundle()
             args.putInt(ARG_CLUB_PK, clubPk)
             args.putInt(ARG_LEDGER_PK, ledgerPk)
+            if (transactions != null) {
+                // TransactionItem을 직렬화하여 전달
+                args.putSerializable(ARG_TRANSACTIONS, ArrayList(transactions))
+            }
             fragment.arguments = args
             return fragment
         }
@@ -60,6 +65,13 @@ class PublicLedgerFragment : Fragment() {
         arguments?.let {
             clubPk = it.getInt(ARG_CLUB_PK, -1)
             ledgerPk = it.getInt(ARG_LEDGER_PK, -1)
+            
+            // 전달받은 거래 내역이 있으면 사용
+            val passedTransactions = it.getSerializable(ARG_TRANSACTIONS) as? ArrayList<TransactionItem>
+            if (passedTransactions != null) {
+                allTransactions = passedTransactions.toList()
+                Log.d("PublicLedgerFragment", "전달받은 거래 내역: ${allTransactions.size}건")
+            }
         }
     }
 
@@ -136,6 +148,14 @@ class PublicLedgerFragment : Fragment() {
     }
 
     private fun fetchTransactions() {
+        // 전달받은 거래 내역이 있으면 API 호출 건너뛰기
+        if (allTransactions.isNotEmpty()) {
+            Log.d("PublicLedgerFragment", "전달받은 거래 내역 사용: ${allTransactions.size}건")
+            updateFinancialSummary()
+            updateTransactionList()
+            return
+        }
+        
         // user_pk 가져오기
         val userPk = UserManager.getUserPk(requireContext())
         if (userPk == null) {
@@ -152,7 +172,7 @@ class PublicLedgerFragment : Fragment() {
                     updateFinancialSummary()
                     updateTransactionList()
                 } else {
-                    Log.e("PublicLedgerFragment", "거래내역 조회 실패: ${response.code()}")
+                    Log.e("PublicLedgerFragment", "거래내역 조출 실패: ${response.code()}")
                 }
             }
 

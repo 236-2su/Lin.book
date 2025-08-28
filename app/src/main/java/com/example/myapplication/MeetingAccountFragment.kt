@@ -18,6 +18,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import com.google.gson.Gson
+import com.example.myapplication.api.ApiClient
+import retrofit2.Callback
+import retrofit2.Response
+import retrofit2.Call
+import com.example.myapplication.UserDetail
 import java.net.HttpURLConnection
 import java.net.URL
 import java.text.SimpleDateFormat
@@ -46,6 +51,9 @@ class MeetingAccountFragment : Fragment() {
             clubPk = it.getInt(ARG_CLUB_PK, -1)
         }
     }
+    
+    // clubPk를 반환하는 메서드
+    fun getClubPk(): Int = clubPk
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -60,6 +68,9 @@ class MeetingAccountFragment : Fragment() {
         
         // 등록하기 버튼 숨기기
         hideRegisterButton()
+        
+        // 기존 계좌가 있는지 확인
+        checkExistingAccount()
         
         // 연동하기 버튼 클릭 이벤트
         val btnLink = view.findViewById<LinearLayout>(R.id.btn_link)
@@ -83,6 +94,40 @@ class MeetingAccountFragment : Fragment() {
         } catch (e: Exception) {
             Log.e("MeetingAccountFragment", "BaseActivity 참조 오류", e)
         }
+    }
+    
+    // 기존 계좌가 있는지 확인
+    private fun checkExistingAccount() {
+        // SharedPreferences에서 저장된 계좌 정보 확인
+        val sharedPrefs = requireContext().getSharedPreferences("account_info", android.content.Context.MODE_PRIVATE)
+        val accountNo = sharedPrefs.getString("account_no", null)
+        val userName = sharedPrefs.getString("user_name", null)
+        
+        if (!accountNo.isNullOrEmpty() && !userName.isNullOrEmpty()) {
+            // 기존 계좌가 있으면 바로 AccountHistoryActivity로 이동
+            Log.d("MeetingAccountFragment", "기존 계좌 발견: $accountNo, 사용자: $userName")
+            navigateToAccountHistory(accountNo, userName)
+        } else {
+            Log.d("MeetingAccountFragment", "기존 계좌 없음, 계좌 생성 페이지 표시")
+        }
+    }
+    
+    // AccountHistoryActivity로 직접 이동
+    private fun navigateToAccountHistory(accountNo: String, userName: String) {
+        val intent = Intent(requireContext(), AccountHistoryActivity::class.java)
+        intent.putExtra("accountNo", accountNo)
+        intent.putExtra("userName", userName)
+        startActivity(intent)
+    }
+    
+    // 계좌 정보를 SharedPreferences에 저장
+    private fun saveAccountInfo(accountNo: String, userName: String) {
+        val sharedPrefs = requireContext().getSharedPreferences("account_info", android.content.Context.MODE_PRIVATE)
+        sharedPrefs.edit()
+            .putString("account_no", accountNo)
+            .putString("user_name", userName)
+            .apply()
+        Log.d("MeetingAccountFragment", "계좌 정보 저장됨: $accountNo, $userName")
     }
     
     // 통장 정보 팝업 다이얼로그 표시
@@ -152,11 +197,9 @@ class MeetingAccountFragment : Fragment() {
                 "apiServiceCode" to "createDemandDepositAccount",
                 "institutionTransactionUniqueNo" to randomNumber,
                 "apiKey" to "7f9fc447584741399a5dfab7dd3ea443",
-                "UserKey" to "1607a094-72cc-4d4f-9ed3-e7cd1d264e2d"
+                "userKey" to "1607a094-72cc-4d4f-9ed3-e7cd1d264e2d"
             ),
-            "Body" to mapOf(
-                "accountTypeUniqueNo" to "088-1-64e152b919e94d"
-            )
+            "accountTypeUniqueNo" to "088-1-64e152b919e94d"  // Body 제거하고 직접 추가
         )
         
         // 전체 요청 데이터 로그 출력
@@ -187,26 +230,38 @@ class MeetingAccountFragment : Fragment() {
                     os.write(jsonData.toByteArray())
                 }
                 
-                // 응답 받기
+                                // 응답 받기
                 val responseCode = connection.responseCode
                 Log.d("MeetingAccountFragment", "API 응답 코드: $responseCode")
                 
-                if (responseCode == 200) {
+                // HTTP 상태 코드 200 또는 201이면 성공
+                if (responseCode == 200 || responseCode == 201) {
                     val response = connection.inputStream.bufferedReader().use { it.readText() }
                     Log.d("MeetingAccountFragment", "API 응답: $response")
                     
-                                         // JSON 응답에서 accountNo 추출
-                     val responseJson = Gson().fromJson(response, Map::class.java)
-                     val accountNo = responseJson["accountNo"]?.toString()
+                    // JSON 응답에서 accountNo 추출 (REC 객체 안에서)
+                    val responseJson = Gson().fromJson(response, Map::class.java)
+                    val rec = responseJson["REC"] as? Map<*, *>
                     
-                    if (accountNo != null) {
-                                                 // 메인 스레드에서 다음 페이지로 이동
-                         withContext(Dispatchers.Main) {
-                             navigateToAccountCreatedPage(accountNo.toString())
-                         }
+                    if (rec != null) {
+                        val accountNo = rec["accountNo"]?.toString()
+                        
+                        if (accountNo != null) {
+                            // 메인 스레드에서 계좌 생성 완료 페이지로 이동
+                            withContext(Dispatchers.Main) {
+                                navigateToAccountCreatedPage(accountNo)
+                            }
+                        } else {
+                            Log.e("MeetingAccountFragment", "REC에서 accountNo를 찾을 수 없음")
+                            withContext(Dispatchers.Main) {
+                                showErrorDialog("계좌 생성 실패", "계좌 번호를 받지 못했습니다.")
+                            }
+                        }
                     } else {
-                        Log.e("MeetingAccountFragment", "accountNo를 찾을 수 없음")
-                        showErrorDialog("계좌 생성 실패", "계좌 번호를 받지 못했습니다.")
+                        Log.e("MeetingAccountFragment", "REC 객체를 찾을 수 없음")
+                        withContext(Dispatchers.Main) {
+                            showErrorDialog("계좌 생성 실패", "응답 데이터 형식이 올바르지 않습니다.")
+                        }
                     }
                 } else {
                     Log.e("MeetingAccountFragment", "API 호출 실패: $responseCode")
@@ -228,10 +283,64 @@ class MeetingAccountFragment : Fragment() {
     private fun navigateToAccountCreatedPage(accountNo: String) {
         Log.d("MeetingAccountFragment", "계좌 생성 완료, 계좌번호: $accountNo")
         
-        // AccountCreatedActivity로 이동
-        val intent = Intent(requireContext(), AccountCreatedActivity::class.java)
-        intent.putExtra("accountNo", accountNo)
-        startActivity(intent)
+        // 현재 로그인한 사용자의 정보 가져오기
+        val userPk = UserManager.getUserPk(requireContext())
+        if (userPk != null) {
+            ApiClient.getApiService().getUserDetail(userPk).enqueue(object : Callback<UserDetail> {
+                override fun onResponse(
+                    call: Call<UserDetail>,
+                    response: Response<UserDetail>
+                ) {
+                    if (response.isSuccessful) {
+                        val userDetail = response.body()
+                        if (userDetail != null) {
+                            // 계좌 정보를 SharedPreferences에 저장
+                            saveAccountInfo(accountNo, userDetail.name ?: "사용자")
+                            
+                            // 사용자 이름과 계좌번호를 함께 전달
+                            val intent = Intent(requireContext(), AccountCreatedActivity::class.java)
+                            intent.putExtra("accountNo", accountNo)
+                            intent.putExtra("userName", userDetail.name ?: "사용자")
+                            startActivity(intent)
+                        } else {
+                            // 사용자 정보를 가져올 수 없는 경우 기본값으로 전달
+                            saveAccountInfo(accountNo, "사용자")
+                            val intent = Intent(requireContext(), AccountCreatedActivity::class.java)
+                            intent.putExtra("accountNo", accountNo)
+                            intent.putExtra("userName", "사용자")
+                            startActivity(intent)
+                        }
+                    } else {
+                        // API 호출 실패 시 기본값으로 전달
+                        saveAccountInfo(accountNo, "사용자")
+                        val intent = Intent(requireContext(), AccountCreatedActivity::class.java)
+                        intent.putExtra("accountNo", accountNo)
+                        intent.putExtra("userName", "사용자")
+                        startActivity(intent)
+                    }
+                }
+                
+                override fun onFailure(
+                    call: Call<UserDetail>,
+                    t: Throwable
+                ) {
+                    Log.e("MeetingAccountFragment", "사용자 정보 가져오기 실패", t)
+                    // 네트워크 오류 시 기본값으로 전달
+                    saveAccountInfo(accountNo, "사용자")
+                    val intent = Intent(requireContext(), AccountCreatedActivity::class.java)
+                    intent.putExtra("accountNo", accountNo)
+                    intent.putExtra("userName", "사용자")
+                    startActivity(intent)
+                }
+            })
+        } else {
+            // userPk가 없는 경우 기본값으로 전달
+            saveAccountInfo(accountNo, "사용자")
+            val intent = Intent(requireContext(), AccountCreatedActivity::class.java)
+            intent.putExtra("accountNo", accountNo)
+            intent.putExtra("userName", "사용자")
+            startActivity(intent)
+        }
     }
     
     // 20자리 고유 난수 생성

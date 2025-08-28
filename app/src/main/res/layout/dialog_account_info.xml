@@ -43,7 +43,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="입출금이 자유로운 대학생 전용 통장으로, ATM 수수료 면제 혜택과 모바일 뱅킹, 자동이체 서비스를 제공합니다. 학업과 생활에 편리하도록 다양한 금융 거래가 간편하게 이루어질 수 있게 설계되었으며, 학생들의 재정 관리를 돕는 맞춤형 금융 상품입니다. 학생들이 부담 없이 이용할 수 있도록 다양한 수수료 면제 혜택도 포함되어 있습니다."
+        android:text="입출금이 자유로운 대학생 전용 통장으로, ATM 수수료 면제 혜택과 모바일 뱅킹, 자동이체 서비스를 제공합니다. 학업과 생활에 편리하도록 다양한 금융 거래가 간편하게 이루어질 수 있게 설계되었으며, 학생들의 재정 관리를 돕는 맞춤형 금융 상품입니다."
         android:textSize="12sp"
         android:textColor="#666666"
         android:lineSpacingExtra="4dp"

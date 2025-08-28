@@ -129,8 +129,8 @@ class TransactionDetailFragment : Fragment() {
         receiptContainer = contentView.findViewById(R.id.receipt_container)
         receiptDivider = contentView.findViewById(R.id.receipt_divider)
         ivReceipt = contentView.findViewById(R.id.iv_receipt)
-        ivHeart = contentView.findViewById(R.id.iv_heart)
-        tvLikeCount = contentView.findViewById(R.id.tv_like_count)
+//        ivHeart = contentView.findViewById(R.id.iv_heart)
+//        tvLikeCount = contentView.findViewById(R.id.tv_like_count)
         
         // 초기에는 수정하기/삭제하기 버튼 숨기기 (데이터 로드 후 표시)
         btnModify.visibility = View.GONE

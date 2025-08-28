@@ -1,6 +1,7 @@
 package com.example.myapplication
 
 import com.google.gson.annotations.SerializedName
+import java.io.Serializable
 
 data class TransactionItem(
     @SerializedName("id")
@@ -20,9 +21,10 @@ data class TransactionItem(
     @SerializedName("category")
     val category: String?, // ex) "회비"
     @SerializedName("ledger_id")
-    val ledgerId: Int, // 장부 ID
+    val ledgerId: Int = 0, // 장부 ID (기본값 추가)
     @SerializedName("club_pk")
-    val clubPk: Int, // 클럽 ID
+    val clubPk: Int = 0, // 클럽 ID (기본값 추가)
     @SerializedName("receipt")
-    val receipt: String? // 영수증 이미지 URL
-)
+    val receipt: String? = null, // 영수증 이미지 URL
+    val author: String = "" // 작성자 (기본값 추가)
+) : Serializable
