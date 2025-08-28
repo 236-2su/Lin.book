@@ -43,12 +43,14 @@ from .services import create_account, get_account_balance, get_transaction_histo
         request=AccountUpdateRequestSerializer,
         responses={200: AccountResponseSerializer},
         tags=["Accounts"],
+        exclude=True,
     ),
     partial_update=extend_schema(
         summary="사용자 계좌 정보 부분 수정 (PATCH)",
         request=AccountUpdateRequestSerializer,
         responses={200: AccountResponseSerializer},
         tags=["Accounts"],
+        exclude=True,
     ),
     destroy=extend_schema(
         summary="사용자 계좌 삭제",
@@ -132,3 +134,24 @@ class AccountsViewSet(viewsets.ModelViewSet):
             return Response(history_data)
         except ValidationError as e:
             return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
+
+
+@extend_schema_view(
+    list=extend_schema(
+        summary="전체 계좌 목록 조회",
+        tags=["Accounts"],
+    ),
+    retrieve=extend_schema(
+        summary="ID로 특정 계좌 상세 조회",
+        tags=["Accounts"],
+    ),
+)
+class AccountLookupViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    ViewSet for retrieving accounts by their ID.
+    """
+
+    queryset = Accounts.objects.select_related("user").all()
+    serializer_class = AccountResponseSerializer
+    lookup_field = "id"
+    lookup_url_kwarg = "accounts_id"

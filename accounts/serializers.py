@@ -20,9 +20,9 @@ class AccountResponseSerializer(serializers.ModelSerializer):
 
 
 class AccountCreateRequestSerializer(serializers.Serializer):
-    """Request for creating an account is empty as user is identified from URL."""
-
-    pass
+    class Meta:
+        model = Accounts
+        fields = ["user"]
 
 
 class AccountUpdateRequestSerializer(serializers.Serializer):
