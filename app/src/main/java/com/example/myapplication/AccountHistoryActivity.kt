@@ -3,6 +3,8 @@ package com.example.myapplication
 import android.content.Intent
 import android.os.Bundle
 import android.widget.TextView
+import com.example.myapplication.api.ApiClient
+import com.example.myapplication.api.ApiService
 import androidx.appcompat.app.AppCompatActivity
 
 class AccountHistoryActivity : AppCompatActivity() {
@@ -35,6 +37,9 @@ class AccountHistoryActivity : AppCompatActivity() {
                     ) { }
                 })
         }
+
+        // 계좌 정보 불러오기
+        fetchAndBindAccountInfo()
 
         findViewById<android.widget.Button>(R.id.btn_back)?.setOnClickListener {
             onBackPressedDispatcher.onBackPressed()
@@ -141,6 +146,64 @@ class AccountHistoryActivity : AppCompatActivity() {
         val atToday = (currentYear == todayYear && currentMonth == todayMonth)
         next?.isEnabled = !atToday
         next?.alpha = if (atToday) 0.3f else 1.0f
+    }
+
+    private fun fetchAndBindAccountInfo() {
+        val userPk = UserManager.getUserPk(this)
+        if (userPk == null) {
+            android.util.Log.e("AccountHistory", "user_pk가 없습니다. 로그인 필요")
+            return
+        }
+
+        // 우선 사용자의 첫 번째 계좌를 조회해 사용. accounts_id가 Intent로 넘어오면 우선 사용
+        val explicitAccountId = intent?.getIntExtra("accounts_id", -1) ?: -1
+        val api = ApiClient.getApiService()
+        if (explicitAccountId > 0) {
+            requestAccountDetail(api, userPk, explicitAccountId)
+            return
+        }
+
+        api.getAccounts(userPk).enqueue(object: retrofit2.Callback<List<ApiService.AccountItem>> {
+            override fun onResponse(
+                call: retrofit2.Call<List<ApiService.AccountItem>>,
+                response: retrofit2.Response<List<ApiService.AccountItem>>
+            ) {
+                val list = response.body()
+                if (response.isSuccessful && !list.isNullOrEmpty()) {
+                    val first = list.first()
+                    requestAccountDetail(api, userPk, first.id)
+                }
+            }
+            override fun onFailure(
+                call: retrofit2.Call<List<ApiService.AccountItem>>,
+                t: Throwable
+            ) {
+                android.util.Log.e("AccountHistory", "getAccounts 실패", t)
+            }
+        })
+    }
+
+    private fun requestAccountDetail(api: ApiService, userPk: Int, accountId: Int) {
+        api.getAccountDetail(userPk, accountId).enqueue(object: retrofit2.Callback<ApiService.AccountItem> {
+            override fun onResponse(
+                call: retrofit2.Call<ApiService.AccountItem>,
+                response: retrofit2.Response<ApiService.AccountItem>
+            ) {
+                val item = response.body()
+                if (response.isSuccessful && item != null) {
+                    // code, created_at, user_name 바인딩
+                    findViewById<TextView>(R.id.tv_account_number)?.text = item.code
+                    findViewById<TextView>(R.id.tv_holder)?.text = item.user_name
+                    findViewById<TextView>(R.id.tv_bank)?.text = item.created_at
+                }
+            }
+            override fun onFailure(
+                call: retrofit2.Call<ApiService.AccountItem>,
+                t: Throwable
+            ) {
+                android.util.Log.e("AccountHistory", "getAccountDetail 실패", t)
+            }
+        })
     }
 }
 

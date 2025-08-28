@@ -17,6 +17,7 @@ import retrofit2.http.PUT
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.Field
 import retrofit2.http.PATCH
+import retrofit2.http.Query
 import retrofit2.http.FieldMap
 
 interface ApiService {
@@ -137,6 +138,10 @@ interface ApiService {
     ): Call<okhttp3.ResponseBody>
 
     // 댓글 좋아요 (백엔드 스펙: { user_id })
+    @retrofit2.http.Headers(
+        "Content-Type: application/json",
+        "Accept: application/json"
+    )
     @POST("/club/{club_pk}/boards/{board_pk}/comments/{id}/like/")
     fun likeComment(
         @Path("club_pk") clubId: Int,
@@ -146,6 +151,11 @@ interface ApiService {
     ): Call<okhttp3.ResponseBody>
 
     data class LikeRequest(val user_id: Int)
+
+    @retrofit2.http.Headers(
+        "Content-Type: application/json",
+        "Accept: application/json"
+    )
     @POST("/club/{club_pk}/boards/{id}/like/")
     fun toggleBoardLike(
         @Path("club_pk") clubId: Int,
@@ -165,6 +175,23 @@ interface ApiService {
         @Path("club_pk") clubId: Int,
         @Path("id") boardId: Int
     ): Call<okhttp3.ResponseBody>
+
+    // 검색 추천 (유사 동아리) - 쿼리 기반
+    data class SimilarClubItem(
+        val id: Int,
+        val score_hint: Float?,
+        val snippet: String?
+    )
+
+    @GET("club/similar/")
+    fun getSimilarClubs(
+        @Query("query") query: String
+    ): Call<List<SimilarClubItem>>
+
+    @GET("club/{id}/similar/")
+    fun getSimilarClubsByClub(
+        @Path("id") clubId: Int
+    ): Call<List<SimilarClubItem>>
 
     // 사용자 상세
     @GET("user/{id}/")
@@ -347,4 +374,25 @@ interface ApiService {
         val vendor: String,
         val event: Int?
     )
+
+    // --- Accounts ---
+    data class AccountItem(
+        val id: Int,
+        val user: Int,
+        val amount: Long?,
+        val code: String,
+        val created_at: String,
+        val user_name: String
+    )
+
+    @GET("user/{user_pk}/accounts/")
+    fun getAccounts(
+        @Path("user_pk") userPk: Int
+    ): Call<List<AccountItem>>
+
+    @GET("user/{user_pk}/accounts/{accounts_id}/")
+    fun getAccountDetail(
+        @Path("user_pk") userPk: Int,
+        @Path("accounts_id") accountId: Int
+    ): Call<AccountItem>
 }

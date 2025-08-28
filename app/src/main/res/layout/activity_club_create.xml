@@ -8,30 +8,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingTop="30dp"
-        android:paddingBottom="30dp">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginBottom="24dp">
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/settings"
-                android:layout_marginEnd="8dp"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="동아리 개설"
-                android:textColor="#333333"
-                android:textSize="16sp"/>
-        </LinearLayout>
+        android:orientation="vertical">
 
         <!-- 동아리명 -->
         <TextView
@@ -147,6 +124,39 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1" />
+
+        <!-- 대문 이미지 -->
+        <TextView
+            style="@style/SectionTitleTextStyle"
+            android:text="웰컴 이미지"/>
+        <TextView
+            android:id="@+id/btn_pick_welcome_image"
+            android:layout_width="match_parent"
+            android:layout_height="51dp"
+            android:gravity="center"
+            android:background="#F0F0F0"
+            android:text="눌러서 파일 첨부하기"
+            android:textColor="#6A6A6A"
+            android:textStyle="bold"
+            android:textSize="14sp"
+            android:layout_marginBottom="24dp"/>
+
+        <!-- 대문 소개 -->
+        <TextView
+            style="@style/SectionTitleTextStyle"
+            android:text="웰컴 문구"/>
+        <EditText
+            android:id="@+id/et_welcome_intro_text"
+            android:inputType="textMultiLine"
+            android:hint="웰컴 문구를 입력해주세요."
+            android:textColorHint="#999999"
+            android:background="@drawable/info_box"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:textSize="@dimen/text_size_medium"
+            android:textColor="#333333"
+            android:layout_marginBottom="24dp"/>
 
         <Button
             android:id="@+id/btn_create_club"

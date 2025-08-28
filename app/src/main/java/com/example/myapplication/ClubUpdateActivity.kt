@@ -6,14 +6,40 @@ import android.widget.EditText
 import android.widget.Spinner
 import android.widget.Button
 import android.widget.ArrayAdapter
+import android.net.Uri
+import androidx.activity.result.contract.ActivityResultContracts
+import android.util.Base64
 
 class ClubUpdateActivity : AppCompatActivity() {
     private var existingShortDescription: String? = null
+    private var pickedImageBase64: String? = null
+    private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        if (uri != null) {
+            try {
+                val inputStream = contentResolver.openInputStream(uri)
+                val bytes = inputStream?.readBytes()
+                inputStream?.close()
+                if (bytes != null) {
+                    pickedImageBase64 = Base64.encodeToString(bytes, Base64.NO_WRAP)
+                    android.widget.Toast.makeText(this, "이미지 첨부 완료", android.widget.Toast.LENGTH_SHORT).show()
+                } else {
+                    android.widget.Toast.makeText(this, "이미지를 읽을 수 없습니다", android.widget.Toast.LENGTH_SHORT).show()
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("ClubUpdateActivity", "이미지 인코딩 실패", e)
+                android.widget.Toast.makeText(this, "이미지 처리 중 오류", android.widget.Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_club_update)
 
         val clubPk = intent?.getIntExtra("club_pk", -1) ?: -1
+        // 웰컴 이미지 첨부 버튼
+        findViewById<android.widget.TextView>(R.id.btn_pick_welcome_image)?.setOnClickListener {
+            pickImageLauncher.launch("image/*")
+        }
 
         findViewById<android.widget.Button>(R.id.btn_back)?.setOnClickListener {
             onBackPressedDispatcher.onBackPressed()
@@ -92,6 +118,7 @@ class ClubUpdateActivity : AppCompatActivity() {
                 if (hashtags.isNotBlank()) fields["hashtags"] = hashtags
                 if (location.isNotBlank()) fields["location"] = location
                 if (shortDesc.isNotBlank()) fields["short_description"] = shortDesc
+                pickedImageBase64?.let { if (it.isNotBlank()) fields["image"] = it }
 
                 api.patchClubForm(clubPk, fields)
                     .enqueue(object : retrofit2.Callback<com.example.myapplication.ClubItem> {
