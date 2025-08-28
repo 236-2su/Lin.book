@@ -1,335 +1,289 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res/auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#F8F9FA">
 
-    <LinearLayout
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:background="@drawable/ledger_report_gradient_background">
+        android:layout_marginBottom="80dp"
+        android:fillViewport="true"
+        android:clipToPadding="false"
+        android:paddingBottom="20dp">
 
-        <!-- 헤더 영역 -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="20dp"
-            android:gravity="center_vertical">
+            android:minHeight="600dp"
+            android:orientation="vertical">
 
-            <!-- Hey-Bi 로고 (기존 logo.png 활용) -->
-            <ImageView
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:src="@drawable/logo"
-                android:layout_marginEnd="12dp"
-                android:id="@+id/iv_logo" />
-
-            <!-- 헤더 텍스트 -->
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="&quot;짱구네 코딩&quot; AI 비서 "
-                    android:textSize="14sp"
-                    android:textColor="#666666"
-                    android:textStyle="bold"
-                    android:fontFamily="sans-serif-medium" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Hey-Bi"
-                    android:textSize="20sp"
-                    android:textColor="#1976D2"
-                    android:textStyle="bold"
-                    android:fontFamily="sans-serif-black" />
-
-            </LinearLayout>
-
-        </LinearLayout>
-
-        <!-- 정보 배너 -->
+        <!-- AI 리포트 헤더 -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="20dp"
-            android:layout_marginBottom="24dp"
-            android:background="@drawable/color_box_blue"
-            android:orientation="horizontal"
-            android:padding="16dp"
-            android:gravity="center_vertical">
+            android:background="@drawable/ledger_report_gradient_background"
+            android:orientation="vertical"
+            android:paddingHorizontal="24dp"
+            android:paddingTop="20dp"
+            android:paddingBottom="24dp">
 
-            <!-- AI 아이콘 -->
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ai_icon"
-                android:layout_marginEnd="8dp" />
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Hey-Bi가 우리 동아리를 위한 리포트를 제공합니다!"
-                android:textSize="14sp"
-                android:textColor="#1976D2"
-                android:fontFamily="sans-serif-medium" />
-
-        </LinearLayout>
-
-        <!-- 섹션 제목 -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="20dp"
-            android:layout_marginBottom="20dp"
-            android:text="AI 분석 리포트 목록"
-            android:textSize="18sp"
-            android:textColor="#333333"
-            android:textStyle="bold"
-            android:fontFamily="sans-serif-black" />
-
-        <!-- 리포트 목록 -->
-        <ScrollView
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:paddingHorizontal="20dp">
-
+            <!-- 제목 섹션 -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="20dp">
 
-                <!-- 리포트 카드 1 -->
                 <LinearLayout
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="12dp"
-                    android:background="@drawable/card_box"
-                    android:orientation="vertical"
-                    android:padding="20dp"
-                    android:foreground="?android:attr/selectableItemBackground"
-                    android:clickable="true"
-                    android:focusable="true">
+                    android:layout_weight="1"
+                    android:orientation="vertical">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="생성일시: 2023년 03월 02일"
-                        android:textSize="12sp"
-                        android:textColor="#999999"
-                        android:layout_marginBottom="8dp" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="타 동아리 비교 운영 분석 리포트"
-                        android:textSize="16sp"
-                        android:textColor="#333333"
+                        android:text="AI 리포트"
+                        android:textSize="24sp"
+                        android:textColor="#1565C0"
                         android:textStyle="bold"
                         android:fontFamily="sans-serif-black"
-                        android:layout_marginBottom="8dp" />
+                        android:layout_marginBottom="6dp" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="생성자: 전영민"
-                        android:textSize="12sp"
-                        android:textColor="#999999"
-                        android:layout_gravity="end" />
-
-                </LinearLayout>
-
-                <!-- 리포트 카드 2 -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="12dp"
-                    android:background="@drawable/card_box"
-                    android:orientation="vertical"
-                    android:padding="20dp"
-                    android:foreground="?android:attr/selectableItemBackground"
-                    android:clickable="true"
-                    android:focusable="true">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="생성일시: 2023년 03월 02일"
-                        android:textSize="12sp"
-                        android:textColor="#999999"
-                        android:layout_marginBottom="8dp" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="타 동아리 비교 운영 분석 리포트"
-                        android:textSize="16sp"
-                        android:textColor="#333333"
-                        android:textStyle="bold"
-                        android:fontFamily="sans-serif-black"
-                        android:layout_marginBottom="8dp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="생성자: 전영민"
-                        android:textSize="12sp"
-                        android:textColor="#999999"
-                        android:layout_gravity="end" />
-
-                </LinearLayout>
-
-                <!-- 리포트 카드 3 -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="12dp"
-                    android:background="@drawable/card_box"
-                    android:orientation="vertical"
-                    android:padding="20dp"
-                    android:foreground="?android:attr/selectableItemBackground"
-                    android:clickable="true"
-                    android:focusable="true">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="생성일시: 2023년 03월 02일"
-                        android:textSize="12sp"
-                        android:textColor="#999999"
-                        android:layout_marginBottom="8dp" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="타 동아리 비교 운영 분석 리포트"
-                        android:textSize="16sp"
-                        android:textColor="#333333"
-                        android:textStyle="bold"
-                        android:fontFamily="sans-serif-black"
-                        android:layout_marginBottom="8dp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="생성자: 전영민"
-                        android:textSize="12sp"
-                        android:textColor="#999999"
-                        android:layout_gravity="end" />
-
-                </LinearLayout>
-
-                <!-- 리포트 카드 4 -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="12dp"
-                    android:background="@drawable/card_box"
-                    android:orientation="vertical"
-                    android:padding="20dp"
-                    android:foreground="?android:attr/selectableItemBackground"
-                    android:clickable="true"
-                    android:focusable="true">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="생성일시: 2023년 03월 02일"
-                        android:textSize="12sp"
-                        android:textColor="#999999"
-                        android:layout_marginBottom="8dp" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="타 동아리 비교 운영 분석 리포트"
-                        android:textSize="16sp"
-                        android:textColor="#333333"
-                        android:textStyle="bold"
-                        android:fontFamily="sans-serif-black"
-                        android:layout_marginBottom="8dp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="생성자: 전영민"
-                        android:textSize="12sp"
-                        android:textColor="#999999"
-                        android:layout_gravity="end" />
-
-                </LinearLayout>
-
-                <!-- 리포트 카드 5 -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="20dp"
-                    android:background="@drawable/card_box"
-                    android:orientation="vertical"
-                    android:padding="20dp"
-                    android:foreground="?android:attr/selectableItemBackground"
-                    android:clickable="true"
-                    android:focusable="true">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="생성일시: 2023년 03월 02일"
-                        android:textSize="12sp"
-                        android:textColor="#999999"
-                        android:layout_marginBottom="8dp" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="타 동아리 비교 운영 분석 리포트"
-                        android:textSize="16sp"
-                        android:textColor="#333333"
-                        android:textStyle="bold"
-                        android:fontFamily="sans-serif-black"
-                        android:layout_marginBottom="8dp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="생성자: 전영민"
-                        android:textSize="12sp"
-                        android:textColor="#999999"
-                        android:layout_gravity="end" />
+                        android:text="동아리 운영 현황을 AI가 스마트하게 분석합니다"
+                        android:textSize="13sp"
+                        android:textColor="#666666"
+                        android:fontFamily="sans-serif-medium" />
 
                 </LinearLayout>
 
             </LinearLayout>
 
-        </ScrollView>
+            <!-- 통계 카드 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:background="#FFFFFF"
+                android:elevation="4dp"
+                android:padding="16dp"
+                android:layout_marginTop="8dp">
 
-    </LinearLayout>
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center">
 
-    <!-- 오른쪽 아래 고정된 파란색 동그란 버튼 -->
+                    <TextView
+                        android:id="@+id/tv_total_reports"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0"
+                        android:textSize="20sp"
+                        android:textColor="#1565C0"
+                        android:textStyle="bold"
+                        android:fontFamily="sans-serif-black" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="총 리포트"
+                        android:textSize="12sp"
+                        android:textColor="#666666"
+                        android:fontFamily="sans-serif-medium"
+                        android:layout_marginTop="2dp" />
+
+                </LinearLayout>
+
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="40dp"
+                    android:background="#E0E0E0" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center">
+
+                    <TextView
+                        android:id="@+id/tv_recent_date"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="없음"
+                        android:textSize="12sp"
+                        android:textColor="#4CAF50"
+                        android:textStyle="bold"
+                        android:fontFamily="sans-serif-black" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="최근 생성"
+                        android:textSize="12sp"
+                        android:textColor="#666666"
+                        android:fontFamily="sans-serif-medium"
+                        android:layout_marginTop="2dp" />
+
+                </LinearLayout>
+
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="40dp"
+                    android:background="#E0E0E0" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="AI"
+                        android:textSize="14sp"
+                        android:textColor="#1565C0"
+                        android:textStyle="bold"
+                        android:fontFamily="sans-serif-black" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="스마트 분석"
+                        android:textSize="12sp"
+                        android:textColor="#666666"
+                        android:fontFamily="sans-serif-medium"
+                        android:layout_marginTop="2dp" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- AI 리포트 목록 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:paddingHorizontal="24dp"
+            android:paddingTop="20dp">
+
+            <!-- 리포트 목록 제목 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="AI 리포트 목록"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="#333333"
+                android:layout_marginBottom="16dp" />
+
+            <!-- 빈 상태 표시 -->
+            <LinearLayout
+                android:id="@+id/empty_state"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:paddingVertical="40dp"
+                android:visibility="gone">
+
+                <!-- AI 심플 아이콘 -->
+                <LinearLayout
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:background="@drawable/btn_selected"
+                    android:backgroundTint="#E8F5E8"
+                    android:gravity="center"
+                    android:layout_marginBottom="20dp"
+                    android:elevation="2dp">
+                    
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="AI"
+                        android:textSize="20sp"
+                        android:textColor="#1565C0"
+                        android:textStyle="bold"
+                        android:fontFamily="sans-serif-black" />
+                        
+                </LinearLayout>
+                
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="첫 AI 리포트를 생성해보세요"
+                    android:textSize="18sp"
+                    android:textColor="#333333"
+                    android:textStyle="bold"
+                    android:fontFamily="sans-serif-black"
+                    android:layout_marginBottom="8dp" />
+                    
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="동아리 활동과 재정 현황을 AI가 전문적으로 분석하여\n맞춤형 인사이트와 개선 제안을 제공합니다"
+                    android:textSize="14sp"
+                    android:textColor="#666666"
+                    android:gravity="center"
+                    android:lineSpacingExtra="2dp"
+                    android:fontFamily="sans-serif"
+                    android:layout_marginBottom="28dp" />
+                
+            </LinearLayout>
+
+            <!-- 섹션 타이틀 -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="16dp"
+                android:layout_marginHorizontal="24dp"
+                android:text="AI 리포트 목록"
+                android:textSize="17.3sp"
+                android:textStyle="bold"
+                android:textColor="#333333" />
+
+            <!-- 리포트 목록 RecyclerView -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_reports_list"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:scrollbars="none"
+                android:visibility="visible" />
+
+        </LinearLayout>
+
+        </LinearLayout>
+
+    </ScrollView>
+
+    <!-- Floating Action Button - 화면에 완전히 고정 -->
     <Button
         android:id="@+id/btn_create_report"
         android:layout_width="56dp"
         android:layout_height="56dp"
         android:layout_gravity="bottom|end"
-        android:layout_marginEnd="20dp"
-        android:layout_marginBottom="20dp"
-        android:background="@drawable/fab_blue_circle"
-        android:src="@drawable/write"
-        android:scaleType="centerInside"
-        android:padding="0dp"
-        android:minWidth="0dp"
-        android:minHeight="0dp"
-        android:backgroundTint="@null"
-        android:backgroundTintMode="src_atop"
-        android:contentDescription="리포트 생성" />
+        android:layout_margin="24dp"
+        android:text="+"
+        android:textSize="24sp"
+        android:textColor="#FFFFFF"
+        android:textStyle="bold"
+        android:background="@drawable/btn_register_blue"
+        android:elevation="8dp" />
 
-</FrameLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

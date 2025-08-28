@@ -19,6 +19,7 @@
 
     <!-- 안내 메시지 -->
     <TextView
+        android:id="@+id/tv_message"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="삭제 후 복구하실 수 없습니다"

@@ -54,6 +54,10 @@
             android:exported="false" />
 
         <activity
+            android:name=".AIReportDetailActivity"
+            android:exported="false" />
+
+        <activity
             android:name=".ClubAnnouncementBoardListActivity"
             android:exported="false" />
 
@@ -99,14 +103,6 @@
 
         <activity
             android:name=".MemberManagementActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".ClubMemberManagementActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".ClubEventLedgerDetailActivity"
             android:exported="false" />
 
     </application>

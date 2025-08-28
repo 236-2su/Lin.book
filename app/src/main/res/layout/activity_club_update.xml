@@ -1,37 +1,82 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/white"
-    android:fillViewport="true">
+    android:orientation="vertical">
 
+    <!-- 공지 목록 헤더와 동일한 상단 헤더 -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingTop="30dp"
-        android:paddingBottom="30dp">
+        android:orientation="horizontal"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="8dp"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:gravity="center_vertical">
+
+        <Button
+            android:id="@+id/btn_back"
+            android:layout_width="24dp"
+            android:layout_height="48dp"
+            android:minWidth="0dp"
+            android:minHeight="0dp"
+            android:padding="0dp"
+            android:backgroundTint="#FFFFFF"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:text="&lt;"
+            android:textColor="@android:color/darker_gray"
+            android:textSize="16sp"
+            android:fontFamily="sans-serif-light"
+            android:clickable="true"
+            android:focusable="true" />
+
+        <ImageView
+            android:id="@+id/iv_logo"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/logo" />
+
+        <TextView
+            android:id="@+id/tv_club_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:text="동아리 정보 수정"
+            android:textStyle="bold"
+            android:textSize="24sp"
+            android:textColor="@android:color/black" />
+
+        <androidx.appcompat.widget.AppCompatImageButton
+            android:id="@+id/btn_member"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:backgroundTint="#FFFFFF"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            app:srcCompat="@drawable/ic_person"
+            android:scaleType="centerInside"
+            android:adjustViewBounds="true"
+            android:padding="6dp"
+            android:contentDescription="멤버 관리" />
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginBottom="24dp">
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/settings"
-                android:layout_marginEnd="8dp"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="동아리 개설"
-                android:textColor="#333333"
-                android:textSize="16sp"/>
-        </LinearLayout>
+            android:orientation="vertical"
+            android:paddingTop="16dp"
+            android:paddingBottom="30dp"
+            android:paddingStart="24dp"
+            android:paddingEnd="24dp">
 
         <!-- 동아리명 -->
         <TextView
@@ -148,12 +193,35 @@
             android:layout_height="0dp"
             android:layout_weight="1" />
 
+        <!-- 대문 소개 -->
+        <TextView
+            style="@style/SectionTitleTextStyle"
+            android:text="웰컴 문구"/>
+        <EditText
+            android:id="@+id/et_welcome_intro_text"
+            android:inputType="textMultiLine"
+            android:hint="웰컴 문구를 입력해주세요."
+            android:textColorHint="#999999"
+            android:background="@drawable/info_box"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:textSize="@dimen/text_size_medium"
+            android:textColor="#333333"
+            android:layout_marginBottom="24dp"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
         <Button
             android:id="@+id/btn_create_club"
             style="@style/ReferenceRegisterButton"
             android:layout_width="match_parent"
             android:layout_marginTop="24dp"
-            android:text="등록하기" />
+            android:text="수정하기" />
 
-    </LinearLayout>
-</ScrollView>
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>
