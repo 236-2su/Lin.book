@@ -269,4 +269,11 @@ interface ApiService {
         val description: String,
         val budget: Long
     )
+
+    // 멤버 삭제 (추방)
+    @DELETE("club/{club_pk}/members/{id}/")
+    fun deleteMember(
+        @Path("club_pk") clubId: Int,
+        @Path("id") memberId: Int
+    ): Call<okhttp3.ResponseBody>
 }
