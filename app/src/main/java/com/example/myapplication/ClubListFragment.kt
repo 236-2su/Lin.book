@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.*
@@ -53,6 +54,7 @@ class ClubListFragment : Fragment() {
         
         setupCategoryButtons()
         setupFloatingActionButton()
+        setupAIFab()
         setupTempRootButton()
         Log.d(TAG, "API 호출 시작")
         fetchClubData()
@@ -499,26 +501,82 @@ class ClubListFragment : Fragment() {
     }
     
     private fun setupFloatingActionButton() {
-        val rootLayout = activity?.findViewById<View>(android.R.id.content)
+        val parent = contentView.findViewById<CoordinatorLayout>(R.id.root_club_list) ?: return
+        if (parent.findViewWithTag<View>("fab_create_club") != null) return
         val fab = FloatingActionButton(requireContext()).apply {
-            layoutParams = FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT).apply {
-                gravity = android.view.Gravity.BOTTOM or android.view.Gravity.END
-                setMargins(0, 0, 40.dpToPx(), 40.dpToPx())
-            }
+            tag = "fab_create_club"
+            val lp = CoordinatorLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+            lp.gravity = android.view.Gravity.BOTTOM or android.view.Gravity.END
+            lp.setMargins(0, 0, 24.dpToPx(), 24.dpToPx())
+            layoutParams = lp
             setImageResource(R.drawable.pencil)
             backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#2457C5"))
             imageTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.WHITE)
             elevation = 8f
             translationZ = 8f
-            
             setOnClickListener {
                 val intent = Intent(activity, ClubCreateActivity::class.java)
                 startActivity(intent)
             }
         }
-        
-        if (rootLayout is ViewGroup) {
-            rootLayout.addView(fab)
+        parent.addView(fab)
+    }
+
+    private fun setupAIFab() {
+        contentView.findViewById<View>(R.id.fab_ai_helper)?.setOnClickListener {
+            val dialogView = layoutInflater.inflate(R.layout.dialog_ai_recommend, null)
+            val dialog = android.app.AlertDialog.Builder(requireContext())
+                .setView(dialogView)
+                .create()
+            dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+            dialog.setCanceledOnTouchOutside(true)
+            dialog.show()
+            dialog.window?.setGravity(android.view.Gravity.BOTTOM)
+            dialog.window?.attributes?.windowAnimations = R.style.Animation_Dialog
+
+            val tabPersonal = dialogView.findViewById<TextView>(R.id.tab_personal)
+            val tabSearch = dialogView.findViewById<TextView>(R.id.tab_search)
+            val panelPersonal = dialogView.findViewById<android.widget.LinearLayout>(R.id.panel_personal)
+            val panelSearch = dialogView.findViewById<android.widget.LinearLayout>(R.id.panel_search)
+
+            fun selectTab(personal: Boolean) {
+                if (personal) {
+                    tabPersonal.setBackgroundResource(R.drawable.bg_ai_tab_selected)
+                    tabPersonal.setTextColor(android.graphics.Color.WHITE)
+                    tabSearch.setBackgroundResource(R.drawable.bg_ai_tab_unselected)
+                    tabSearch.setTextColor(android.graphics.Color.parseColor("#7B61FF"))
+                    panelPersonal.visibility = android.view.View.VISIBLE
+                    panelSearch.visibility = android.view.View.GONE
+                } else {
+                    tabSearch.setBackgroundResource(R.drawable.bg_ai_tab_selected_search)
+                    tabSearch.setTextColor(android.graphics.Color.WHITE)
+                    tabPersonal.setBackgroundResource(R.drawable.bg_ai_tab_unselected)
+                    tabPersonal.setTextColor(android.graphics.Color.parseColor("#7B61FF"))
+                    panelPersonal.visibility = android.view.View.GONE
+                    panelSearch.visibility = android.view.View.VISIBLE
+                }
+            }
+
+            tabPersonal.setOnClickListener { selectTab(true) }
+            tabSearch.setOnClickListener { selectTab(false) }
+            selectTab(true)
+
+            dialogView.findViewById<android.widget.Button>(R.id.btn_ai_personal)?.setOnClickListener {
+                android.widget.Toast.makeText(requireContext(), "맞춤 추천 준비 중", android.widget.Toast.LENGTH_SHORT).show()
+                dialog.dismiss()
+            }
+            dialogView.findViewById<android.widget.Button>(R.id.btn_ai_search)?.setOnClickListener {
+                val query = dialogView.findViewById<android.widget.EditText>(R.id.et_ai_query)?.text?.toString()?.trim()
+                if (query.isNullOrEmpty()) {
+                    android.widget.Toast.makeText(requireContext(), "질문을 입력해주세요.", android.widget.Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
+                }
+                android.widget.Toast.makeText(requireContext(), "검색: $query", android.widget.Toast.LENGTH_SHORT).show()
+                dialog.dismiss()
+            }
         }
     }
     

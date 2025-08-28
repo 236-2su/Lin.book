@@ -45,6 +45,67 @@ class ClubAnnouncementBoardListActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
+        // AI 버튼 클릭 시 다이얼로그 표시
+        findViewById<android.widget.TextView>(R.id.fab_ai_helper)?.apply {
+            setOnClickListener {
+                val dialogView = layoutInflater.inflate(R.layout.dialog_ai_recommend, null)
+                val dialog = android.app.AlertDialog.Builder(this@ClubAnnouncementBoardListActivity)
+                    .setView(dialogView)
+                    .create()
+                dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+                dialog.setCanceledOnTouchOutside(true)
+                dialog.show()
+                dialog.window?.setGravity(android.view.Gravity.BOTTOM)
+                dialog.window?.attributes?.windowAnimations = R.style.Animation_Dialog
+
+                // 탭 전환: 맞춤추천 / 검색 추천
+                val tabPersonal = dialogView.findViewById<TextView>(R.id.tab_personal)
+                val tabSearch = dialogView.findViewById<TextView>(R.id.tab_search)
+                val panelPersonal = dialogView.findViewById<android.widget.LinearLayout>(R.id.panel_personal)
+                val panelSearch = dialogView.findViewById<android.widget.LinearLayout>(R.id.panel_search)
+
+                fun selectTab(personal: Boolean) {
+                    if (personal) {
+                        tabPersonal.setBackgroundResource(R.drawable.bg_ai_tab_selected)
+                        tabPersonal.setTextColor(android.graphics.Color.WHITE)
+                        tabSearch.setBackgroundResource(R.drawable.bg_ai_tab_unselected)
+                        tabSearch.setTextColor(android.graphics.Color.parseColor("#7B61FF"))
+                        panelPersonal.visibility = android.view.View.VISIBLE
+                        panelSearch.visibility = android.view.View.GONE
+                    } else {
+                        tabSearch.setBackgroundResource(R.drawable.bg_ai_tab_selected_search)
+                        tabSearch.setTextColor(android.graphics.Color.WHITE)
+                        tabPersonal.setBackgroundResource(R.drawable.bg_ai_tab_unselected)
+                        tabPersonal.setTextColor(android.graphics.Color.parseColor("#7B61FF"))
+                        panelPersonal.visibility = android.view.View.GONE
+                        panelSearch.visibility = android.view.View.VISIBLE
+                    }
+                }
+
+                tabPersonal.setOnClickListener { selectTab(true) }
+                tabSearch.setOnClickListener { selectTab(false) }
+                // 기본: 맞춤추천 탭
+                selectTab(true)
+
+                dialogView.findViewById<Button>(R.id.btn_ai_personal)?.setOnClickListener {
+                    // TODO: 맞춤추천 API 연동: 사용자의 가입 동아리 기반 추천 트리거
+                    Toast.makeText(this@ClubAnnouncementBoardListActivity, "맞춤 추천 준비 중", Toast.LENGTH_SHORT).show()
+                    dialog.dismiss()
+                }
+
+                dialogView.findViewById<Button>(R.id.btn_ai_search)?.setOnClickListener {
+                    val query = dialogView.findViewById<android.widget.EditText>(R.id.et_ai_query)?.text?.toString()?.trim()
+                    if (query.isNullOrEmpty()) {
+                        Toast.makeText(this@ClubAnnouncementBoardListActivity, "질문을 입력해주세요.", Toast.LENGTH_SHORT).show()
+                        return@setOnClickListener
+                    }
+                    // TODO: AI 추천 검색 로직 연결 (API 연동 시 구현)
+                    Toast.makeText(this@ClubAnnouncementBoardListActivity, "검색: $query", Toast.LENGTH_SHORT).show()
+                    dialog.dismiss()
+                }
+            }
+        }
+
         // 공유하기 버튼: 동아리 URL을 클립보드에 복사하고 토스트 안내
         findViewById<androidx.appcompat.widget.AppCompatImageButton>(R.id.btn_share)?.setOnClickListener {
             val clubPk = intent?.getIntExtra(EXTRA_CLUB_PK, -1) ?: -1

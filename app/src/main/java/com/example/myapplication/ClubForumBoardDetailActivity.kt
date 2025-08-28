@@ -15,6 +15,7 @@ import android.util.Log
 class ClubForumBoardDetailActivity : AppCompatActivity() {
     
     private lateinit var boardItem: BoardItem
+    private var isLiked: Boolean = false
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,6 +38,11 @@ class ClubForumBoardDetailActivity : AppCompatActivity() {
         
         // UI 업데이트
         updateUI()
+
+        // 좋아요 아이콘 클릭 리스너 연결
+        findViewById<ImageView>(R.id.iv_like)?.setOnClickListener {
+            toggleLike()
+        }
     }
 
     override fun onResume() {
@@ -514,17 +520,34 @@ class ClubForumBoardDetailActivity : AppCompatActivity() {
                 response: retrofit2.Response<okhttp3.ResponseBody>
             ) {
                 if (response.isSuccessful) {
+                    // 상태 토글 및 UI 반영
+                    isLiked = !isLiked
+                    updateLikeUi()
                     // 재조회로 카운트 업데이트
                     refreshMeta()
                 } else {
-                    Toast.makeText(this@ClubForumBoardDetailActivity, "좋아요 처리 실패", Toast.LENGTH_SHORT).show()
+                    val code = response.code()
+                    val err = try { response.errorBody()?.string() } catch (_: Exception) { null }
+                    android.util.Log.e("BoardLike", "fail code=$code body=$err")
+                    val msg = if (code == 404) "동아리 멤버만 좋아요를 누를 수 있어요." else "좋아요 처리 실패"
+                    Toast.makeText(this@ClubForumBoardDetailActivity, msg, Toast.LENGTH_SHORT).show()
                 }
             }
 
             override fun onFailure(call: retrofit2.Call<okhttp3.ResponseBody>, t: Throwable) {
+                android.util.Log.e("BoardLike", "network error: ${t.message}")
                 Toast.makeText(this@ClubForumBoardDetailActivity, "네트워크 오류: ${t.message}", Toast.LENGTH_SHORT).show()
             }
         })
+    }
+
+    private fun updateLikeUi() {
+        val likeView = findViewById<ImageView>(R.id.iv_like)
+        if (isLiked) {
+            likeView?.setImageResource(R.drawable.ic_heart_filled)
+        } else {
+            likeView?.setImageResource(R.drawable.ic_heart_outline)
+        }
     }
 
     private fun fetchAuthorFromUserApi(idFromBoard: Int) {

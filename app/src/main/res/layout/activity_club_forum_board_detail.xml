@@ -166,9 +166,10 @@
                         android:gravity="end|center_vertical">
 
                         <ImageView
-                            android:layout_width="32dp"
-                            android:layout_height="32dp"
-                            android:src="@drawable/like_img" />
+                            android:id="@+id/iv_like"
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:src="@drawable/ic_heart_outline" />
 
                         <TextView
                             android:id="@+id/tv_likes_count"

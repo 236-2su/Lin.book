@@ -201,7 +201,7 @@
                             android:layout_height="wrap_content"
                             android:text="0000-000-000-00"
                             android:textSize="18sp"
-                            android:textStyle="bold"/>
+                            android:textStyle="normal"/>
                     </LinearLayout>
 
                     <LinearLayout
@@ -234,7 +234,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="은행명"
+                            android:text="개설일자"
                             android:textSize="16sp"
                             android:textColor="#111111"/>
                         <View
@@ -245,7 +245,7 @@
                             android:id="@+id/tv_bank"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="싸피은행"
+                            android:text="2025-08-28"
                             android:textSize="16sp"/>
                     </LinearLayout>
                 </LinearLayout>

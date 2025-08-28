@@ -576,11 +576,16 @@ class ClubAnnouncementBoardDetailActivity : AppCompatActivity() {
                     updateLikeUi()
                     refreshMeta()
                 } else {
-                    Toast.makeText(this@ClubAnnouncementBoardDetailActivity, "좋아요 처리 실패", Toast.LENGTH_SHORT).show()
+                    val code = response.code()
+                    val err = try { response.errorBody()?.string() } catch (_: Exception) { null }
+                    android.util.Log.e("BoardLike", "fail code=$code body=$err")
+                    val msg = if (code == 404) "동아리 멤버만 좋아요를 누를 수 있어요." else "좋아요 처리 실패"
+                    Toast.makeText(this@ClubAnnouncementBoardDetailActivity, msg, Toast.LENGTH_SHORT).show()
                 }
             }
 
             override fun onFailure(call: retrofit2.Call<okhttp3.ResponseBody>, t: Throwable) {
+                android.util.Log.e("BoardLike", "network error: ${t.message}")
                 Toast.makeText(this@ClubAnnouncementBoardDetailActivity, "네트워크 오류: ${t.message}", Toast.LENGTH_SHORT).show()
             }
         })

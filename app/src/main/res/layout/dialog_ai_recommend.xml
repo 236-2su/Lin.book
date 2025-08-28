@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/dialog_background"
+    android:padding="24dp"
+    android:layout_margin="16dp"
+    android:layout_gravity="bottom|center_horizontal">
+
+    <!-- 탭 버튼 영역 -->
+    <LinearLayout
+        android:id="@+id/layout_ai_tabs"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginBottom="16dp">
+
+        <TextView
+            android:id="@+id/tab_personal"
+            android:layout_width="0dp"
+            android:layout_height="36dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="맞춤추천"
+            android:textStyle="bold"
+            android:textSize="14sp"
+            android:textColor="#FFFFFFFF"
+            android:background="@drawable/bg_ai_tab_selected"
+            android:layout_marginEnd="6dp" />
+
+        <TextView
+            android:id="@+id/tab_search"
+            android:layout_width="0dp"
+            android:layout_height="36dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="검색 추천"
+            android:textStyle="bold"
+            android:textSize="14sp"
+            android:textColor="#7B61FF"
+            android:background="@drawable/bg_ai_tab_unselected"
+            android:layout_marginStart="6dp" />
+    </LinearLayout>
+
+    <!-- 맞춤추천 컨텐츠 -->
+    <LinearLayout
+        android:id="@+id/panel_personal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="내가 가입한 동아리를 기반으로 Hey-Bi가 동아리를 추천해드립니다."
+            android:textColor="#000000"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:lineSpacingExtra="2dp"
+            android:layout_marginBottom="12dp" />
+
+        <Button
+            android:id="@+id/btn_ai_personal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_button_ai_gradient"
+            app:backgroundTint="@null"
+            android:text="추천받기"
+            android:textColor="#FFFFFFFF"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <!-- 검색 추천 컨텐츠 -->
+    <LinearLayout
+        android:id="@+id/panel_search"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/tv_ai_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="나에게 맞는 동아리를 Hey_Bi에게 묻고 추천받아보세요!"
+            android:textColor="#000000"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:lineSpacingExtra="2dp"
+            android:layout_marginBottom="12dp" />
+
+        <EditText
+            android:id="@+id/et_ai_query"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_input_ai"
+            android:hint="원하시는 활동, 관심사 등을 입력하세요"
+            android:textColorHint="#99000000"
+            android:textColor="#000000"
+            android:inputType="text"
+            android:minHeight="48dp"
+            android:padding="0dp"
+            android:layout_marginBottom="16dp" />
+
+        <Button
+            android:id="@+id/btn_ai_search"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_button_ai_search_gradient"
+            app:backgroundTint="@null"
+            android:text="검색하기"
+            android:textColor="#FFFFFFFF"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+</LinearLayout>
+
+

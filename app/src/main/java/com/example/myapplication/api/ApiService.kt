@@ -137,6 +137,10 @@ interface ApiService {
     ): Call<okhttp3.ResponseBody>
 
     // 댓글 좋아요 (백엔드 스펙: { user_id })
+    @retrofit2.http.Headers(
+        "Content-Type: application/json",
+        "Accept: application/json"
+    )
     @POST("/club/{club_pk}/boards/{board_pk}/comments/{id}/like/")
     fun likeComment(
         @Path("club_pk") clubId: Int,
@@ -146,6 +150,11 @@ interface ApiService {
     ): Call<okhttp3.ResponseBody>
 
     data class LikeRequest(val user_id: Int)
+
+    @retrofit2.http.Headers(
+        "Content-Type: application/json",
+        "Accept: application/json"
+    )
     @POST("/club/{club_pk}/boards/{id}/like/")
     fun toggleBoardLike(
         @Path("club_pk") clubId: Int,
@@ -233,4 +242,25 @@ interface ApiService {
         val title: String,
         val content: Map<String, Any> // JSONField는 Map으로 받음
     )
+
+    // --- Accounts ---
+    data class AccountItem(
+        val id: Int,
+        val user: Int,
+        val amount: Long?,
+        val code: String,
+        val created_at: String,
+        val user_name: String
+    )
+
+    @GET("user/{user_pk}/accounts/")
+    fun getAccounts(
+        @Path("user_pk") userPk: Int
+    ): Call<List<AccountItem>>
+
+    @GET("user/{user_pk}/accounts/{accounts_id}/")
+    fun getAccountDetail(
+        @Path("user_pk") userPk: Int,
+        @Path("accounts_id") accountId: Int
+    ): Call<AccountItem>
 }
