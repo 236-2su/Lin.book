@@ -192,20 +192,58 @@ interface ApiService {
         @retrofit2.http.Query("month") month: Int
     ): Call<AIReportResponse>
 
-    // 연간 리포트 생성
+    // 연간 리포트 생성 (YearlyReportResponse 사용)
     @POST("report/clubs/{club_pk}/ledgers/{ledger_pk}/reports/yearly/")
     fun createYearlyReport(
         @Path("club_pk") clubId: Int,
         @Path("ledger_pk") ledgerId: Int,
         @retrofit2.http.Query("year") year: Int
-    ): Call<AIReportResponse>
+    ): Call<YearlyReportResponse>
 
     // 유사 동아리 비교 리포트 생성
     @POST("report/similar-clubs/club/{club_id}/year/{year}/")
     fun createSimilarClubsReport(
         @Path("club_id") clubId: Int,
         @Path("year") year: Int
-    ): Call<AIReportResponse>
+    ): Call<SimilarClubsReportResponse>
+
+    // Club Events API
+    @GET("clubs/{club_id}/events/")
+    fun getClubEvents(
+        @Path("club_id") clubId: Int
+    ): Call<List<EventItem>>
+
+    @GET("clubs/{club_id}/events/{event_pk}/")
+    fun getEventDetail(
+        @Path("club_id") clubId: Int,
+        @Path("event_pk") eventId: Int
+    ): Call<EventItem>
+
+    @GET("clubs/{club_id}/events/{event_pk}/transactions/")
+    fun getEventTransactions(
+        @Path("club_id") clubId: Int,
+        @Path("event_pk") eventId: Int
+    ): Call<List<LedgerTransactionItem>>
+
+    // 리포트 삭제
+    @DELETE("report/reports/{report_pk}/")
+    fun deleteReport(
+        @Path("report_pk") reportId: Int
+    ): Call<okhttp3.ResponseBody>
+    
+    // Gemini AI 리포트 조언 생성 (기존)
+    @POST("report/reports/{report_pk}/advice/")
+    fun getReportAdvice(
+        @Path("report_pk") reportId: Int
+    ): Call<GeminiAdviceResponse>
+    
+    // 장부 기반 AI 재무 조언 생성 (새로운 API)
+    @POST("report/clubs/{club_pk}/ledgers/{ledger_pk}/advice/")
+    fun getLedgerAdvice(
+        @Path("club_pk") clubId: Int,
+        @Path("ledger_pk") ledgerId: Int,
+        @retrofit2.http.Query("year") year: Int
+    ): Call<GeminiAdviceResponse>
 
     // 월간 리포트 목록 조회
     @GET("report/clubs/{club_pk}/ledgers/{ledger_pk}/reports/monthly/")
@@ -224,7 +262,31 @@ interface ApiService {
         @retrofit2.http.Query("year") year: Int
     ): Call<List<BackendReportItem>>
 
-    // 백엔드 실제 응답 구조 (리포트 생성 시)
+    // 월간 리포트 응답 구조
+    data class MonthlyReportResponse(
+        val ledger_id: Int,
+        val club_id: Int,
+        val year: Int,
+        val month: Int,
+        val period: Map<String, String>,
+        val summary: Map<String, Int>,
+        val by_type: List<Map<String, Any>>,
+        val by_payment_method: List<Map<String, Any>>,
+        val by_event: List<Map<String, Any>>,
+        val daily_series: List<Map<String, Any>>
+    )
+
+    // 연간 리포트 응답 구조 (백엔드와 일치)
+    data class YearlyReportResponse(
+        val ledger_id: Int,
+        val club_id: Int,
+        val year: Int,
+        val summary: Map<String, Int>,
+        val by_type: Map<String, Map<String, Int>>, // 딕셔너리 형태
+        val by_month: Map<String, MonthlyReportResponse>
+    )
+
+    // 기존 AIReportResponse는 호환성을 위해 유지 (월간용)
     data class AIReportResponse(
         val ledger_id: Int,
         val club_id: Int,
@@ -235,7 +297,8 @@ interface ApiService {
         val by_type: List<Map<String, Any>>,
         val by_payment_method: List<Map<String, Any>>,
         val by_event: List<Map<String, Any>>,
-        val daily_series: List<Map<String, Any>>?
+        val daily_series: List<Map<String, Any>>?,
+        val by_month: Map<String, Any>?
     )
 
     // 백엔드 저장된 리포트 데이터 클래스
@@ -244,5 +307,44 @@ interface ApiService {
         val ledger: Int,
         val title: String,
         val content: Map<String, Any> // JSONField는 Map으로 받음
+    )
+
+    // 유사 동아리 비교 리포트 응답 데이터 클래스 (연간 리포트 기반)
+    data class SimilarClubsReportResponse(
+        val original_club_report: YearlyReportResponse,
+        val similar_club_reports: List<YearlyReportResponse>
+    )
+
+    // Gemini AI 조언 응답 데이터 클래스
+    data class GeminiAdviceResponse(
+        val overall: String,
+        val by_month: String,
+        val by_income: String,
+        val advices: List<String>
+    )
+
+    // Event API 응답 클래스
+    data class EventItem(
+        val id: Int,
+        val name: String,
+        val start_date: String,
+        val end_date: String,
+        val description: String?,
+        val budget: Int
+    )
+
+    // 장부 거래 API 응답 클래스  
+    data class LedgerTransactionItem(
+        val id: Int,
+        val ledger: Int,
+        val created_at: String,
+        val updated_at: String,
+        val date_time: String,
+        val amount: Int,
+        val type: String?,
+        val payment_method: String,
+        val description: String,
+        val vendor: String,
+        val event: Int?
     )
 }

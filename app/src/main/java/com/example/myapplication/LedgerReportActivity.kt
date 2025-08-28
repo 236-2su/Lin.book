@@ -11,6 +11,12 @@ import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.content.ContextCompat
+import com.example.myapplication.api.ApiClient
+import com.example.myapplication.api.ApiService
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import org.json.JSONObject
 import java.text.SimpleDateFormat
 import java.util.*
@@ -108,7 +114,7 @@ class LedgerReportActivity : BaseActivity() {
             
             // RecyclerView 설정
             recyclerView.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(this)
-            reportsAdapter = AIReportsAdapter { reportJson ->
+            reportsAdapter = AIReportsAdapter({ reportJson ->
                 // 리포트 클릭 시 상세 페이지로 이동
                 Log.d("LedgerReportActivity", "🎯 리포트 클릭됨!")
                 Log.d("LedgerReportActivity", "전달할 데이터: $reportJson")
@@ -123,6 +129,9 @@ class LedgerReportActivity : BaseActivity() {
                     Log.e("LedgerReportActivity", "Detail 페이지 이동 실패", e)
                     Toast.makeText(this, "상세 페이지를 열 수 없습니다: ${e.message}", Toast.LENGTH_LONG).show()
                 }
+            }) { reportJson, position ->
+                // 삭제 처리
+                deleteReport(reportJson, position)
             }
             recyclerView.adapter = reportsAdapter
             
@@ -155,9 +164,9 @@ class LedgerReportActivity : BaseActivity() {
 
     private fun setupButtonClickEvents(contentView: View) {
         try {
-            // 리포트 생성 버튼 클릭 이벤트 (화면에 고정된 Button)
-            val btnCreateReport = findViewById<Button>(R.id.btn_create_report)
-            Log.d("LedgerReportActivity", "화면 고정 Button 찾기 시도: ${btnCreateReport != null}")
+            // 리포트 생성 버튼 클릭 이벤트 (화면에 고정된 FloatingActionButton)
+            val btnCreateReport = findViewById<com.google.android.material.floatingactionbutton.FloatingActionButton>(R.id.btn_create_report)
+            Log.d("LedgerReportActivity", "화면 고정 FloatingActionButton 찾기 시도: ${btnCreateReport != null}")
             
             if (btnCreateReport != null) {
                 Log.d("LedgerReportActivity", "버튼 정보: visibility=${btnCreateReport.visibility}, clickable=${btnCreateReport.isClickable}")
@@ -210,9 +219,6 @@ class LedgerReportActivity : BaseActivity() {
     private fun loadAIReports() {
         Log.d("LedgerReportActivity", "🚀 AI 리포트 목록 로드 시작")
         
-        // 1. 백엔드 연결 상태 테스트
-        testBackendConnection()
-        
         val clubId = getCurrentClubId()
         Log.d("LedgerReportActivity", "🏠 현재 클럽 ID: $clubId")
         
@@ -223,10 +229,11 @@ class LedgerReportActivity : BaseActivity() {
             return
         }
         
-        // 2. 실제 백엔드 데이터 확인
-        testBackendReportData(clubId)
+        // 먼저 로컬 리포트를 로드하여 즉시 표시
+        Log.d("LedgerReportActivity", "📱 로컬 리포트 우선 로드")
+        loadLocalReports()
         
-        // 3. 장부 목록을 가져와서 첫 번째 장부 ID를 얻음
+        // 그 다음 백엔드 데이터 확인 및 동기화
         Log.d("LedgerReportActivity", "📋 장부 목록 조회 중...")
         com.example.myapplication.api.ApiClient.getApiService().getLedgerList(clubId).enqueue(object : retrofit2.Callback<List<LedgerApiItem>> {
             override fun onResponse(
@@ -448,7 +455,7 @@ class LedgerReportActivity : BaseActivity() {
                         val typeName = typeData["type"] as? String ?: "기타"
                         val typeIncome = (typeData["income"] as? Number)?.toInt() ?: 0
                         val typeExpense = (typeData["expense"] as? Number)?.toInt() ?: 0
-                        appendLine("• $typeName: 수입 ${String.format("%,d", typeIncome)}원, 지출 ${String.format("%,d", typeExpense)}원")
+                        appendLine("• $typeName: 수입 ${formatLedgerAmount(typeIncome)}, 지출 ${formatLedgerAmount(typeExpense)}")
                     }
                     appendLine()
                 }
@@ -461,7 +468,7 @@ class LedgerReportActivity : BaseActivity() {
                         val method = paymentData["payment_method"] as? String ?: "기타"
                         val methodIncome = (paymentData["income"] as? Number)?.toInt() ?: 0
                         val methodExpense = (paymentData["expense"] as? Number)?.toInt() ?: 0
-                        appendLine("• $method: 수입 ${String.format("%,d", methodIncome)}원, 지출 ${String.format("%,d", methodExpense)}원")
+                        appendLine("• $method: 수입 ${formatLedgerAmount(methodIncome)}, 지출 ${formatLedgerAmount(methodExpense)}")
                     }
                     appendLine()
                 }
@@ -475,7 +482,7 @@ class LedgerReportActivity : BaseActivity() {
                         val eventIncome = (eventData["income"] as? Number)?.toInt() ?: 0
                         val eventExpense = (eventData["expense"] as? Number)?.toInt() ?: 0
                         val eventNet = eventIncome - eventExpense
-                        appendLine("• $eventName: 수입 ${String.format("%,d", eventIncome)}원, 지출 ${String.format("%,d", eventExpense)}원, 순수익 ${String.format("%,d", eventNet)}원")
+                        appendLine("• $eventName: 수입 ${formatLedgerAmount(eventIncome)}, 지출 ${formatLedgerAmount(eventExpense)}, 순수익 ${formatLedgerAmount(eventNet)}")
                     }
                     appendLine()
                 }
@@ -536,6 +543,7 @@ class LedgerReportActivity : BaseActivity() {
         try {
             val clubId = getCurrentClubId()
             Log.d("LedgerReportActivity", "🏠 현재 클럽 ID: $clubId")
+            Log.d("LedgerReportActivity", "🗂️ 읽을 SharedPreferences 키: ai_reports_club_$clubId")
             
             val sharedPref = getSharedPreferences("ai_reports_club_$clubId", Context.MODE_PRIVATE)
             
@@ -560,15 +568,9 @@ class LedgerReportActivity : BaseActivity() {
             
             Log.d("LedgerReportActivity", "📈 최종 로컬 리포트 수: ${reports.size}")
             
-            // 로컬 데이터가 없으면 테스트 데이터 추가
             if (reports.isEmpty()) {
-                Log.d("LedgerReportActivity", "❌ 로컬 데이터 없음 - 테스트 데이터 생성")
-                val testReports = createTestReports()
-                
-                // 테스트 데이터를 SharedPreferences에도 저장
-                saveTestReportsToLocal(testReports)
-                
-                showReportsList(testReports)
+                Log.d("LedgerReportActivity", "❌ 저장된 리포트 없음 - 빈 상태 표시")
+                showEmptyState()
             } else {
                 Log.d("LedgerReportActivity", "✅ 로컬 리포트 목록 표시 시작 (${reports.size}개)")
                 showReportsList(reports)
@@ -727,8 +729,13 @@ class LedgerReportActivity : BaseActivity() {
             Log.d("LedgerReportActivity", "🔧 emptyState 상태: ${emptyState != null}")
             Log.d("LedgerReportActivity", "🔧 reportsAdapter 상태: ${::reportsAdapter.isInitialized}")
             
+            // 필터링 없이 모든 리포트 표시
+            val filteredReports = reports
+            
+            Log.d("LedgerReportActivity", "🔍 필터링 후 리포트 수: ${filteredReports.size} (필터링 전: ${reports.size})")
+            
             // 각 리포트 내용 로깅
-            reports.forEachIndexed { index, report ->
+            filteredReports.forEachIndexed { index, report ->
                 try {
                     val reportObj = JSONObject(report)
                     Log.d("LedgerReportActivity", "📋 리포트 $index: ${reportObj.optString("title")} (타입: ${reportObj.optString("type")})")
@@ -743,7 +750,7 @@ class LedgerReportActivity : BaseActivity() {
             Log.d("LedgerReportActivity", "✅ Visibility 설정 완료")
             
             // 생성일시 기준으로 정렬 (최신순)
-            val sortedReports = reports.sortedByDescending { 
+            val sortedReports = filteredReports.sortedByDescending { 
                 try {
                     JSONObject(it).getLong("created_at")
                 } catch (e: Exception) { 
@@ -768,14 +775,74 @@ class LedgerReportActivity : BaseActivity() {
                 
                 // 어댑터 아이템 수 확인
                 Log.d("LedgerReportActivity", "📦 어댑터 아이템 수: ${reportsAdapter.itemCount}")
+                
+                // RecyclerView 상태를 다시 한번 강제로 업데이트
+                recyclerView.post {
+                    Log.d("LedgerReportActivity", "🔄 RecyclerView UI 스레드에서 업데이트")
+                    Log.d("LedgerReportActivity", "  - 최종 어댑터 아이템 수: ${reportsAdapter.itemCount}")
+                    Log.d("LedgerReportActivity", "  - RecyclerView 자식 수: ${recyclerView.childCount}")
+                    
+                    // 어댑터에 변경사항 알림
+                    recyclerView.adapter?.notifyDataSetChanged()
+                    
+                    // 레이아웃 매니저에 스크롤 위치 초기화
+                    recyclerView.layoutManager?.scrollToPosition(0)
+                }
+                
             } else {
                 Log.e("LedgerReportActivity", "❌ reportsAdapter가 초기화되지 않음!")
+                
+                // 어댑터가 초기화되지 않았다면 다시 초기화 시도
+                try {
+                    Log.d("LedgerReportActivity", "🔧 어댑터 긴급 재초기화 시도")
+                    initializeRecyclerViewAdapter()
+                    
+                    // 재초기화 후 다시 데이터 설정
+                    if (::reportsAdapter.isInitialized) {
+                        reportsAdapter.updateReports(sortedReports)
+                        Log.d("LedgerReportActivity", "✅ 긴급 재초기화 후 데이터 설정 완료")
+                    }
+                } catch (e: Exception) {
+                    Log.e("LedgerReportActivity", "❌ 어댑터 긴급 재초기화 실패", e)
+                }
             }
             
         } catch (e: Exception) {
             Log.e("LedgerReportActivity", "❌ 리포트 목록 표시 실패", e)
             e.printStackTrace()
             showEmptyState()
+        }
+    }
+    
+    private fun initializeRecyclerViewAdapter() {
+        Log.d("LedgerReportActivity", "🔧 RecyclerView 어댑터 초기화")
+        
+        try {
+            reportsAdapter = AIReportsAdapter({ reportJson ->
+                Log.d("LedgerReportActivity", "🎯 리포트 클릭됨!")
+                Log.d("LedgerReportActivity", "전달할 데이터: $reportJson")
+                
+                try {
+                    val intent = Intent(this, AIReportDetailActivity::class.java)
+                    intent.putExtra("report_data", reportJson)
+                    Log.d("LedgerReportActivity", "AIReportDetailActivity 시작")
+                    startActivity(intent)
+                    Log.d("LedgerReportActivity", "✅ AIReportDetailActivity 시작 완료")
+                } catch (e: Exception) {
+                    Log.e("LedgerReportActivity", "상세 페이지를 열 수 없습니다", e)
+                    Toast.makeText(this, "상세 페이지를 열 수 없습니다: ${e.message}", Toast.LENGTH_LONG).show()
+                }
+            }) { reportJson, position ->
+                // 삭제 처리
+                deleteReport(reportJson, position)
+            }
+            
+            recyclerView.adapter = reportsAdapter
+            Log.d("LedgerReportActivity", "✅ 어댑터 초기화 완료")
+            
+        } catch (e: Exception) {
+            Log.e("LedgerReportActivity", "❌ 어댑터 초기화 실패", e)
+            throw e
         }
     }
     
@@ -935,9 +1002,9 @@ class LedgerReportActivity : BaseActivity() {
                 📊 ${year}년 동아리 재정 분석 (실제 데이터)
                 
                 💰 재정 현황:
-                • 총 수입: ${String.format("%,d", income)}원
-                • 총 지출: ${String.format("%,d", expense)}원
-                • 순이익: ${String.format("%,d", net)}원
+                • 총 수입: ${String.format(Locale.US, "%,d", income)}원
+                • 총 지출: ${String.format(Locale.US, "%,d", expense)}원
+                • 순이익: ${String.format(Locale.US, "%,d", net)}원
                 
                 📈 분석 결과:
                 • 재정 건전성: ${if (net > 0) "양호 ✅" else "주의 ⚠️"}
@@ -1053,18 +1120,36 @@ class LedgerReportActivity : BaseActivity() {
 
     private fun deleteReport(reportData: JSONObject) {
         try {
-            val sharedPref = getSharedPreferences("ai_reports", Context.MODE_PRIVATE)
-            val reports = sharedPref.getStringSet("reports", mutableSetOf())?.toMutableSet() ?: mutableSetOf()
+            val clubId = getCurrentClubId()
+            val sharedPref = getSharedPreferences("ai_reports_club_$clubId", Context.MODE_PRIVATE)
             
-            val reportJson = reportData.toString()
-            reports.remove(reportJson)
+            // JSON Array 방식으로 읽기 (일관성 유지)
+            val reportsJson = sharedPref.getString("reports_json", "[]")
+            val reportsArray = org.json.JSONArray(reportsJson)
             
-            sharedPref.edit()
-                .putStringSet("reports", reports)
-                .apply()
+            val reportToDelete = reportData.toString()
+            val updatedArray = org.json.JSONArray()
             
-            loadAIReports()
-            Toast.makeText(this, "리포트가 삭제되었습니다.", Toast.LENGTH_SHORT).show()
+            // 삭제할 리포트를 제외하고 새 배열에 추가
+            for (i in 0 until reportsArray.length()) {
+                val existingReport = reportsArray.getJSONObject(i)
+                if (existingReport.toString() != reportToDelete) {
+                    updatedArray.put(existingReport)
+                }
+            }
+            
+            // 업데이트된 배열 저장
+            val success = sharedPref.edit()
+                .putString("reports_json", updatedArray.toString())
+                .commit()
+                
+            if (success) {
+                Log.d("LedgerReportActivity", "✅ 리포트 삭제 성공: ${updatedArray.length()}개 남음")
+                loadAIReports()
+                Toast.makeText(this, "리포트가 삭제되었습니다.", Toast.LENGTH_SHORT).show()
+            } else {
+                throw Exception("SharedPreferences 저장 실패")
+            }
         } catch (e: Exception) {
             Log.e("LedgerReportActivity", "리포트 삭제 실패", e)
             Toast.makeText(this, "삭제 중 오류가 발생했습니다.", Toast.LENGTH_SHORT).show()
@@ -1073,41 +1158,54 @@ class LedgerReportActivity : BaseActivity() {
     
     private fun updateStatistics(contentView: View) {
         try {
-            val sharedPref = getSharedPreferences("ai_reports", Context.MODE_PRIVATE)
-            val reports = sharedPref.getStringSet("reports", emptySet()) ?: emptySet()
+            val clubId = getCurrentClubId()
+            val sharedPref = getSharedPreferences("ai_reports_club_$clubId", Context.MODE_PRIVATE)
+            val reportsJson = sharedPref.getString("reports_json", "[]")
+            val reportsArray = org.json.JSONArray(reportsJson)
+            val reportCount = reportsArray.length()
             
-            // 총 리포트 수 업데이트
-            val tvTotalReports = contentView.findViewById<TextView>(R.id.tv_total_reports)
-            tvTotalReports?.text = reports.size.toString()
+            // AI 분석 상태 업데이트
+            val tvAnalysisStatus = contentView.findViewById<TextView>(R.id.tv_analysis_status)
+            tvAnalysisStatus?.text = if (reportCount > 0) "활성화" else "대기중"
+            tvAnalysisStatus?.setTextColor(if (reportCount > 0) 
+                ContextCompat.getColor(this@LedgerReportActivity, android.R.color.holo_green_dark) else 
+                ContextCompat.getColor(this@LedgerReportActivity, android.R.color.darker_gray))
             
             // 최근 생성일 업데이트
             val tvRecentDate = contentView.findViewById<TextView>(R.id.tv_recent_date)
-            if (reports.isNotEmpty()) {
-                val latestReport = reports.maxByOrNull { 
+            if (reportCount > 0) {
+                var latestTimestamp = 0L
+                for (i in 0 until reportsArray.length()) {
                     try {
-                        JSONObject(it).getLong("created_at")
-                    } catch (e: Exception) { 
-                        0L 
+                        val report = reportsArray.getJSONObject(i)
+                        val createdAt = report.getLong("created_at")
+                        if (createdAt > latestTimestamp) {
+                            latestTimestamp = createdAt
+                        }
+                    } catch (e: Exception) {
+                        // 날짜 파싱 오류 무시
                     }
                 }
                 
-                latestReport?.let { reportJson ->
-                    try {
-                        val reportData = JSONObject(reportJson)
-                        val createdAt = reportData.getLong("created_at")
-                        val dateFormat = SimpleDateFormat("MM/dd", Locale.KOREA)
-                        tvRecentDate?.text = dateFormat.format(Date(createdAt))
-                    } catch (e: Exception) {
-                        tvRecentDate?.text = "오늘"
-                    }
+                if (latestTimestamp > 0) {
+                    val dateFormat = SimpleDateFormat("MM/dd", Locale.KOREA)
+                    tvRecentDate?.text = dateFormat.format(Date(latestTimestamp))
+                } else {
+                    tvRecentDate?.text = "오늘"
                 }
             } else {
                 tvRecentDate?.text = "없음"
             }
             
-            Log.d("LedgerReportActivity", "통계 업데이트 완료: ${reports.size}개 리포트")
+            Log.d("LedgerReportActivity", "통계 업데이트 완료: ${reportCount}개 리포트")
         } catch (e: Exception) {
             Log.e("LedgerReportActivity", "통계 업데이트 실패", e)
+            // 오류 시 기본값 설정
+            val tvAnalysisStatus = contentView.findViewById<TextView>(R.id.tv_analysis_status)
+            tvAnalysisStatus?.text = "오류"
+            tvAnalysisStatus?.setTextColor(ContextCompat.getColor(this@LedgerReportActivity, android.R.color.holo_red_dark))
+            val tvRecentDate = contentView.findViewById<TextView>(R.id.tv_recent_date)
+            tvRecentDate?.text = "없음"
         }
     }
 
@@ -1186,7 +1284,7 @@ class LedgerReportActivity : BaseActivity() {
     }
     
     private fun formatLedgerAmount(amount: Int): String {
-        return String.format("%,d", amount)
+        return "${String.format(Locale.US, "%,d", amount)}원"
     }
     
     override fun getCurrentClubId(): Int {
@@ -1212,16 +1310,185 @@ class LedgerReportActivity : BaseActivity() {
                 // 즉시 목록 새로고침 (강제)
                 Log.d("LedgerReportActivity", "🔄 리포트 생성 후 강제 새로고침 시작")
                 
-                // 1초 후에 새로고침 (백엔드 저장 완료 대기)
+                // 즉시 새로고침 (로컬 저장된 데이터 표시)
+                loadAIReports()
+                
+                // 통계 업데이트
+                val contentView = findViewById<android.widget.FrameLayout>(R.id.content_container)?.getChildAt(0)
+                contentView?.let { updateStatistics(it) }
+                
+                // 1초 후에 한번 더 새로고침 (백엔드 동기화 확인)
                 android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
-                    Log.d("LedgerReportActivity", "⏰ 1초 후 새로고침 실행")
+                    Log.d("LedgerReportActivity", "⏰ 1초 후 추가 새로고침 실행")
                     loadAIReports()
                     
-                    // 통계 업데이트
-                    val contentView = findViewById<android.widget.FrameLayout>(R.id.content_container)?.getChildAt(0)
-                    contentView?.let { updateStatistics(it) }
+                    // 통계 재업데이트
+                    val contentView2 = findViewById<android.widget.FrameLayout>(R.id.content_container)?.getChildAt(0)
+                    contentView2?.let { updateStatistics(it) }
                 }, 1000)
             }
+        }
+    }
+
+    private fun setupLedgerSelectionForReport(contentView: View) {
+        Log.d("LedgerReportActivity", "장부 선택 UI 설정 시작")
+        
+        val clubId = getCurrentClubId()
+        if (clubId <= 0) return
+        
+        // 장부 목록 조회
+        ApiClient.getApiService().getLedgerList(clubId).enqueue(object : retrofit2.Callback<List<LedgerApiItem>> {
+            override fun onResponse(
+                call: retrofit2.Call<List<LedgerApiItem>>,
+                response: retrofit2.Response<List<LedgerApiItem>>
+            ) {
+                if (response.isSuccessful) {
+                    val ledgers = response.body() ?: emptyList()
+                    Log.d("LedgerReportActivity", "조회된 장부 수: ${ledgers.size}")
+                    
+                    if (ledgers.size > 1) {
+                        // 여러 장부가 있을 때만 선택 UI 표시
+                        showLedgerSelectionUI(contentView, ledgers)
+                    } else {
+                        // 장부가 1개이거나 없으면 선택 UI 숨김
+                        hideLedgerSelectionUI(contentView)
+                    }
+                } else {
+                    Log.e("LedgerReportActivity", "장부 목록 조회 실패: ${response.code()}")
+                    hideLedgerSelectionUI(contentView)
+                }
+            }
+            
+            override fun onFailure(call: retrofit2.Call<List<LedgerApiItem>>, t: Throwable) {
+                Log.e("LedgerReportActivity", "장부 목록 조회 네트워크 오류", t)
+                hideLedgerSelectionUI(contentView)
+            }
+        })
+    }
+    
+    private fun showLedgerSelectionUI(contentView: View, ledgers: List<LedgerApiItem>) {
+        val selectionContainer = contentView.findViewById<LinearLayout>(R.id.ledger_selection_container)
+        val dropdown = contentView.findViewById<LinearLayout>(R.id.dropdown_ledger_selection_report)
+        val selectedText = contentView.findViewById<TextView>(R.id.tv_selected_ledger_report)
+        
+        selectionContainer?.visibility = View.VISIBLE
+        
+        // 첫 번째 장부를 기본 선택
+        if (ledgers.isNotEmpty()) {
+            selectedText?.text = ledgers[0].name
+            selectedText?.setTextColor(android.graphics.Color.parseColor("#333333"))
+        }
+        
+        dropdown?.setOnClickListener {
+            showLedgerSelectionDialog(ledgers, selectedText)
+        }
+        
+        Log.d("LedgerReportActivity", "장부 선택 UI 표시 완료")
+    }
+    
+    private fun hideLedgerSelectionUI(contentView: View) {
+        val selectionContainer = contentView.findViewById<LinearLayout>(R.id.ledger_selection_container)
+        selectionContainer?.visibility = View.GONE
+        Log.d("LedgerReportActivity", "장부 선택 UI 숨김 완료")
+    }
+    
+    private fun showLedgerSelectionDialog(ledgers: List<LedgerApiItem>, selectedText: TextView?) {
+        val ledgerNames = ledgers.map { "${it.name} (ID: ${it.id})" }.toTypedArray()
+        
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("장부 선택")
+            .setMessage("보고서를 보여줄 장부를 선택하세요")
+            .setItems(ledgerNames) { _, which ->
+                val selectedLedger = ledgers[which]
+                selectedText?.text = selectedLedger.name
+                selectedText?.setTextColor(android.graphics.Color.parseColor("#333333"))
+                
+                // 선택된 장부에 따라 리포트 필터링/새로고침
+                onLedgerSelected(selectedLedger.id)
+            }
+            .show()
+    }
+    
+    private fun onLedgerSelected(ledgerId: Int) {
+        Log.d("LedgerReportActivity", "장부 선택됨: $ledgerId")
+        // 선택된 장부에 맞는 리포트 목록 새로고침
+        loadAIReports()
+    }
+    
+    private fun deleteReport(reportJson: String, position: Int) {
+        try {
+            val reportData = JSONObject(reportJson)
+            val reportId = reportData.optInt("id", -1)
+            
+            if (reportId == -1) {
+                // 로컬 저장된 리포트 삭제
+                deleteLocalReport(reportJson, position)
+                return
+            }
+            
+            // 백엔드에서 리포트 삭제
+            val apiService = ApiClient.getApiService()
+            apiService.deleteReport(reportId).enqueue(object : Callback<okhttp3.ResponseBody> {
+                override fun onResponse(call: Call<okhttp3.ResponseBody>, response: Response<okhttp3.ResponseBody>) {
+                    if (response.isSuccessful) {
+                        runOnUiThread {
+                            Toast.makeText(this@LedgerReportActivity, "리포트가 삭제되었습니다", Toast.LENGTH_SHORT).show()
+                            // 로컬에서도 삭제
+                            deleteLocalReport(reportJson, position)
+                        }
+                    } else {
+                        runOnUiThread {
+                            Toast.makeText(this@LedgerReportActivity, "리포트 삭제에 실패했습니다", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+                
+                override fun onFailure(call: Call<okhttp3.ResponseBody>, t: Throwable) {
+                    runOnUiThread {
+                        Toast.makeText(this@LedgerReportActivity, "네트워크 오류: ${t.message}", Toast.LENGTH_SHORT).show()
+                        // 네트워크 실패시에도 로컬에서는 삭제
+                        deleteLocalReport(reportJson, position)
+                    }
+                }
+            })
+            
+        } catch (e: Exception) {
+            Log.e("LedgerReportActivity", "리포트 삭제 실패", e)
+            Toast.makeText(this, "리포트 삭제에 실패했습니다: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
+    }
+    
+    private fun deleteLocalReport(reportJson: String, position: Int) {
+        try {
+            val clubId = getCurrentClubId()
+            val sharedPref = getSharedPreferences("ai_reports_club_$clubId", Context.MODE_PRIVATE)
+            
+            // 현재 리포트 목록 로드
+            val reportsJson = sharedPref.getString("reports_json", "[]")
+            val reportsArray = org.json.JSONArray(reportsJson)
+            
+            // 삭제할 리포트 찾기 및 제거
+            val updatedReports = org.json.JSONArray()
+            for (i in 0 until reportsArray.length()) {
+                val report = reportsArray.getJSONObject(i)
+                if (report.toString() != reportJson) {
+                    updatedReports.put(report)
+                }
+            }
+            
+            // 업데이트된 리포트 목록 저장
+            sharedPref.edit()
+                .putString("reports_json", updatedReports.toString())
+                .apply()
+            
+            // 리포트 목록 새로고침
+            loadAIReports()
+            
+            Log.d("LedgerReportActivity", "로컬 리포트 삭제 완료")
+            
+        } catch (e: Exception) {
+            Log.e("LedgerReportActivity", "로컬 리포트 삭제 실패", e)
+            Toast.makeText(this, "로컬 리포트 삭제에 실패했습니다: ${e.message}", Toast.LENGTH_SHORT).show()
         }
     }
 }

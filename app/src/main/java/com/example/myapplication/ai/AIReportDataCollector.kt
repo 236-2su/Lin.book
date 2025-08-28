@@ -4,7 +4,7 @@ import com.example.myapplication.api.ApiClient
 import com.example.myapplication.ClubItem
 import com.example.myapplication.LedgerApiItem
 import com.example.myapplication.TransactionItem
-import com.example.myapplication.EventItem
+import com.example.myapplication.api.ApiService.EventItem
 import com.example.myapplication.BoardItem
 import android.content.Context
 import android.content.SharedPreferences
