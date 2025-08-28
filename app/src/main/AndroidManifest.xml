@@ -105,6 +105,10 @@
             android:name=".ClubMemberManagementActivity"
             android:exported="false" />
 
+        <activity
+            android:name=".ClubEventLedgerDetailActivity"
+            android:exported="false" />
+
     </application>
 
 </manifest>

@@ -261,18 +261,31 @@ class ClubMemberManagementActivity : AppCompatActivity() {
         val btnJoinRequest = findViewById<TextView>(R.id.btnJoinRequest)
         
         if (isShowingAll) {
-            // 전체 탭 선택
-            // TODO: btn_all_selected 드로어블 추가 후 주석 해제
-            // btnAll?.setBackgroundResource(R.drawable.btn_all_selected)
-            btnAll?.setTextColor(resources.getColor(android.R.color.black, null))
-            // btnJoinRequest?.setBackgroundResource(R.drawable.btn_all)
-            btnJoinRequest?.setTextColor(resources.getColor(android.R.color.darker_gray, null))
+            // 전체 탭 선택 - Me 스타일 적용
+            btnAll?.apply {
+                setTextAppearance(R.style.ReferenceSmallButton_Me)
+                setBackgroundResource(R.drawable.btn_me_selected)
+                setTextColor(resources.getColor(android.R.color.white, null))
+            }
+            // 가입 요청 탭 미선택 - 파란색 테두리
+            btnJoinRequest?.apply {
+                setTextAppearance(R.style.ReferenceSmallButton_All)
+                setBackgroundResource(R.drawable.tab_unselected_border)
+                setTextColor(resources.getColor(android.R.color.black, null))
+            }
         } else {
-            // 가입 요청 탭 선택
-            // btnAll?.setBackgroundResource(R.drawable.btn_all)
-            btnAll?.setTextColor(resources.getColor(android.R.color.darker_gray, null))
-            // btnJoinRequest?.setBackgroundResource(R.drawable.btn_all_selected)
-            btnJoinRequest?.setTextColor(resources.getColor(android.R.color.black, null))
+            // 전체 탭 미선택 - 파란색 테두리
+            btnAll?.apply {
+                setTextAppearance(R.style.ReferenceSmallButton_All)
+                setBackgroundResource(R.drawable.tab_unselected_border)
+                setTextColor(resources.getColor(android.R.color.black, null))
+            }
+            // 가입 요청 탭 선택 - Me 스타일 적용
+            btnJoinRequest?.apply {
+                setTextAppearance(R.style.ReferenceSmallButton_Me)
+                setBackgroundResource(R.drawable.btn_me_selected)
+                setTextColor(resources.getColor(android.R.color.white, null))
+            }
         }
     }
     

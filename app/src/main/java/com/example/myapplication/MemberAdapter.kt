@@ -65,11 +65,15 @@ class MemberAdapter(
             memberPhone.text = member.phone
             joinDate.text = "가입일: ${member.joinDate}"
 
-            // Me 배지 표시 여부
+            // Me 배지 표시 여부 및 테두리 설정
             if (member.isMe) {
                 meBadge.visibility = View.VISIBLE
+                // Me 배지와 같은 색상의 테두리 적용
+                itemView.setBackgroundResource(R.drawable.border_me)
             } else {
                 meBadge.visibility = View.GONE
+                // 테두리 제거
+                itemView.setBackgroundResource(android.R.color.transparent)
             }
 
             // 역할에 따른 배지 텍스트 설정

@@ -1,5 +1,6 @@
 package com.example.myapplication
 
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -25,6 +26,18 @@ class EventLedgerAdapter(
         val event = events[position]
         holder.nameTextView.text = event.name
         holder.periodTextView.text = "행사 예정 기간: ${event.start_date} ~ ${event.end_date}"
+        
+        holder.itemView.setOnClickListener {
+            val context = holder.itemView.context
+            val intent = Intent(context, ClubEventLedgerDetailActivity::class.java).apply {
+                putExtra("club_pk", (context as ClubEventLedgerListActivity).intent.getIntExtra(ClubEventLedgerListActivity.EXTRA_CLUB_PK, -1))
+                putExtra("event_name", event.name)
+                putExtra("event_start_date", event.start_date)
+                putExtra("event_end_date", event.end_date)
+                putExtra("event_pk", event.id)
+            }
+            context.startActivity(intent)
+        }
     }
 
     override fun getItemCount(): Int = events.size
