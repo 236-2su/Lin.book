@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res/auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -63,6 +63,7 @@
 
                 </LinearLayout>
 
+
             </LinearLayout>
 
             <!-- 통계 카드 -->
@@ -83,19 +84,19 @@
                     android:gravity="center">
 
                     <TextView
-                        android:id="@+id/tv_total_reports"
+                        android:id="@+id/tv_analysis_status"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="0"
-                        android:textSize="20sp"
-                        android:textColor="#1565C0"
+                        android:text="활성화"
+                        android:textSize="14sp"
+                        android:textColor="#4CAF50"
                         android:textStyle="bold"
                         android:fontFamily="sans-serif-black" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="총 리포트"
+                        android:text="AI 분석 상태"
                         android:textSize="12sp"
                         android:textColor="#666666"
                         android:fontFamily="sans-serif-medium"
@@ -181,15 +182,58 @@
             android:paddingHorizontal="24dp"
             android:paddingTop="20dp">
 
-            <!-- 리포트 목록 제목 -->
-            <TextView
-                android:layout_width="wrap_content"
+
+            <!-- 장부 선택 영역 -->
+            <LinearLayout
+                android:id="@+id/ledger_selection_container"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="AI 리포트 목록"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:textColor="#333333"
-                android:layout_marginBottom="16dp" />
+                android:orientation="vertical"
+                android:layout_marginBottom="16dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="장부 선택"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="#333333"
+                    android:layout_marginBottom="8dp" />
+
+                <LinearLayout
+                    android:id="@+id/dropdown_ledger_selection_report"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:background="@drawable/btn_unselected"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingHorizontal="16dp"
+                    android:layout_marginBottom="16dp"
+                    android:foreground="?android:attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true">
+
+                    <TextView
+                        android:id="@+id/tv_selected_ledger_report"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="장부를 선택하세요"
+                        android:textSize="14sp"
+                        android:textColor="#CCCCCC"
+                        android:fontFamily="sans-serif-medium" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="▼"
+                        android:textSize="12sp"
+                        android:textColor="#999999" />
+
+                </LinearLayout>
+
+            </LinearLayout>
 
             <!-- 빈 상태 표시 -->
             <LinearLayout
@@ -245,17 +289,6 @@
                 
             </LinearLayout>
 
-            <!-- 섹션 타이틀 -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="16dp"
-                android:layout_marginHorizontal="24dp"
-                android:text="AI 리포트 목록"
-                android:textSize="17.3sp"
-                android:textStyle="bold"
-                android:textColor="#333333" />
 
             <!-- 리포트 목록 RecyclerView -->
             <androidx.recyclerview.widget.RecyclerView
@@ -272,18 +305,15 @@
 
     </ScrollView>
 
-    <!-- Floating Action Button - 화면에 완전히 고정 -->
-    <Button
+    <!-- Create Report Button - Bottom Right Position -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/btn_create_report"
-        android:layout_width="56dp"
-        android:layout_height="56dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
-        android:layout_margin="24dp"
-        android:text="+"
-        android:textSize="24sp"
-        android:textColor="#FFFFFF"
-        android:textStyle="bold"
-        android:background="@drawable/btn_register_blue"
-        android:elevation="8dp" />
+        android:layout_margin="16dp"
+        android:src="@drawable/ic_add"
+        android:backgroundTint="#1976D2"
+        android:elevation="6dp" />
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+</FrameLayout>

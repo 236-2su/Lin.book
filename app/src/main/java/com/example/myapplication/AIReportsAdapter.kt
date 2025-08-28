@@ -5,12 +5,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import android.app.AlertDialog
 import org.json.JSONObject
 import java.text.SimpleDateFormat
 import java.util.*
 
 class AIReportsAdapter(
-    private val onItemClick: (String) -> Unit
+    private val onItemClick: (String) -> Unit,
+    private val onDeleteClick: ((String, Int) -> Unit)? = null
 ) : RecyclerView.Adapter<AIReportsAdapter.ReportViewHolder>() {
 
     private var reports = listOf<String>()
@@ -45,7 +47,7 @@ class AIReportsAdapter(
     override fun onBindViewHolder(holder: ReportViewHolder, position: Int) {
         android.util.Log.d("AIReportsAdapter", "🔗 onBindViewHolder 호출됨 - 위치: $position")
         if (position < reports.size) {
-            holder.bind(reports[position], onItemClick)
+            holder.bind(reports[position], onItemClick, onDeleteClick, position)
             android.util.Log.d("AIReportsAdapter", "✅ ViewHolder 바인딩 완료 - 위치: $position")
         } else {
             android.util.Log.e("AIReportsAdapter", "❌ 잘못된 위치: $position, 리포트 수: ${reports.size}")
@@ -59,8 +61,9 @@ class AIReportsAdapter(
         private val tvCreatedDate: TextView = itemView.findViewById(R.id.tv_created_date)
         private val tvReportTitle: TextView = itemView.findViewById(R.id.tv_report_title)
         private val tvReportPreview: TextView = itemView.findViewById(R.id.tv_report_preview)
+        private val btnDeleteReport: TextView = itemView.findViewById(R.id.btn_delete_report)
 
-                fun bind(reportJson: String, onItemClick: (String) -> Unit) {
+                fun bind(reportJson: String, onItemClick: (String) -> Unit, onDeleteClick: ((String, Int) -> Unit)? = null, position: Int = -1) {
             try {
                 val reportData = JSONObject(reportJson)
                 
@@ -133,6 +136,19 @@ class AIReportsAdapter(
                     onItemClick(reportJson)
                 }
                 
+                // 삭제 버튼 클릭 처리
+                btnDeleteReport.setOnClickListener {
+                    val title = reportData.optString("title", "이 리포트")
+                    AlertDialog.Builder(itemView.context)
+                        .setTitle("리포트 삭제")
+                        .setMessage("'$title'을(를) 정말 삭제하시겠습니까?")
+                        .setPositiveButton("삭제") { _, _ ->
+                            onDeleteClick?.invoke(reportJson, position)
+                        }
+                        .setNegativeButton("취소", null)
+                        .show()
+                }
+                
                 android.util.Log.d("AIReportsAdapter", "리포트 바인딩 완료: ${reportData.optString("title")} (타입: $type)")
                 
             } catch (e: Exception) {
@@ -147,6 +163,18 @@ class AIReportsAdapter(
                 
                 itemView.setOnClickListener {
                     onItemClick(reportJson)
+                }
+                
+                // 삭제 버튼 클릭 처리 (예외 처리 블록)
+                btnDeleteReport.setOnClickListener {
+                    AlertDialog.Builder(itemView.context)
+                        .setTitle("리포트 삭제")
+                        .setMessage("이 리포트를 정말 삭제하시겠습니까?")
+                        .setPositiveButton("삭제") { _, _ ->
+                            onDeleteClick?.invoke(reportJson, position)
+                        }
+                        .setNegativeButton("취소", null)
+                        .show()
                 }
             }
         }
