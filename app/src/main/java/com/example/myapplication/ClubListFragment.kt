@@ -139,6 +139,9 @@ class ClubListFragment : Fragment() {
     }
 
     private fun displayClubList(clubs: List<ClubItem>) {
+        // Fragment가 detach되었으면 종료
+        if (!isAdded) return
+        
         if (clubItems.isEmpty()) {
             clubItems.clear()
             clubItems.addAll(clubs)
@@ -264,6 +267,8 @@ class ClubListFragment : Fragment() {
     }
 
     private fun displaySampleData() {
+        // Fragment가 detach되었으면 종료
+        if (!isAdded) return
         val sampleClubs = listOf(
             ClubItem(1, "방구석 경제", "경제학부", "academic", "경제", "경제를 좋아하는 사람이라면 누구나...", "#분위기가 좋은", "2025-08-23", "학생회관 421호", "1줄 소개"),
             ClubItem(2, "짱구네 코딩", "컴퓨터학부", "academic", "프로그래밍", "코딩을 좋아하는 사람들이 모여...", "#분위기가좋은 #동아리실이 편한", "2025-08-23", "학생회관 421호", "1줄 소개")
@@ -272,7 +277,9 @@ class ClubListFragment : Fragment() {
     }
 
     private fun createClubCard(club: ClubItem): View {
-        // This part needs context (this -> requireContext())
+        // Fragment가 attach되지 않았으면 빈 View 반환
+        if (!isAdded) return View(context)
+        
         val cardView = LinearLayout(requireContext()).apply {
             layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply { setMargins(4, 4, 4, 16) }
             orientation = LinearLayout.VERTICAL

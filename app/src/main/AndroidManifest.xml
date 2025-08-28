@@ -106,11 +106,11 @@
             android:exported="false" />
 
         <activity
-            android:name=".AccountHistoryActivity"
+            android:name=".ClubMemberManagementActivity"
             android:exported="false" />
 
         <activity
-            android:name=".ClubUpdateActivity"
+            android:name=".ClubEventLedgerDetailActivity"
             android:exported="false" />
 
     </application>

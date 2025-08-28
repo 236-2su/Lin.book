@@ -76,7 +76,7 @@ interface ApiService {
         val location: String,
         val short_description: String
     )
-    
+
     @GET("/club/{club_pk}/ledger/{ledger_pk}/transactions/")
     fun getTransactions(
         @Path("club_pk") clubId: Int,
@@ -170,6 +170,18 @@ interface ApiService {
     @GET("user/{id}/")
     fun getUserDetail(@Path("id") userId: Int): Call<com.example.myapplication.UserDetail>
 
+    // 사용자 목록 조회
+    @GET("user/")
+    fun getUserList(): Call<List<com.example.myapplication.UserResponse>>
+
+    // 클럽 멤버 목록 조회
+    @GET("club/{club_pk}/members/")
+    fun getClubMembers(@Path("club_pk") clubId: Int): Call<List<com.example.myapplication.MemberResponse>>
+
+    // 가입 대기 멤버 목록 조회
+    @GET("club/{club_pk}/members/waiting/")
+    fun getWaitingMembers(@Path("club_pk") clubId: Int): Call<List<com.example.myapplication.MemberResponse>>
+
     // AI 리포트 관련 API
     // 월간 리포트 생성
     @POST("report/clubs/{club_pk}/ledgers/{ledger_pk}/reports/monthly/")
@@ -194,7 +206,7 @@ interface ApiService {
         @Path("club_id") clubId: Int,
         @Path("year") year: Int
     ): Call<AIReportResponse>
-    
+
     // 월간 리포트 목록 조회
     @GET("report/clubs/{club_pk}/ledgers/{ledger_pk}/reports/monthly/")
     fun getMonthlyReports(
@@ -203,7 +215,7 @@ interface ApiService {
         @retrofit2.http.Query("year") year: Int,
         @retrofit2.http.Query("month") month: Int
     ): Call<List<BackendReportItem>>
-    
+
     // 연간 리포트 목록 조회
     @GET("report/clubs/{club_pk}/ledgers/{ledger_pk}/reports/yearly/")
     fun getYearlyReports(
@@ -225,7 +237,7 @@ interface ApiService {
         val by_event: List<Map<String, Any>>,
         val daily_series: List<Map<String, Any>>?
     )
-    
+
     // 백엔드 저장된 리포트 데이터 클래스
     data class BackendReportItem(
         val id: Int,
