@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .views import MonthlyReportView, SimilarClubsYearlyReportView, YearlyReportView
+from .views import MonthlyReportView, ReportAdviceView, SimilarClubsYearlyReportView, YearlyReportView
 
 urlpatterns = [
     path(
@@ -18,4 +18,5 @@ urlpatterns = [
         SimilarClubsYearlyReportView.as_view(),
         name="similar-clubs-yearly-report",
     ),
+    path("report/reports/<int:report_pk>/advice/", ReportAdviceView.as_view(), name="report-advice"),
 ]

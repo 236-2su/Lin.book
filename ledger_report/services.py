@@ -1,8 +1,11 @@
 # ledger_report/services.py
+import json
+import os
 from calendar import monthrange
 from datetime import date as dt_date
 from typing import Optional
 
+import google.generativeai as genai
 from django.db.models import Case, IntegerField, Sum, Value, When
 from django.db.models.functions import TruncDate
 
@@ -153,8 +156,7 @@ def yearly_ledger_stats(
 ):
     """
     특정 장부의 연간 통계를 계산해 dict로 반환.
-    월별 상세 내역을 포함하며, 연간 전체 요약 정보를 추가로 제공합니다.
-    NOTE: 월별 통계를 12번 호출하므로, 성능에 민감한 경우 최적화가 필요할 수 있습니다.
+    월별 상세 내역을 포함하며, 연간 전체 요약 및 항목별 집계를 추가로 제공합니다.
     """
     today = dt_date.today()
     year = year or today.year
@@ -163,18 +165,38 @@ def yearly_ledger_stats(
     total_income = 0
     total_expense = 0
 
+    # 연간 항목별(by_type) 데이터 집계를 위한 딕셔너리
+    total_by_type = {}
+
     # 첫 달 통계를 먼저 가져와서 ledger_id 유효성 검사 및 club_id 확보
+    # NOTE: monthly_ledger_stats가 DB에 월별 보고서를 생성하므로, 이 구조를 유지합니다.
     first_month_stats = monthly_ledger_stats(ledger_id=ledger_id, year=year, month=1)
     by_month_stats[1] = first_month_stats
     total_income += first_month_stats["summary"]["income"]
     total_expense += first_month_stats["summary"]["expense"]
     club_id = first_month_stats["club_id"]
 
+    # 첫 달의 by_type 데이터를 total_by_type에 집계
+    for item in first_month_stats.get("by_type", []):
+        type_name = item["type"]
+        total_by_type[type_name] = {
+            "income": item.get("income", 0),
+            "expense": item.get("expense", 0),
+        }
+
     for month in range(2, 13):
         monthly_data = monthly_ledger_stats(ledger_id=ledger_id, year=year, month=month)
         by_month_stats[month] = monthly_data
         total_income += monthly_data["summary"]["income"]
         total_expense += monthly_data["summary"]["expense"]
+
+        # 월별 by_type 데이터를 total_by_type에 누적
+        for item in monthly_data.get("by_type", []):
+            type_name = item["type"]
+            if type_name not in total_by_type:
+                total_by_type[type_name] = {"income": 0, "expense": 0}
+            total_by_type[type_name]["income"] += item.get("income", 0)
+            total_by_type[type_name]["expense"] += item.get("expense", 0)
 
     stats_dict = {
         "ledger_id": ledger_id,
@@ -185,10 +207,11 @@ def yearly_ledger_stats(
             "expense": total_expense,
             "net": total_income - total_expense,
         },
+        "by_type": total_by_type,  # 연간 항목별 집계 데이터 추가
         "by_month": by_month_stats,
     }
 
-    # 보고서 생성
+    # 연간 보고서 DB 생성
     ledger = Ledger.objects.select_related("club").get(pk=ledger_id)
     club_name = ledger.club.name
     base_title = f"{club_name}_{year}년_보고서"
@@ -252,3 +275,70 @@ def generate_similar_clubs_yearly_report(club_id: int, year: int):
                 all_reports["similar_club_reports"].append(report_data)
 
     return all_reports
+
+
+# === LLM Configuration === #
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+CHATBOT_LLM_MODEL = "gemini-2.5-pro"
+
+genai.configure(api_key=GEMINI_API_KEY)
+
+
+# === LLM Definition === #
+class GeminiLLM:
+    def __init__(self, model_name=CHATBOT_LLM_MODEL):
+        self.model = genai.GenerativeModel(model_name)
+
+    def __call__(self, prompt: str, **kwargs) -> str:
+        try:
+            response = self.model.generate_content(prompt, **kwargs)
+            return response.text
+        except Exception as e:
+            return f"[Gemini API Error] {str(e)}"
+
+
+def get_gemini_llm() -> GeminiLLM:
+    return GeminiLLM()
+
+
+def generate_report_advice_with_llm(report_data: dict) -> str:
+    """
+    연간 보고서 데이터를 LLM에 전달하여 재무 조언을 생성합니다.
+    """
+    # LLM에 전달할 프롬프트를 구성합니다.
+    # JSON 데이터를 문자열로 변환하여 컨텍스트로 제공합니다.
+    report_str = json.dumps(report_data, indent=2, ensure_ascii=False)
+
+    system_prompt = "당신은 전문적인 동아리 재무 분석가입니다. 제공된 연간 재무 보고서 데이터를 바탕으로, 동아리 운영진이 다음 해 재무 계획을 세우는 데 도움이 될 만한 상세하고 구체적인 조언을 한국어로 작성해 주세요. 결과는 반드시 JSON 형태여야 합니다."
+
+    prompt = f"""
+{system_prompt}
+
+아래는 우리 동아리의 {report_data.get('year')}년 연간 재무 보고서 데이터입니다.
+
+[연간 재무 보고서 데이터]
+{report_str}
+
+[요청 사항]
+위 데이터를 심층적으로 분석하여 다음 내용을 포함하는 재무 분석 보고서 및 조언을 작성해 주세요. 결과는 반드시 JSON 형태이어야 합니다.
+
+1.  **총평:** 연간 총 수입, 총 지출, 순이익에 대한 요약 및 전반적인 재무 상태에 대한 평가.
+2.  **월별 동향 분석:** 수입과 지출이 가장 많았던 달을 언급하고, 그 원인에 대해 추측해 보세요. 월별 순이익의 변동 추이를 설명해 주세요.
+3.  **주요 지출 항목 분석:** 가장 큰 비중을 차지하는 지출 항목(type) 상위 2-3개를 식별하고, 해당 지출의 타당성과 절감 방안에 대해 조언해 주세요.
+4.  **수입원 분석:** 주요 수입원의 특징을 분석하고, 수입 증대를 위한 아이디어를 제안해 주세요.
+5.  **종합 제언:** 분석 내용을 바탕으로, 다음 해에 동아리가 재정적으로 더 발전하기 위한 구체적인 실행 계획이나 목표를 2~3가지 제안해 주세요.
+
+보고서 결과는 API 출력으로 제공될 예정이므로 반드시 다음과 완전히 같은 JSON 형태여야 합니다.
+{{
+"overall" : string,
+"by_month" : string,
+"by_income" : string,
+"advices" : [string, string...]
+}}
+"""
+
+    # LLM을 호출하여 조언을 생성합니다.
+    llm = get_gemini_llm()
+    advice = llm(prompt)
+
+    return advice
