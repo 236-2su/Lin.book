@@ -65,7 +65,7 @@ multidict==6.6.3
 mypy_extensions==1.1.0
 networkx==3.2.1
 nodeenv==1.9.1
-numpy==2.3.2
+numpy==2.0.2
 orjson==3.11.2
 packaging==25.0
 pillow==11.3.0
