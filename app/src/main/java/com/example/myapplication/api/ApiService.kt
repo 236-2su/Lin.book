@@ -5,6 +5,7 @@ import com.example.myapplication.ClubItem
 import com.example.myapplication.EventItem
 import com.example.myapplication.EventCreateRequest
 import com.example.myapplication.TransactionItem
+import com.example.myapplication.EventTransactionItem
 import com.example.myapplication.model.Ledger
 import com.example.myapplication.model.Transaction
 import retrofit2.Call
@@ -244,5 +245,28 @@ interface ApiService {
         val ledger: Int,
         val title: String,
         val content: Map<String, Any> // JSONField는 Map으로 받음
+    )
+
+    // 행사 거래내역 조회
+    @GET("club/{club_pk}/events/{event_pk}/transactions/")
+    fun getEventTransactions(
+        @Path("club_pk") clubId: Int,
+        @Path("event_pk") eventId: Int
+    ): Call<List<EventTransactionItem>>
+
+    // 행사 상세 조회
+    @GET("club/{club_pk}/events/{event_pk}/")
+    fun getEventDetail(
+        @Path("club_pk") clubId: Int,
+        @Path("event_pk") eventId: Int
+    ): Call<EventDetailResponse>
+
+    data class EventDetailResponse(
+        val id: Int,
+        val name: String,
+        val start_date: String,
+        val end_date: String,
+        val description: String,
+        val budget: Long
     )
 }

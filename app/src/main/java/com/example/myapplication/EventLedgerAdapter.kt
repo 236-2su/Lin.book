@@ -29,6 +29,8 @@ class EventLedgerAdapter(
         
         holder.itemView.setOnClickListener {
             val context = holder.itemView.context
+            android.util.Log.d("EventLedgerAdapter", "아이템 클릭됨 - 이벤트: ${event.name}")
+            
             val intent = Intent(context, ClubEventLedgerDetailActivity::class.java).apply {
                 putExtra("club_pk", (context as ClubEventLedgerListActivity).intent.getIntExtra(ClubEventLedgerListActivity.EXTRA_CLUB_PK, -1))
                 putExtra("event_name", event.name)
@@ -36,7 +38,16 @@ class EventLedgerAdapter(
                 putExtra("event_end_date", event.end_date)
                 putExtra("event_pk", event.id)
             }
-            context.startActivity(intent)
+            
+            android.util.Log.d("EventLedgerAdapter", "Intent: $intent")
+            android.util.Log.d("EventLedgerAdapter", "ClubEventLedgerDetailActivity로 이동 시작")
+            
+            try {
+                context.startActivity(intent)
+                android.util.Log.d("EventLedgerAdapter", "Activity 시작 성공")
+            } catch (e: Exception) {
+                android.util.Log.e("EventLedgerAdapter", "Activity 시작 실패: ${e.message}")
+            }
         }
     }
 

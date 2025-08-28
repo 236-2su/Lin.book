@@ -101,8 +101,11 @@ class ClubEventLedgerListActivity : AppCompatActivity() {
                     val events = response.body()!!
                     Log.d("ClubEventLedgerList", "API 성공: ${events.size}개 행사")
                     
+                    // start_date 기준 최신순 정렬 (내림차순)
+                    val sortedEvents = events.sortedByDescending { it.start_date }
+                    
                     eventList.clear()
-                    eventList.addAll(events)
+                    eventList.addAll(sortedEvents)
                     eventAdapter.notifyDataSetChanged()
                 } else {
                     Log.e("ClubEventLedgerList", "API 응답 오류: ${response.code()}")
