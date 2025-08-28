@@ -13,10 +13,12 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.snackbar.Snackbar
 import android.util.Log
+import android.content.SharedPreferences
 
 class ClubAnnouncementBoardDetailActivity : AppCompatActivity() {
     
     private lateinit var boardItem: BoardItem
+    private var isLiked: Boolean = false
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,6 +54,10 @@ class ClubAnnouncementBoardDetailActivity : AppCompatActivity() {
         findViewById<android.widget.ImageView>(R.id.iv_like)?.setOnClickListener {
             toggleLike()
         }
+
+        // 좋아요 초기 상태 반영
+        isLiked = isBoardLiked(boardItem.id)
+        updateLikeUi()
     }
 
     override fun onResume() {
@@ -211,6 +217,8 @@ class ClubAnnouncementBoardDetailActivity : AppCompatActivity() {
                     // 목록 렌더링
                     val container = findViewById<android.widget.LinearLayout>(R.id.comments_container)
                     container?.removeAllViews()
+                    val emptyView = findViewById<android.widget.LinearLayout>(R.id.empty_comments_placeholder)
+                    emptyView?.visibility = if (comments.isEmpty()) android.view.View.VISIBLE else android.view.View.GONE
                     val myUserPk = UserManager.getUserPk(this@ClubAnnouncementBoardDetailActivity) ?: -1
                     fetchMyClubMemberPk(clubPk, myUserPk) { myMemberPk ->
                     comments.forEach { comment ->
@@ -224,8 +232,9 @@ class ClubAnnouncementBoardDetailActivity : AppCompatActivity() {
                         }
 
                         val avatar = android.widget.ImageView(this@ClubAnnouncementBoardDetailActivity).apply {
-                            layoutParams = android.widget.LinearLayout.LayoutParams(44, 44)
-                            setImageResource(R.drawable.account)
+                            val size = dp(44)
+                            layoutParams = android.widget.LinearLayout.LayoutParams(size, size)
+                            setImageResource(R.drawable.profile_default)
                         }
                         row.addView(avatar)
 
@@ -257,7 +266,6 @@ class ClubAnnouncementBoardDetailActivity : AppCompatActivity() {
                             layoutParams = android.widget.LinearLayout.LayoutParams(0, 1).apply { weight = 1f }
                         }
                         metaRow.addView(spacer)
-
                         val isMine = (comment.author == myUserPk) || (myMemberPk != null && comment.author == myMemberPk)
                         if (isMine) {
                             val editBtn = android.widget.TextView(this@ClubAnnouncementBoardDetailActivity).apply {
@@ -289,26 +297,35 @@ class ClubAnnouncementBoardDetailActivity : AppCompatActivity() {
                             setPadding(0, 4, 0, 0)
                         }
 
-                        // 좋아요 버튼/수는 메타 행의 우측에 배치
-                        val likeIcon = android.widget.ImageView(this@ClubAnnouncementBoardDetailActivity).apply {
-                            layoutParams = android.widget.LinearLayout.LayoutParams(100, 100)
-                            setPadding(8, 8, 8, 8)
-                            isClickable = true
-                            isFocusable = true
-                            setImageResource(R.drawable.like_img)
-                            setOnClickListener { toggleCommentLike(comment) }
+                        // 게시글과 동일 레이아웃로 좋아요 영역 구성 (별도 행, 우측 정렬)
+                        val likesRow = android.widget.LinearLayout(this@ClubAnnouncementBoardDetailActivity).apply {
+                            orientation = android.widget.LinearLayout.HORIZONTAL
+                            gravity = android.view.Gravity.END or android.view.Gravity.CENTER_VERTICAL
                         }
-                        val likeCount = android.widget.TextView(this@ClubAnnouncementBoardDetailActivity).apply {
+                        val ivLike = android.widget.ImageView(this@ClubAnnouncementBoardDetailActivity).apply {
+                            val size = dp(24)
+                            layoutParams = android.widget.LinearLayout.LayoutParams(size, size)
+                            val liked = isCommentLiked(comment.id)
+                            setImageResource(if (liked) R.drawable.ic_heart_filled else R.drawable.ic_heart_outline)
+                            setOnClickListener {
+                                toggleCommentLike(comment)
+                                val nowLiked = !isCommentLiked(comment.id)
+                                setCommentLiked(comment.id, nowLiked)
+                                setImageResource(if (nowLiked) R.drawable.ic_heart_filled else R.drawable.ic_heart_outline)
+                            }
+                        }
+                        val tvLikeCount = android.widget.TextView(this@ClubAnnouncementBoardDetailActivity).apply {
                             text = (comment.likes ?: 0).toString()
                             textSize = 14f
-                            setPadding(6, 0, 0, 0)
+                            setPadding(dp(6), 0, 0, 0)
                         }
-                        metaRow.addView(likeIcon)
-                        metaRow.addView(likeCount)
+                        likesRow.addView(ivLike)
+                        likesRow.addView(tvLikeCount)
 
                         right.addView(metaRow)
                         right.addView(createdAtView)
                         right.addView(contentView)
+                        right.addView(likesRow)
                         row.addView(right)
                         container?.addView(row)
                     }
@@ -557,7 +574,7 @@ class ClubAnnouncementBoardDetailActivity : AppCompatActivity() {
             })
     }
 
-    private var isLiked: Boolean = false
+    
 
     private fun toggleLike() {
         val clubPk = intent.getIntExtra("club_pk", -1)
@@ -574,6 +591,7 @@ class ClubAnnouncementBoardDetailActivity : AppCompatActivity() {
                 if (response.isSuccessful) {
                     isLiked = !isLiked
                     updateLikeUi()
+                    setBoardLiked(boardId, isLiked)
                     refreshMeta()
                 } else {
                     val code = response.code()
@@ -599,6 +617,18 @@ class ClubAnnouncementBoardDetailActivity : AppCompatActivity() {
             likeView?.setImageResource(R.drawable.ic_heart_outline)
         }
     }
+
+    // --- 좋아요 상태 저장/복원 및 유틸 ---
+    private fun likesPrefs(): SharedPreferences = getSharedPreferences("likes", MODE_PRIVATE)
+    private fun isBoardLiked(boardId: Int): Boolean = likesPrefs().getBoolean("board_$boardId", false)
+    private fun setBoardLiked(boardId: Int, liked: Boolean) {
+        likesPrefs().edit().putBoolean("board_$boardId", liked).apply()
+    }
+    private fun isCommentLiked(commentId: Int): Boolean = likesPrefs().getBoolean("comment_$commentId", false)
+    private fun setCommentLiked(commentId: Int, liked: Boolean) {
+        likesPrefs().edit().putBoolean("comment_$commentId", liked).apply()
+    }
+    private fun dp(value: Int): Int = (value * resources.displayMetrics.density).toInt()
     
     private fun showPopupMenu(view: View) {
         val popup = PopupMenu(this, view)

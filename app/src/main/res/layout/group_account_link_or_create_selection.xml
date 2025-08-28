@@ -148,7 +148,7 @@
 
         <ImageView
             style="@style/ReferenceIcon"
-            android:src="@drawable/account"
+            android:src="@drawable/profile_default"
             android:layout_marginBottom="8dp" />
 
         <TextView

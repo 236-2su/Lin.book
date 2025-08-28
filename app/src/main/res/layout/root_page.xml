@@ -126,32 +126,23 @@
     </LinearLayout>
 
     <!-- 내용 컨테이너 (정확한 패딩과 위치) -->
-    <ScrollView
+    <FrameLayout
+        android:id="@+id/content_container"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:fillViewport="true"
         android:paddingStart="24dp"
         android:paddingTop="8dp"
         android:paddingEnd="24dp"
         android:paddingBottom="16dp">
 
-        <FrameLayout
-            android:id="@+id/content_container"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingStart="0dp"
-            android:paddingEnd="0dp">
+        <!-- 여기에 event_list_layout 포함 -->
+<!--        <include layout="@layout/layout_event_list" />-->
+        <!-- 여기에 event_create_layout 포함 -->
+<!--        <include layout="@layout/layout_event_create" />-->
+        <!-- 여기에 event_detail_layout 포함 -->
+<!--        <include layout="@layout/layout_event_detail" />-->
 
-            <!-- 여기에 event_list_layout 포함 -->
-<!--            <include layout="@layout/layout_event_list" />-->
-            <!-- 여기에 event_create_layout 포함 -->
-<!--            <include layout="@layout/layout_event_create" />-->
-            <!-- 여기에 event_detail_layout 포함 -->
-<!--            <include layout="@layout/layout_event_detail" />-->
-
-        </FrameLayout>
-
-    </ScrollView>
+    </FrameLayout>
 
 </LinearLayout>

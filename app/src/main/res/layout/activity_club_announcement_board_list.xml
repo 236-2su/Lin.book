@@ -10,14 +10,16 @@
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:gravity="center_horizontal"
-        android:padding="16dp">
+        android:paddingStart="24dp"
+        android:paddingTop="60dp"
+        android:paddingEnd="24dp"
+        android:paddingBottom="8dp">
 
     <!-- 뒤로가기 버튼 -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginTop="16dp"
         android:layout_marginBottom="24dp"
         android:layout_gravity="center_vertical">
 
@@ -182,7 +184,7 @@
 
                 <TextView
                     android:id="@+id/btn_notice"
-                    style="@style/ReferenceCategoryButton.Selected"
+                    style="@style/BoardButtonSelectedStyle"
                     android:text="공지사항" />
 
                 <TextView

@@ -5,7 +5,7 @@
     <padding android:left="16dp" android:top="10dp" android:right="16dp" android:bottom="10dp" />
     <gradient
         android:type="linear"
-        android:startColor="#7B61FF"
-        android:endColor="#FFD36E"
+        android:startColor="#00C2A8"
+        android:endColor="#1976D2"
         android:angle="0" />
 </shape>

@@ -156,18 +156,20 @@
 
 
 
-    <!-- 오른쪽 하단 AI 버튼: 파란 FAB과 동일한 노출 방식(FAB)으로 배치 -->
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
+    <!-- 오른쪽 중앙 고정 AI 버튼 -->
+    <TextView
         android:id="@+id/fab_ai_helper"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
         android:layout_gravity="bottom|end"
-        android:layout_marginEnd="24dp"
-        android:layout_marginBottom="24dp"
-        app:fabSize="normal"
-        app:backgroundTint="#7B61FF"
-        app:srcCompat="@drawable/ic_ai_logo"
-        app:tint="#FFFFFF"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="96dp"
+        android:background="@drawable/bg_fab_ai"
+        android:gravity="center"
+        android:text="AI"
+        android:textColor="#FFFFFF"
+        android:textStyle="bold"
+        android:textSize="20sp"
         android:contentDescription="AI 추천" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

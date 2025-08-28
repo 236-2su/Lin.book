@@ -3,6 +3,7 @@ package com.example.myapplication
 import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
+import android.content.SharedPreferences
 import android.view.View
 import android.widget.Button
 import android.widget.ImageView
@@ -43,6 +44,10 @@ class ClubForumBoardDetailActivity : AppCompatActivity() {
         findViewById<ImageView>(R.id.iv_like)?.setOnClickListener {
             toggleLike()
         }
+
+        // 좋아요 초기 상태 반영
+        isLiked = isBoardLiked(boardItem.id)
+        updateLikeUi()
     }
 
     override fun onResume() {
@@ -149,6 +154,8 @@ class ClubForumBoardDetailActivity : AppCompatActivity() {
                     findViewById<android.widget.TextView>(R.id.tv_comment_header)?.text = "댓글(${comments.size})"
                     val container = findViewById<android.widget.LinearLayout>(R.id.comments_container)
                     container?.removeAllViews()
+                    val emptyView = findViewById<android.widget.LinearLayout>(R.id.empty_comments_placeholder)
+                    emptyView?.visibility = if (comments.isEmpty()) android.view.View.VISIBLE else android.view.View.GONE
                     val myUserPk = UserManager.getUserPk(this@ClubForumBoardDetailActivity) ?: -1
                     comments.forEach { comment ->
                         val row = android.widget.LinearLayout(this@ClubForumBoardDetailActivity).apply {
@@ -161,8 +168,9 @@ class ClubForumBoardDetailActivity : AppCompatActivity() {
                         }
 
                         val avatar = android.widget.ImageView(this@ClubForumBoardDetailActivity).apply {
-                            layoutParams = android.widget.LinearLayout.LayoutParams(44, 44)
-                            setImageResource(R.drawable.account)
+                            val size = dp(44)
+                            layoutParams = android.widget.LinearLayout.LayoutParams(size, size)
+                            setImageResource(R.drawable.profile_default)
                         }
                         row.addView(avatar)
 
@@ -224,21 +232,29 @@ class ClubForumBoardDetailActivity : AppCompatActivity() {
                             metaRow.addView(deleteBtn)
                         }
 
-                        val likeIcon = android.widget.ImageView(this@ClubForumBoardDetailActivity).apply {
-                            layoutParams = android.widget.LinearLayout.LayoutParams(100, 100)
-                            setPadding(8, 8, 8, 8)
-                            isClickable = true
-                            isFocusable = true
-                            setImageResource(R.drawable.like_img)
-                            setOnClickListener { toggleCommentLike(comment) }
+                        val likesRow = android.widget.LinearLayout(this@ClubForumBoardDetailActivity).apply {
+                            orientation = android.widget.LinearLayout.HORIZONTAL
+                            gravity = android.view.Gravity.END or android.view.Gravity.CENTER_VERTICAL
                         }
-                        val likeCount = android.widget.TextView(this@ClubForumBoardDetailActivity).apply {
+                        val ivLike = android.widget.ImageView(this@ClubForumBoardDetailActivity).apply {
+                            val size = dp(24)
+                            layoutParams = android.widget.LinearLayout.LayoutParams(size, size)
+                            val liked = isCommentLiked(comment.id)
+                            setImageResource(if (liked) R.drawable.ic_heart_filled else R.drawable.ic_heart_outline)
+                            setOnClickListener {
+                                toggleCommentLike(comment)
+                                val nowLiked = !isCommentLiked(comment.id)
+                                setCommentLiked(comment.id, nowLiked)
+                                setImageResource(if (nowLiked) R.drawable.ic_heart_filled else R.drawable.ic_heart_outline)
+                            }
+                        }
+                        val tvLikeCount = android.widget.TextView(this@ClubForumBoardDetailActivity).apply {
                             text = (comment.likes ?: 0).toString()
                             textSize = 14f
-                            setPadding(6, 0, 0, 0)
+                            setPadding(dp(6), 0, 0, 0)
                         }
-                        metaRow.addView(likeIcon)
-                        metaRow.addView(likeCount)
+                        likesRow.addView(ivLike)
+                        likesRow.addView(tvLikeCount)
 
                         right.addView(metaRow)
                         val createdAtView = android.widget.TextView(this@ClubForumBoardDetailActivity).apply {
@@ -252,6 +268,7 @@ class ClubForumBoardDetailActivity : AppCompatActivity() {
                         }
                         right.addView(createdAtView)
                         right.addView(contentView)
+                        right.addView(likesRow)
                         row.addView(right)
                         container?.addView(row)
                     }
@@ -523,6 +540,7 @@ class ClubForumBoardDetailActivity : AppCompatActivity() {
                     // 상태 토글 및 UI 반영
                     isLiked = !isLiked
                     updateLikeUi()
+                    setBoardLiked(boardId, isLiked)
                     // 재조회로 카운트 업데이트
                     refreshMeta()
                 } else {
@@ -549,6 +567,18 @@ class ClubForumBoardDetailActivity : AppCompatActivity() {
             likeView?.setImageResource(R.drawable.ic_heart_outline)
         }
     }
+
+    // --- 좋아요 상태 저장/복원 및 유틸 ---
+    private fun likesPrefs(): SharedPreferences = getSharedPreferences("likes", MODE_PRIVATE)
+    private fun isBoardLiked(boardId: Int): Boolean = likesPrefs().getBoolean("board_$boardId", false)
+    private fun setBoardLiked(boardId: Int, liked: Boolean) {
+        likesPrefs().edit().putBoolean("board_$boardId", liked).apply()
+    }
+    private fun isCommentLiked(commentId: Int): Boolean = likesPrefs().getBoolean("comment_$commentId", false)
+    private fun setCommentLiked(commentId: Int, liked: Boolean) {
+        likesPrefs().edit().putBoolean("comment_$commentId", liked).apply()
+    }
+    private fun dp(value: Int): Int = (value * resources.displayMetrics.density).toInt()
 
     private fun fetchAuthorFromUserApi(idFromBoard: Int) {
         val api = com.example.myapplication.api.ApiClient.getApiService()

@@ -17,6 +17,7 @@ import retrofit2.http.PUT
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.Field
 import retrofit2.http.PATCH
+import retrofit2.http.Query
 import retrofit2.http.FieldMap
 
 interface ApiService {
@@ -174,6 +175,23 @@ interface ApiService {
         @Path("club_pk") clubId: Int,
         @Path("id") boardId: Int
     ): Call<okhttp3.ResponseBody>
+
+    // 검색 추천 (유사 동아리) - 쿼리 기반
+    data class SimilarClubItem(
+        val id: Int,
+        val score_hint: Float?,
+        val snippet: String?
+    )
+
+    @GET("club/similar/")
+    fun getSimilarClubs(
+        @Query("query") query: String
+    ): Call<List<SimilarClubItem>>
+
+    @GET("club/{id}/similar/")
+    fun getSimilarClubsByClub(
+        @Path("id") clubId: Int
+    ): Call<List<SimilarClubItem>>
 
     // 사용자 상세
     @GET("user/{id}/")
