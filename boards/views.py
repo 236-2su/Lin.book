@@ -93,7 +93,7 @@ class BoardViewSet(viewsets.ModelViewSet):
         },
     )
     @action(detail=True, methods=["post"])
-    def like(self, request, pk=None):
+    def like(self, request, pk=None, club_pk=None):
         serializer = LikeCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user_id = serializer.validated_data["user_id"]
@@ -195,7 +195,7 @@ class CommentsViewSet(viewsets.ModelViewSet):
         },
     )
     @action(detail=True, methods=["post"])
-    def like(self, request, comment_pk=None):
+    def like(self, request, club_pk=None, board_pk=None, comment_pk=None):
         serializer = LikeCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user_id = serializer.validated_data["user_id"]

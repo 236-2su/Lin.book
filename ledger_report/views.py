@@ -153,11 +153,14 @@ class SimilarClubsYearlyReportView(APIView):
 
 class ReportAdviceView(APIView):
     @extend_schema(
-        summary="보고서 재무 조언 생성",
-        description="특정 보고서(월간/연간)에 대해 LLM을 사용하여 재무 조언을 생성합니다.",
+        summary="연간 보고서 재무 조언 생성",
+        description="""특정 장부의 해당 년도 최신 연간 보고서에 대해 LLM을 사용하여 재무 조언을 생성합니다.
+        보고서가 없으면 새로 생성합니다.""",
         request=None,
         parameters=[
-            OpenApiParameter("report_pk", int, OpenApiParameter.PATH, description="레저 보고서 ID"),
+            OpenApiParameter("club_pk", int, OpenApiParameter.PATH, description="클럽 ID"),
+            OpenApiParameter("ledger_pk", int, OpenApiParameter.PATH, description="장부 ID"),
+            OpenApiParameter("year", int, OpenApiParameter.QUERY, description="조회 또는 생성할 년도"),
         ],
         responses={
             200: OpenApiResponse(description="OK - 조언이 포함된 JSON 응답"),
@@ -166,24 +169,47 @@ class ReportAdviceView(APIView):
         },
         tags=["LedgerReport"],
     )
-    def post(self, request, report_pk: int):
-        report = get_object_or_404(LedgerReports, pk=report_pk)
+    def post(self, request, club_pk: int, ledger_pk: int):
+        ledger = get_object_or_404(Ledger, pk=ledger_pk, club_id=club_pk)
+        try:
+            year = int(request.query_params.get("year"))
+        except (ValueError, TypeError):
+            return Response({"detail": "year는 필수 정수 값입니다."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # The report content is already a dict, no need to parse it from JSON
+        base_title = f"{ledger.club.name}_{year}년_보고서"
+        report = LedgerReports.objects.filter(ledger=ledger, title__startswith=base_title).order_by("-title").first()
+
+        if not report:
+            yearly_ledger_stats(ledger_id=ledger_pk, year=year)
+            report = (
+                LedgerReports.objects.filter(ledger=ledger, title__startswith=base_title).order_by("-title").first()
+            )
+
         report_data = report.content
-
         advice_json_str = generate_report_advice_with_llm(report_data)
-
-        # Clean up the string from markdown format
         cleaned_advice_str = advice_json_str.strip().replace("```json", "").replace("```", "").strip()
 
         try:
-            # The LLM is prompted to return a JSON string, so we parse it here
             advice_data = json.loads(cleaned_advice_str)
             return Response(advice_data, status=status.HTTP_200_OK)
         except json.JSONDecodeError:
-            # If the LLM output is not valid JSON, return an error
             return Response(
                 {"error": "Failed to parse LLM response as JSON.", "raw_response": advice_json_str},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
+
+
+class ReportDetailView(APIView):
+    @extend_schema(
+        summary="보고서 상세 조회",
+        description="특정 보고서의 상세 내용을 조회합니다.",
+        parameters=[
+            OpenApiParameter("report_pk", int, OpenApiParameter.PATH, description="레저 보고서 ID"),
+        ],
+        responses={200: OpenApiResponse(LedgerReportsSerializer, description="OK")},
+        tags=["LedgerReport"],
+    )
+    def get(self, request, report_pk: int):
+        report = get_object_or_404(LedgerReports, pk=report_pk)
+        serializer = LedgerReportsSerializer(report)
+        return Response(serializer.data)
