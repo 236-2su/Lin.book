@@ -7,6 +7,7 @@ import com.example.myapplication.EventCreateRequest
 import com.example.myapplication.TransactionItem
 import com.example.myapplication.model.Ledger
 import com.example.myapplication.model.Transaction
+import com.example.myapplication.api.TransactionDetailResponse
 import retrofit2.Call
 import retrofit2.http.GET
 import retrofit2.http.POST
@@ -18,11 +19,24 @@ import retrofit2.http.FormUrlEncoded
 import retrofit2.http.Field
 import retrofit2.http.PATCH
 import retrofit2.http.FieldMap
+import retrofit2.http.Query
 
 interface ApiService {
     // 로그인
     data class LoginRequest(val email: String)
     data class LoginResponse(val pk: Int, val club_pks: List<Int>?)
+    
+    // 동아리 생성
+    data class ClubCreateRequest(
+        val name: String,
+        val department: String,
+        val major_category: String,
+        val minor_category: String,
+        val description: String,
+        val hashtags: String,
+        val location: String,
+        val short_description: String
+    )
 
     @POST("user/login/")
     fun login(@Body req: LoginRequest): Call<LoginResponse>
@@ -245,4 +259,19 @@ interface ApiService {
         val title: String,
         val content: Map<String, Any> // JSONField는 Map으로 받음
     )
+    
+    // 특정 장부의 모든 거래 목록 조회 (suspend 함수 - 코루틴 사용)
+    @GET("/club/{club_pk}/ledger/{ledger_pk}/transactions/")
+    suspend fun getTransactionsForLedger(
+        @Path("club_pk") clubPk: Int,
+        @Path("ledger_pk") ledgerPk: Int
+    ): List<TransactionItem>
+
+    // 특정 거래 상세 내역 조회 (suspend 함수 - 코루틴 사용)
+    @GET("/club/{club_pk}/ledger/{ledger_pk}/transactions/{id}/")
+    suspend fun getTransactionDetail(
+        @Path("club_pk") clubPk: Int,
+        @Path("ledger_pk") ledgerPk: Int,
+        @Path("id") transactionId: Int
+    ): TransactionDetailResponse
 }

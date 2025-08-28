@@ -114,7 +114,7 @@ class ClubListFragment : Fragment() {
         // ... (이하 로직은 ClubListActivity와 동일)
         try {
             val client = ApiClient.createUnsafeOkHttpClient()
-            val baseUrl = com.example.myapplication.BuildConfig.BASE_URL.trimEnd('/')
+            val baseUrl = "https://finopenapi.ssafy.io"  // BuildConfig 대신 직접 URL 사용
             val request = Request.Builder().url("$baseUrl/club/").build()
             val response = client.newCall(request).execute()
             
@@ -139,9 +139,6 @@ class ClubListFragment : Fragment() {
     }
 
     private fun displayClubList(clubs: List<ClubItem>) {
-        // Fragment가 detach되었으면 종료
-        if (!isAdded) return
-        
         if (clubItems.isEmpty()) {
             clubItems.clear()
             clubItems.addAll(clubs)
@@ -165,10 +162,30 @@ class ClubListFragment : Fragment() {
         val prefs = requireContext().getSharedPreferences("auth", android.content.Context.MODE_PRIVATE)
         val pksStr = prefs.getString("club_pks", null) ?: return
         val pkList = pksStr.split(',').mapNotNull { it.trim().toIntOrNull() }
-        if (pkList.isEmpty()) return
+        
+        val rv = contentView.findViewById<RecyclerView>(R.id.my_club_recycler) ?: return
+        
+        if (pkList.isEmpty()) {
+            // 가입한 동아리가 없을 때
+            showNoMyClubsMessage(rv)
+            return
+        }
 
         val myClubs = clubs.filter { pkList.contains(it.id) }
-        val rv = contentView.findViewById<RecyclerView>(R.id.my_club_recycler) ?: return
+        
+        if (myClubs.isEmpty()) {
+            // 가입한 동아리가 없을 때
+            showNoMyClubsMessage(rv)
+            return
+        }
+        
+        // 내 동아리가 있을 때 메시지 컨테이너 숨기기
+        val messageContainer = contentView.findViewById<LinearLayout>(R.id.my_club_message_container)
+        messageContainer?.visibility = View.GONE
+        
+        // RecyclerView 보이기
+        rv.visibility = View.VISIBLE
+        
         rv.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
         if (rv.onFlingListener == null) {
             PagerSnapHelper().attachToRecyclerView(rv)
@@ -183,9 +200,40 @@ class ClubListFragment : Fragment() {
                 bindMyClubCard(holder.itemView as LinearLayout, myClubs[position])
             }
         }
+        
+        // 페이지 인디케이터 생성
+        createPageIndicators(myClubs.size)
+        
+        // RecyclerView 스크롤 리스너 추가
+        rv.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+                val layoutManager = recyclerView.layoutManager as LinearLayoutManager
+                val position = layoutManager.findFirstVisibleItemPosition()
+                updatePageIndicators(position)
+            }
+        })
     }
 
     private class MyClubVH(view: View) : RecyclerView.ViewHolder(view)
+    
+    // 페이지 인디케이터 관련 변수
+    private val pageIndicators = mutableListOf<View>()
+    private var currentPagePosition = 0
+    
+    // 가입한 동아리가 없을 때 메시지 표시
+    private fun showNoMyClubsMessage(recyclerView: RecyclerView) {
+        // RecyclerView를 숨기고 메시지 표시
+        recyclerView.visibility = View.GONE
+        
+        // 메시지 컨테이너 표시
+        val messageContainer = contentView.findViewById<LinearLayout>(R.id.my_club_message_container)
+        messageContainer?.visibility = View.VISIBLE
+        
+        // 페이지 인디케이터 숨기기
+        val container = contentView.findViewById<LinearLayout>(R.id.page_indicators_container)
+        container?.visibility = View.GONE
+    }
 
     private fun createMyClubCardView(parent: ViewGroup): View {
         val card = LinearLayout(parent.context).apply {
@@ -193,7 +241,7 @@ class ClubListFragment : Fragment() {
             layoutParams = RecyclerView.LayoutParams(
                 RecyclerView.LayoutParams.MATCH_PARENT,
                 RecyclerView.LayoutParams.WRAP_CONTENT
-            ).apply { setMargins(4.dpToPx(), 4.dpToPx(), 4.dpToPx(), 16.dpToPx()) }
+            ).apply { setMargins(4.dpToPx(), 4.dpToPx(), 4.dpToPx(), 8.dpToPx()) }
             orientation = LinearLayout.VERTICAL
             setBackgroundResource(R.drawable.card_box_light_blue)
             setPadding(60, 40, 60, 40)
@@ -241,7 +289,7 @@ class ClubListFragment : Fragment() {
         info.addView(hashtags)
         info.addView(name)
         info.addView(deptLoc)
-
+        
         val image = androidx.cardview.widget.CardView(requireContext()).apply {
             layoutParams = LinearLayout.LayoutParams(100.dpToPx(), 80.dpToPx())
             radius = 4f
@@ -265,10 +313,58 @@ class ClubListFragment : Fragment() {
             startActivity(intent)
         }
     }
+    
+    // 페이지 인디케이터 생성
+    private fun createPageIndicators(count: Int) {
+        val container = contentView.findViewById<LinearLayout>(R.id.page_indicators_container) ?: return
+        
+        // 기존 인디케이터 제거
+        container.removeAllViews()
+        pageIndicators.clear()
+        
+        // 동아리 개수만큼 점 생성
+        repeat(count) { index ->
+            val indicator = View(requireContext()).apply {
+                layoutParams = LinearLayout.LayoutParams(
+                    resources.getDimensionPixelSize(R.dimen.page_indicator_size),
+                    resources.getDimensionPixelSize(R.dimen.page_indicator_size)
+                ).apply {
+                    marginEnd = resources.getDimensionPixelSize(R.dimen.page_indicator_margin)
+                }
+                background = resources.getDrawable(
+                    if (index == 0) R.drawable.page_indicator_selected 
+                    else R.drawable.page_indicator_unselected, 
+                    null
+                )
+            }
+            
+            pageIndicators.add(indicator)
+            container.addView(indicator)
+        }
+        
+        currentPagePosition = 0
+    }
+    
+    // 페이지 인디케이터 업데이트
+    private fun updatePageIndicators(position: Int) {
+        if (position < 0 || position >= pageIndicators.size) return
+        
+        // 이전 위치의 인디케이터를 비활성화
+        if (currentPagePosition < pageIndicators.size) {
+            pageIndicators[currentPagePosition].background = resources.getDrawable(
+                R.drawable.page_indicator_unselected, null
+            )
+        }
+        
+        // 현재 위치의 인디케이터를 활성화
+        pageIndicators[position].background = resources.getDrawable(
+            R.drawable.page_indicator_selected, null
+        )
+        
+        currentPagePosition = position
+    }
 
     private fun displaySampleData() {
-        // Fragment가 detach되었으면 종료
-        if (!isAdded) return
         val sampleClubs = listOf(
             ClubItem(1, "방구석 경제", "경제학부", "academic", "경제", "경제를 좋아하는 사람이라면 누구나...", "#분위기가 좋은", "2025-08-23", "학생회관 421호", "1줄 소개"),
             ClubItem(2, "짱구네 코딩", "컴퓨터학부", "academic", "프로그래밍", "코딩을 좋아하는 사람들이 모여...", "#분위기가좋은 #동아리실이 편한", "2025-08-23", "학생회관 421호", "1줄 소개")
@@ -277,9 +373,7 @@ class ClubListFragment : Fragment() {
     }
 
     private fun createClubCard(club: ClubItem): View {
-        // Fragment가 attach되지 않았으면 빈 View 반환
-        if (!isAdded) return View(context)
-        
+        // This part needs context (this -> requireContext())
         val cardView = LinearLayout(requireContext()).apply {
             layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply { setMargins(4, 4, 4, 16) }
             orientation = LinearLayout.VERTICAL

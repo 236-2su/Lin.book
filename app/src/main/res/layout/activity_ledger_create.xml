@@ -24,7 +24,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="공개장부 작성"
+            android:text="거래 내역 추가 등록"
             android:textSize="20sp"
             android:textStyle="bold"
             android:textColor="#333333" />
@@ -96,6 +96,30 @@
         android:textSize="14sp"
         android:textColor="#333333"
         android:padding="16dp"
+        android:layout_marginBottom="24dp" />
+
+    <!-- 내역 구분 -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="내역 구분"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textColor="#333333"
+        android:layout_marginBottom="8dp" />
+
+    <EditText
+        android:id="@+id/et_transaction_category"
+        android:layout_width="match_parent"
+        android:layout_height="49dp"
+        android:background="@drawable/info_box"
+        android:hint="내역을 입력하세요 (예: 회비, 소모품비, 행사비 등)"
+        android:textColorHint="#999999"
+        android:textSize="14sp"
+        android:textColor="#333333"
+        android:padding="16dp"
+        android:paddingBottom="8dp"
+        android:inputType="text"
         android:layout_marginBottom="24dp" />
 
     <!-- 금액 -->

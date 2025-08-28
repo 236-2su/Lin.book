@@ -89,6 +89,18 @@ class ClubEventLedgerListActivity : AppCompatActivity() {
             startActivity(intent)
             finish()
         }
+
+        // 공개장부 버튼
+        findViewById<TextView>(R.id.btn_public_account).setOnClickListener {
+            // MainActivity로 이동하여 LedgerContentFragment 표시
+            val intent = Intent(this, MainActivity::class.java)
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            intent.putExtra("show_public_ledger", true)
+            intent.putExtra("club_pk", clubPk)
+            intent.putExtra("ledger_pk", 10) // 기본값으로 10 사용 (필요시 API로 조회 가능)
+            startActivity(intent)
+            finish()
+        }
     }
 
     private fun loadEventList(clubPk: Int) {

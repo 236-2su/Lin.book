@@ -2,10 +2,12 @@ package com.example.myapplication
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.FrameLayout
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
@@ -27,6 +29,10 @@ class LedgerDetailActivity : BaseActivity() {
     private lateinit var btnPrev: View
     private lateinit var btnNext: View
     private lateinit var contentView: View
+    
+    // 댓글 좋아요 상태 관리
+    private var isCommentLiked = false
+    private var commentLikeCount = 0
 
     // Activity Result Launcher
     private val editLedgerLauncher = registerForActivityResult(
@@ -233,12 +239,102 @@ class LedgerDetailActivity : BaseActivity() {
         val btnEdit = contentView.findViewById<TextView>(R.id.btn_edit)
         btnEdit.setOnClickListener {
             val intent = Intent(this@LedgerDetailActivity, LedgerEditActivity::class.java)
-            intent.putExtra("LEDGER_ITEM", item)
+            
+            // LedgerItem에서 직접 데이터 추출 (기존 구조 그대로 사용)
+            val amount = item.amount.replace(Regex("[^0-9]"), "").toLongOrNull() ?: 0L
+            val date = item.date   // LedgerItem의 date 필드 직접 사용
+            val memo = item.memo   // LedgerItem의 memo 필드 직접 사용
+            val vendor = item.author // LedgerItem의 author 필드를 vendor로 사용
+            
+            // type 필드가 "수입"/"지출"이 아니면 금액 부호로 자동 설정
+            val type = when {
+                item.type == "수입" || item.type == "지출" -> item.type
+                amount > 0 -> "수입"
+                amount < 0 -> "지출"
+                else -> "기타"
+            }
+            
+            // 태그에서 결제수단 찾기
+            val paymentMethod = when {
+                item.tags.contains("현금") -> "현금"
+                item.tags.contains("카드") -> "카드"
+                item.tags.contains("계좌이체") -> "계좌이체"
+                else -> "기타"
+            }
+            
+            // 디버깅을 위한 로그
+            Log.d("LedgerDetail", "수정하기 버튼 클릭 - 전달할 데이터:")
+            Log.d("LedgerDetail", "전체 item 객체: $item")
+            Log.d("LedgerDetail", "원본 item.type: '${item.type}'")
+            Log.d("LedgerDetail", "계산된 type: '$type'")
+            Log.d("LedgerDetail", "date: $date, amount: $amount")
+            Log.d("LedgerDetail", "vendor: $vendor, payment_method: $paymentMethod, memo: $memo")
+            
+            // TRANSACTION_CATEGORY 값 확인
+            Log.d("LedgerDetail", "TRANSACTION_CATEGORY로 전달할 값: '${item.type}'")
+            
+                            // Intent로 데이터 전달
+                intent.putExtra("ORIGINAL_TYPE", type)
+                intent.putExtra("ORIGINAL_DATE", date)
+                intent.putExtra("ORIGINAL_AMOUNT", amount)
+                intent.putExtra("VENDOR_NAME", vendor)
+                intent.putExtra("PAYMENT_METHOD", paymentMethod)
+                intent.putExtra("ORIGINAL_MEMO", memo)
+                intent.putExtra("TRANSACTION_CATEGORY", item.type) // 원본 item.type 값을 그대로 사용
+            
             editLedgerLauncher.launch(intent)
         }
 
+        // 댓글 하트 기능 설정
+        setupCommentHeart()
+        
         // --- 네비게이션 버튼 가시성 업데이트 ---
         btnPrev.visibility = if (position == 0) View.INVISIBLE else View.VISIBLE
         btnNext.visibility = if (ledgerItems != null && position == ledgerItems!!.size - 1) View.INVISIBLE else View.VISIBLE
+    }
+    
+    // 댓글 하트 기능 설정
+    private fun setupCommentHeart() {
+        val ivCommentHeart = contentView.findViewById<ImageView>(R.id.iv_comment_heart)
+        val tvCommentLikeCount = contentView.findViewById<TextView>(R.id.tv_comment_like_count)
+        
+        // 초기 상태 설정
+        updateCommentHeartUI()
+        
+        // 하트 클릭 이벤트
+        ivCommentHeart?.setOnClickListener {
+            toggleCommentLike()
+        }
+    }
+    
+    // 댓글 좋아요 토글
+    private fun toggleCommentLike() {
+        isCommentLiked = !isCommentLiked
+        
+        if (isCommentLiked) {
+            commentLikeCount++
+            Toast.makeText(this, "댓글을 좋아합니다", Toast.LENGTH_SHORT).show()
+        } else {
+            commentLikeCount--
+            Toast.makeText(this, "좋아요를 취소했습니다", Toast.LENGTH_SHORT).show()
+        }
+        
+        updateCommentHeartUI()
+    }
+    
+    // 댓글 하트 UI 업데이트
+    private fun updateCommentHeartUI() {
+        val ivCommentHeart = contentView.findViewById<ImageView>(R.id.iv_comment_heart)
+        val tvCommentLikeCount = contentView.findViewById<TextView>(R.id.tv_comment_like_count)
+        
+        // 하트 아이콘 변경
+        if (isCommentLiked) {
+            ivCommentHeart?.setImageResource(R.drawable.ic_heart_filled)
+        } else {
+            ivCommentHeart?.setImageResource(R.drawable.ic_heart_outline)
+        }
+        
+        // 좋아요 수 업데이트
+        tvCommentLikeCount?.text = commentLikeCount.toString()
     }
 }

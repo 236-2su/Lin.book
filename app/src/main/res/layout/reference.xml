@@ -218,7 +218,8 @@
     <TextView
         android:id="@+id/btn_register"
         style="@style/ReferenceRegisterButton"
-        android:text="등록하기" />
+        android:text="등록하기"
+        android:visibility="gone" />
 
     <!-- 연동하기/개설하기 버튼 -->
     <TextView

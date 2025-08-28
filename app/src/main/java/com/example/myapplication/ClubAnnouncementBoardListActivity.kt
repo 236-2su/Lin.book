@@ -140,9 +140,13 @@ class ClubAnnouncementBoardListActivity : AppCompatActivity() {
         // 모임통장 버튼
         findViewById<TextView>(R.id.btn_meeting_account).setOnClickListener {
             val currentClubPk = intent?.getIntExtra(EXTRA_CLUB_PK, -1) ?: -1
-            val intent = Intent(this, AccountHistoryActivity::class.java)
+            // MainActivity로 이동하여 MeetingAccountFragment 표시 (root_page와 동일한 과정)
+            val intent = Intent(this, MainActivity::class.java)
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            intent.putExtra("show_meeting_account", true)
             intent.putExtra("club_pk", currentClubPk)
             startActivity(intent)
+            finish()
         }
     }
     

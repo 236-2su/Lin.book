@@ -35,6 +35,9 @@ class ReferenceFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         // 뷰가 생성된 후 UI 로직을 설정합니다.
         setupReferenceLogic()
+        
+        // 동아리 생성 버튼 숨기기
+        hideLocalRegisterButton()
     }
 
     private fun setupReferenceLogic() {
@@ -85,6 +88,25 @@ class ReferenceFragment : Fragment() {
         val btnNextPage = contentView.findViewById<Button>(R.id.btn_next_page)
         btnNextPage.setOnClickListener {
             (activity as? MainActivity)?.replaceFragment(ClubListFragment())
+        }
+    }
+    
+    // 동아리 생성 버튼 숨기기
+    private fun hideLocalRegisterButton() {
+        try {
+            // ReferenceFragment 내부의 동아리 생성 버튼 숨기기
+            val registerButton = contentView.findViewById<View>(R.id.btn_register)
+            if (registerButton != null) {
+                registerButton.visibility = View.GONE
+                android.util.Log.d("ReferenceFragment", "동아리 생성 버튼 숨김 완료")
+            }
+            
+            // BaseActivity의 전역 동아리 생성 버튼 숨김 메서드도 호출
+            val baseActivity = activity as? BaseActivity
+            baseActivity?.hideAllRegisterButtonsGlobally()
+            
+        } catch (e: Exception) {
+            android.util.Log.e("ReferenceFragment", "동아리 생성 버튼 숨기기 오류", e)
         }
     }
 

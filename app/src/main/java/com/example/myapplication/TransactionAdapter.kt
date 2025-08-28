@@ -14,6 +14,12 @@ class TransactionAdapter(
     private var transactions: List<TransactionItem>
 ) : RecyclerView.Adapter<TransactionAdapter.TransactionViewHolder>() {
 
+    private var onItemClickListener: ((Int) -> Unit)? = null
+
+    fun setOnItemClickListener(listener: (Int) -> Unit) {
+        onItemClickListener = listener
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TransactionViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.item_transaction, parent, false)
@@ -38,6 +44,15 @@ class TransactionAdapter(
         private val amount: TextView = itemView.findViewById(R.id.tv_transaction_amount)
         private val vendor: TextView = itemView.findViewById(R.id.tv_transaction_vendor)
         private val description: TextView = itemView.findViewById(R.id.tv_transaction_description)
+
+        init {
+            itemView.setOnClickListener {
+                val position = adapterPosition
+                if (position != RecyclerView.NO_POSITION) {
+                    onItemClickListener?.invoke(position)
+                }
+            }
+        }
 
         fun bind(transaction: TransactionItem) {
             // 타입 및 카테고리
