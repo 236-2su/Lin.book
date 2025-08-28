@@ -213,3 +213,17 @@ class ReportDetailView(APIView):
         report = get_object_or_404(LedgerReports, pk=report_pk)
         serializer = LedgerReportsSerializer(report)
         return Response(serializer.data)
+
+    @extend_schema(
+        summary="보고서 삭제",
+        description="특정 보고서를 삭제합니다.",
+        parameters=[
+            OpenApiParameter("report_pk", int, OpenApiParameter.PATH, description="레저 보고서 ID"),
+        ],
+        responses={204: OpenApiResponse(description="No Content")},
+        tags=["LedgerReport"],
+    )
+    def delete(self, request, report_pk: int):
+        report = get_object_or_404(LedgerReports, pk=report_pk)
+        report.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
