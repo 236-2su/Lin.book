@@ -11,7 +11,7 @@ from django.db.models.functions import TruncDate
 
 from club.models import Club
 from club.services import similar_by_club
-from ledger.models import Event, Ledger, LedgerTransactions  # 기존 앱의 모델 사용
+from ledger.models import Event, Ledger, LedgerTransactions
 
 from .models import LedgerReports
 

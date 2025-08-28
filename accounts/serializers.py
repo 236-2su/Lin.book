@@ -12,7 +12,7 @@ class AccountResponseSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Accounts
-        fields = ["id", "user", "amount", "code", "created_at", "user_name"]
+        fields = ["id", "user", "amount", "code", "created_at", "user_name", "club"]
         read_only_fields = fields
 
     def get_user_name(self, obj):

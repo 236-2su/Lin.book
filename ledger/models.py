@@ -17,6 +17,7 @@ class Receipt(models.Model):
     ocr_text = models.TextField()
     amount = models.IntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
+    processed_text = models.JSONField()
 
 
 class Event(models.Model):

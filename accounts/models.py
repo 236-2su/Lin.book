@@ -1,5 +1,6 @@
 from django.db import models
 
+from club.models import Club
 from user.models import User
 
 
@@ -8,6 +9,7 @@ class Accounts(models.Model):
     amount = models.IntegerField()
     code = models.CharField(max_length=50)
     created_at = models.DateField(auto_now_add=True)
+    club = models.ForeignKey(Club, on_delete=models.SET_NULL, null=True, blank=True)
 
 
 class AccountTransactions(models.Model):

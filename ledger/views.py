@@ -1,7 +1,10 @@
+import json
+
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema, extend_schema_view
 from rest_framework import viewsets
-from rest_framework.decorators import action
+from rest_framework.decorators import action, parser_classes
+from rest_framework.parsers import MultiPartParser
 from rest_framework.response import Response
 
 from club.models import Club
@@ -16,6 +19,7 @@ from .serializers import (
     LedgerTransactionsSerializer,
     ReceiptSerializer,
 )
+from .services import ocr_from_file
 from .utils import sync_ledger_amount
 
 
@@ -303,9 +307,9 @@ class LedgerTransactionsViewSet(viewsets.ModelViewSet):
                 name="ledger_pk", description="장부 ID", required=True, type=int, location=OpenApiParameter.PATH
             ),
         ],
-        summary="영수증 생성",
-        description="새로운 영수증을 생성합니다.",
-        request=ReceiptSerializer,
+        summary="영수증 생성 및 OCR",
+        description="새로운 영수증을 생성하고 OCR을 수행합니다.",
+        request=ReceiptSerializer,  # This will be ignored due to MultiPartParser
         responses={
             201: OpenApiResponse(ReceiptSerializer, description="Created"),
             400: OpenApiResponse(description="Bad Request"),
@@ -379,6 +383,35 @@ class ReceiptViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return Receipt.objects.filter(ledgertransactions__ledger_id=self.kwargs["ledger_pk"])
+
+    @parser_classes([MultiPartParser])
+    def create(self, request, *args, **kwargs):
+        image_file = request.FILES.get("image")
+        if not image_file:
+            return Response({"error": "Image file is required."}, status=400)
+
+        ocr_result = ocr_from_file(image_file)
+        if not ocr_result:
+            return Response({"error": "OCR processing failed."}, status=500)
+
+        raw_text = ocr_result.get("raw_text")
+        processed_data_str = ocr_result.get("processed_data")
+
+        # try:
+        #     processed_data = json.loads(processed_data_str.strip('```json
+        #     ').strip('```'))
+        # except json.JSONDecodeError:
+        #     return Response({"error": "Failed to parse processed data from LLM."}, status=500)
+        processed_data = ""
+
+        amount = processed_data.get("amount")
+
+        receipt = Receipt.objects.create(
+            image=image_file, ocr_text=raw_text, processed_text=processed_data, amount=amount
+        )
+
+        serializer = self.get_serializer(receipt)
+        return Response(serializer.data, status=201)
 
 
 @extend_schema_view(
@@ -501,3 +534,19 @@ class EventViewSet(viewsets.ModelViewSet):
         transactions = LedgerTransactions.objects.filter(event=event)
         serializer = LedgerTransactionsSerializer(transactions, many=True)
         return Response(serializer.data)
+
+
+@extend_schema_view(
+    list=extend_schema(
+        summary="이벤트별 거래 내역 요약 조회",
+        description="각 이벤트별로 거래 내역의 총합을 요약하여 조회합니다.",
+        responses={200: EventTransactionSerializer(many=True)},
+        tags=["Event"],
+    )
+)
+class EventTransactionSummaryViewSet(viewsets.ReadOnlyModelViewSet):
+    serializer_class = EventTransactionSerializer
+
+    def get_queryset(self):
+        club_pk = self.kwargs.get("club_pk")
+        return Event.objects.filter(club_id=club_pk).prefetch_related("ledgertransactions_set")
