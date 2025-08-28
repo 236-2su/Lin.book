@@ -1,6 +1,7 @@
 package com.example.myapplication
 
 import android.content.Intent
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,6 +11,15 @@ import androidx.recyclerview.widget.RecyclerView
 class EventLedgerAdapter(
     private val events: List<EventItem>
 ) : RecyclerView.Adapter<EventLedgerAdapter.EventLedgerViewHolder>() {
+
+    // 5가지 배경 drawable 리소스 배열
+    private val backgroundDrawables = intArrayOf(
+        R.drawable.card_box_light_blue, // 연한 파랑
+        R.drawable.card_box_pink,       // 연한 빨강
+        R.drawable.card_box_yellow,     // 연한 노랑
+        R.drawable.card_box_green,      // 연한 초록
+        R.drawable.card_box_purple      // 연한 보라
+    )
 
     class EventLedgerViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val nameTextView: TextView = view.findViewById(R.id.tv_event_name)
@@ -26,6 +36,11 @@ class EventLedgerAdapter(
         val event = events[position]
         holder.nameTextView.text = event.name
         holder.periodTextView.text = "행사 예정 기간: ${event.start_date} ~ ${event.end_date}"
+        
+        // 이벤트 ID를 기반으로 일관성 있는 배경 drawable 적용
+        val drawableIndex = event.id % backgroundDrawables.size
+        val backgroundDrawable = backgroundDrawables[drawableIndex]
+        holder.itemView.setBackgroundResource(backgroundDrawable)
         
         holder.itemView.setOnClickListener {
             val context = holder.itemView.context

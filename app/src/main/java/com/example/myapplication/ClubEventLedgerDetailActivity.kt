@@ -1,8 +1,10 @@
 package com.example.myapplication
 
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -14,6 +16,15 @@ import retrofit2.Callback
 import retrofit2.Response
 
 class ClubEventLedgerDetailActivity : AppCompatActivity() {
+    
+    // EventLedgerAdapter와 동일한 drawable 리소스 배열
+    private val backgroundDrawables = intArrayOf(
+        R.drawable.card_box_light_blue, // 연한 파랑
+        R.drawable.card_box_pink,       // 연한 빨강
+        R.drawable.card_box_yellow,     // 연한 노랑
+        R.drawable.card_box_green,      // 연한 초록
+        R.drawable.card_box_purple      // 연한 보라
+    )
     
     private var clubPk: Int = -1
     private var eventPk: Int = -1
@@ -55,6 +66,14 @@ class ClubEventLedgerDetailActivity : AppCompatActivity() {
         
         findViewById<TextView>(R.id.tv_event_title).text = eventName
         findViewById<TextView>(R.id.tv_event_period).text = "행사 예정 기간: $eventStartDate ~ $eventEndDate"
+        
+        // 이벤트 ID를 기반으로 일관성 있는 배경 drawable 적용
+        val eventInfoCard = findViewById<LinearLayout>(R.id.event_info_card)
+        if (eventPk != -1) {
+            val drawableIndex = eventPk % backgroundDrawables.size
+            val backgroundDrawable = backgroundDrawables[drawableIndex]
+            eventInfoCard.setBackgroundResource(backgroundDrawable)
+        }
         
         // 월별 네비게이션 버튼들은 현재 레이아웃에서 주석 처리됨
         // findViewById<TextView>(R.id.btn_prev_month).setOnClickListener {
