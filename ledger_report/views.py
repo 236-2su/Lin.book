@@ -1,3 +1,5 @@
+import json
+
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema
 from rest_framework import status
@@ -12,7 +14,12 @@ from .serializers import (
     MonthlyLedgerStatsResponseSerializer,
     YearlyLedgerStatsResponseSerializer,
 )
-from .services import generate_similar_clubs_yearly_report, monthly_ledger_stats, yearly_ledger_stats
+from .services import (
+    generate_report_advice_with_llm,
+    generate_similar_clubs_yearly_report,
+    monthly_ledger_stats,
+    yearly_ledger_stats,
+)
 
 
 class MonthlyReportView(APIView):
@@ -142,3 +149,41 @@ class SimilarClubsYearlyReportView(APIView):
         if "error" in reports:
             return Response(reports, status=status.HTTP_404_NOT_FOUND)
         return Response(reports, status=status.HTTP_201_CREATED)
+
+
+class ReportAdviceView(APIView):
+    @extend_schema(
+        summary="보고서 재무 조언 생성",
+        description="특정 보고서(월간/연간)에 대해 LLM을 사용하여 재무 조언을 생성합니다.",
+        request=None,
+        parameters=[
+            OpenApiParameter("report_pk", int, OpenApiParameter.PATH, description="레저 보고서 ID"),
+        ],
+        responses={
+            200: OpenApiResponse(description="OK - 조언이 포함된 JSON 응답"),
+            400: OpenApiResponse(description="Bad Request - JSON 파싱 오류"),
+            404: OpenApiResponse(description="Not Found - 해당 ID의 보고서 없음"),
+        },
+        tags=["LedgerReport"],
+    )
+    def post(self, request, report_pk: int):
+        report = get_object_or_404(LedgerReports, pk=report_pk)
+
+        # The report content is already a dict, no need to parse it from JSON
+        report_data = report.content
+
+        advice_json_str = generate_report_advice_with_llm(report_data)
+
+        # Clean up the string from markdown format
+        cleaned_advice_str = advice_json_str.strip().replace("```json", "").replace("```", "").strip()
+
+        try:
+            # The LLM is prompted to return a JSON string, so we parse it here
+            advice_data = json.loads(cleaned_advice_str)
+            return Response(advice_data, status=status.HTTP_200_OK)
+        except json.JSONDecodeError:
+            # If the LLM output is not valid JSON, return an error
+            return Response(
+                {"error": "Failed to parse LLM response as JSON.", "raw_response": advice_json_str},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
