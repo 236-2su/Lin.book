@@ -37,12 +37,17 @@ class AccountInternalSerializer(serializers.ModelSerializer):
     Not exposed in Swagger documentation.
     """
 
+    user_name = serializers.SerializerMethodField()
+
     class Meta:
         model = Accounts
         # save() method needs to be able to set user, code, amount
-        fields = ["id", "user", "amount", "code", "created_at"]
-        read_only_fields = ["id", "user", "created_at"]
+        fields = ["id", "user", "amount", "code", "created_at", "user_name"]
+        read_only_fields = ["id", "user", "created_at", "user_name"]
         extra_kwargs = {"amount": {"required": False}, "code": {"required": False}}
+
+    def get_user_name(self, obj):
+        return obj.user.name
 
 
 # --- Other Serializers ---
