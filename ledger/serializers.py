@@ -37,3 +37,22 @@ class EventSerializer(serializers.ModelSerializer):
     class Meta:
         model = Event
         exclude = ["club"]
+
+
+class EventTransactionSerializer(serializers.ModelSerializer):
+    transaction_amount = serializers.SerializerMethodField()
+    transaction_type = serializers.SerializerMethodField()
+    transaction_date_time = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Event
+        fields = ["transaction_amount", "transaction_type", "transaction_datetime"]
+
+    def get_transaction_amount(self, obj):
+        return obj.ledgertransactions.amount
+
+    def get_transaction_type(self, obj):
+        return obj.ledgertransactions.type
+
+    def get_transaction_date_time(self, obj):
+        return obj.ledgertransactions.date_time

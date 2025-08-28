@@ -1,6 +1,7 @@
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema, extend_schema_view
-from rest_framework import status, viewsets
+from rest_framework import viewsets
+from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from club.models import Club
@@ -8,6 +9,7 @@ from club.models import Club
 from .models import Event, Ledger, LedgerTransactions, Receipt
 from .serializers import (
     EventSerializer,
+    EventTransactionSerializer,
     LedgerCreateSerializer,
     LedgerSerializer,
     LedgerTransactionCreateSerializer,
@@ -483,3 +485,16 @@ class EventViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         club = get_object_or_404(Club, pk=self.kwargs["club_pk"])
         serializer.save(club=club)
+
+    @extend_schema(
+        summary="이벤트 거래 내역 조회",
+        description="특정 이벤트에 대한 모든 거래 내역을 조회합니다.",
+        responses={200: LedgerTransactionsSerializer(many=True)},
+        tags=["Event"],
+    )
+    @action(detail=True, methods=["get"], url_path="transactions")
+    def get_transaction(self, request, *args, **kwargs):
+        event = self.get_object()
+        transactions = LedgerTransactions.objects.filter(event=event)
+        serializer = LedgerTransactionsSerializer(transactions, many=True)
+        return Response(serializer.data)
