@@ -170,6 +170,18 @@ interface ApiService {
     @GET("user/{id}/")
     fun getUserDetail(@Path("id") userId: Int): Call<com.example.myapplication.UserDetail>
 
+    // 사용자 목록 조회
+    @GET("user/")
+    fun getUserList(): Call<List<com.example.myapplication.UserResponse>>
+
+    // 클럽 멤버 목록 조회
+    @GET("club/{club_pk}/members/")
+    fun getClubMembers(@Path("club_pk") clubId: Int): Call<List<com.example.myapplication.MemberResponse>>
+
+    // 가입 대기 멤버 목록 조회
+    @GET("club/{club_pk}/members/waiting/")
+    fun getWaitingMembers(@Path("club_pk") clubId: Int): Call<List<com.example.myapplication.MemberResponse>>
+
     // AI 리포트 관련 API
     // 월간 리포트 생성
     @POST("report/clubs/{club_pk}/ledgers/{ledger_pk}/reports/monthly/")
