@@ -10,13 +10,12 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <!-- 동아리명 -->
         <TextView
             style="@style/SectionTitleTextStyle"
             android:text="동아리명"/>
         <EditText
             android:id="@+id/et_club_name"
-            android:hint="예: 방구석 경제, 프로그래밍 동아리"
+            android:hint="방구석 경제, 프로그래밍 동아리"
             android:textColorHint="#999999"
             android:background="@drawable/info_box"
             android:layout_width="match_parent"
@@ -26,13 +25,12 @@
             android:textColor="#333333"
             android:layout_marginBottom="24dp"/>
 
-        <!-- 학과/부문 -->
         <TextView
             style="@style/SectionTitleTextStyle"
             android:text="학과/부문"/>
         <EditText
             android:id="@+id/et_department"
-            android:hint="예: 컴퓨터공학과, 경영학과"
+            android:hint="컴퓨터공학과, 경영학과"
             android:textColorHint="#999999"
             android:background="@drawable/info_box"
             android:layout_width="match_parent"
@@ -42,7 +40,6 @@
             android:textColor="#333333"
             android:layout_marginBottom="24dp"/>
 
-        <!-- 대분류 -->
         <TextView
             style="@style/SectionTitleTextStyle"
             android:text="대분류"/>
@@ -55,13 +52,12 @@
             android:padding="16dp"
             android:layout_marginBottom="24dp" />
 
-        <!-- 소분류 -->
         <TextView
             style="@style/SectionTitleTextStyle"
             android:text="소분류"/>
         <EditText
             android:id="@+id/et_minor_category"
-            android:hint="예: 프로그래밍, 경제학, 미술"
+            android:hint="프로그래밍, 경제학, 미술"
             android:textColorHint="#999999"
             android:background="@drawable/info_box"
             android:layout_width="match_parent"
@@ -71,13 +67,12 @@
             android:textColor="#333333"
             android:layout_marginBottom="24dp"/>
 
-        <!-- 해시태그 -->
         <TextView
             style="@style/SectionTitleTextStyle"
             android:text="해시태그"/>
         <EditText
             android:id="@+id/et_hashtags"
-            android:hint="예: #코딩 #알고리즘"
+            android:hint="#코딩 #알고리즘"
             android:textColorHint="#999999"
             android:background="@drawable/info_box"
             android:layout_width="match_parent"
@@ -87,13 +82,12 @@
             android:textColor="#333333"
             android:layout_marginBottom="24dp"/>
 
-        <!-- 동아리실 위치 -->
         <TextView
             style="@style/SectionTitleTextStyle"
             android:text="동아리실 위치"/>
         <EditText
             android:id="@+id/et_location"
-            android:hint="예: 공학관 301호, 경영관 2층"
+            android:hint="공학관 301호, 경영관 2층"
             android:textColorHint="#999999"
             android:background="@drawable/info_box"
             android:layout_width="match_parent"
@@ -103,7 +97,6 @@
             android:textColor="#333333"
             android:layout_marginBottom="24dp"/>
 
-        <!-- 소개 -->
         <TextView
             style="@style/SectionTitleTextStyle"
             android:text="소개"/>
@@ -125,7 +118,6 @@
             android:layout_height="0dp"
             android:layout_weight="1" />
 
-        <!-- 대문 이미지 -->
         <TextView
             style="@style/SectionTitleTextStyle"
             android:text="웰컴 이미지"/>
@@ -141,7 +133,6 @@
             android:textSize="14sp"
             android:layout_marginBottom="24dp"/>
 
-        <!-- 대문 소개 -->
         <TextView
             style="@style/SectionTitleTextStyle"
             android:text="웰컴 문구"/>

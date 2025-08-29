@@ -115,17 +115,43 @@ class ClubMemberManagementActivity : AppCompatActivity() {
     private fun setupSwipeToDelete() {
         val swipeToDeleteCallback = SwipeToDeleteCallback(this) { position ->
             val deletedMember = members[position]
-            memberAdapter.removeItem(position)
             
-            Snackbar.make(recyclerView, "${deletedMember.name}님이 삭제되었습니다.", Snackbar.LENGTH_LONG)
-                .setAction("실행 취소") {
-                    memberAdapter.restoreItem(position, deletedMember)
-                }
-                .show()
+            // API 호출로 서버에서 멤버 삭제
+            deleteMemberFromServer(deletedMember, position)
         }
         
         val itemTouchHelper = ItemTouchHelper(swipeToDeleteCallback)
         itemTouchHelper.attachToRecyclerView(recyclerView)
+    }
+
+    private fun deleteMemberFromServer(member: Member, position: Int) {
+        val apiService = ApiClient.getApiService()
+        
+        apiService.deleteMember(clubPk, member.id).enqueue(object : Callback<okhttp3.ResponseBody> {
+            override fun onResponse(call: Call<okhttp3.ResponseBody>, response: Response<okhttp3.ResponseBody>) {
+                if (response.isSuccessful) {
+                    // 서버 삭제 성공 시 UI에서도 제거
+                    memberAdapter.removeItem(position)
+                    
+                    Snackbar.make(recyclerView, "${member.name}님이 삭제되었습니다.", Snackbar.LENGTH_LONG)
+                        .setAction("실행 취소") {
+                            // 실행 취소 시에는 다시 서버에 복원 요청이 필요하지만,
+                            // 현재는 UI만 복원 (서버 복원 API가 없는 경우)
+                            memberAdapter.restoreItem(position, member)
+                        }
+                        .show()
+                } else {
+                    // 서버 삭제 실패 시 오류 메시지
+                    Toast.makeText(this@ClubMemberManagementActivity, "멤버 삭제에 실패했습니다.", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<okhttp3.ResponseBody>, t: Throwable) {
+                // 네트워크 오류 시 오류 메시지
+                Toast.makeText(this@ClubMemberManagementActivity, "네트워크 오류가 발생했습니다.", Toast.LENGTH_SHORT).show()
+                Log.e("API_ERROR", "멤버 삭제 실패: ${t.message}")
+            }
+        })
     }
 
     private fun loadClubInfo() {

@@ -24,6 +24,40 @@
                 style="@style/SectionTitleTextStyle"
                 android:layout_marginBottom="12dp"/>
                 
+            <!-- 내 동아리가 없을 때 표시할 메시지 컨테이너 -->
+            <LinearLayout
+                android:id="@+id/my_club_message_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:padding="32dp"
+                android:visibility="gone">
+                
+                <ImageView
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    android:src="@drawable/club"
+                    android:alpha="0.5"
+                    android:layout_marginBottom="16dp"/>
+                    
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="가입한 동아리가 없습니다"
+                    android:textSize="16sp"
+                    android:textColor="#666666"
+                    android:layout_marginBottom="8dp"/>
+                    
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="아래에서 동아리를 찾아 가입해보세요!"
+                    android:textSize="14sp"
+                    android:textColor="#999999"/>
+                    
+            </LinearLayout>
+                
             <!-- 임시 루트 페이지 이동 버튼 -->
             <Button
                 android:id="@+id/btn_temp_root"
@@ -58,7 +92,7 @@
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:orientation="horizontal"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="4dp"
                 android:layout_marginBottom="24dp">
                 <View
                     android:layout_width="8dp"

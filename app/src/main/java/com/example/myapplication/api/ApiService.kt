@@ -5,6 +5,7 @@ import com.example.myapplication.ClubItem
 import com.example.myapplication.EventItem
 import com.example.myapplication.EventCreateRequest
 import com.example.myapplication.TransactionItem
+import com.example.myapplication.EventTransactionItem
 import com.example.myapplication.model.Ledger
 import com.example.myapplication.model.Transaction
 import retrofit2.Call
@@ -26,6 +27,18 @@ interface ApiService {
     // 로그인
     data class LoginRequest(val email: String)
     data class LoginResponse(val pk: Int, val club_pks: List<Int>?)
+
+    // 동아리 생성
+    data class ClubCreateRequest(
+        val name: String,
+        val department: String,
+        val major_category: String,
+        val minor_category: String,
+        val description: String,
+        val hashtags: String,
+        val location: String,
+        val short_description: String
+    )
 
     @POST("user/login/")
     fun login(@Body req: LoginRequest): Call<LoginResponse>
@@ -192,10 +205,6 @@ interface ApiService {
     ): Call<okhttp3.ResponseBody>
 
     // 댓글 좋아요 (백엔드 스펙: { user_id })
-    @retrofit2.http.Headers(
-        "Content-Type: application/json",
-        "Accept: application/json"
-    )
     @POST("/club/{club_pk}/boards/{board_pk}/comments/{id}/like/")
     fun likeComment(
         @Path("club_pk") clubId: Int,
@@ -205,11 +214,6 @@ interface ApiService {
     ): Call<okhttp3.ResponseBody>
 
     data class LikeRequest(val user_id: Int)
-
-    @retrofit2.http.Headers(
-        "Content-Type: application/json",
-        "Accept: application/json"
-    )
     @POST("/club/{club_pk}/boards/{id}/like/")
     fun toggleBoardLike(
         @Path("club_pk") clubId: Int,
@@ -237,6 +241,21 @@ interface ApiService {
         val snippet: String?
     )
 
+    // Wrapper for API responses that return objects instead of arrays
+    data class SimilarClubResponse(
+        val results: List<SimilarClubItem>? = null,
+        val items: List<SimilarClubItem>? = null,
+        val data: List<SimilarClubItem>? = null,
+        val clubs: List<SimilarClubItem>? = null,
+        val recommendations: List<SimilarClubItem>? = null,
+        val similar: List<SimilarClubItem>? = null
+    ) {
+        // Get the actual list from whichever field is populated
+        fun getSimilarClubs(): List<SimilarClubItem> {
+            return results ?: items ?: data ?: clubs ?: recommendations ?: similar ?: emptyList()
+        }
+    }
+
     @GET("club/similar/")
     fun getSimilarClubs(
         @Query("query") query: String
@@ -245,7 +264,7 @@ interface ApiService {
     @GET("club/{id}/similar/")
     fun getSimilarClubsByClub(
         @Path("id") clubId: Int
-    ): Call<List<SimilarClubItem>>
+    ): Call<SimilarClubResponse>
 
     // 사용자 상세
     @GET("user/{id}/")
@@ -294,30 +313,18 @@ interface ApiService {
         @Path("club_id") clubId: Int
     ): Call<List<EventItem>>
 
-    @GET("clubs/{club_id}/events/{event_pk}/")
-    fun getEventDetail(
-        @Path("club_id") clubId: Int,
-        @Path("event_pk") eventId: Int
-    ): Call<EventItem>
-
-    @GET("clubs/{club_id}/events/{event_pk}/transactions/")
-    fun getEventTransactions(
-        @Path("club_id") clubId: Int,
-        @Path("event_pk") eventId: Int
-    ): Call<List<LedgerTransactionItem>>
-
     // 리포트 삭제
     @DELETE("report/reports/{report_pk}/")
     fun deleteReport(
         @Path("report_pk") reportId: Int
     ): Call<okhttp3.ResponseBody>
-    
+
     // Gemini AI 리포트 조언 생성 (기존)
     @POST("report/reports/{report_pk}/advice/")
     fun getReportAdvice(
         @Path("report_pk") reportId: Int
     ): Call<GeminiAdviceResponse>
-    
+
     // 장부 기반 AI 재무 조언 생성 (새로운 API)
     @POST("report/clubs/{club_pk}/ledgers/{ledger_pk}/advice/")
     fun getLedgerAdvice(
@@ -414,7 +421,7 @@ interface ApiService {
         val budget: Int
     )
 
-    // 장부 거래 API 응답 클래스  
+    // 장부 거래 API 응답 클래스
     data class LedgerTransactionItem(
         val id: Int,
         val ledger: Int,
@@ -449,4 +456,50 @@ interface ApiService {
         @Path("user_pk") userPk: Int,
         @Path("accounts_id") accountId: Int
     ): Call<AccountItem>
+
+    // Transaction Detail API
+    @GET("club/{club_pk}/ledger/{ledger_pk}/transactions/{transaction_id}/")
+    suspend fun getTransactionDetail(
+        @Path("club_pk") clubId: Int,
+        @Path("ledger_pk") ledgerId: Int,
+        @Path("transaction_id") transactionId: Int
+    ): TransactionDetailResponse
+
+    @GET("club/{club_pk}/ledger/{ledger_pk}/transactions/")
+    suspend fun getTransactionsForLedger(
+        @Path("club_pk") clubId: Int,
+        @Path("ledger_pk") ledgerId: Int
+    ): List<TransactionItem>
+
+    // 행사 거래내역 조회
+    @GET("club/{club_pk}/events/{event_pk}/transactions/")
+    fun getEventTransactions(
+        @Path("club_pk") clubId: Int,
+        @Path("event_pk") eventId: Int
+    ): Call<List<EventTransactionItem>>
+
+    // 행사 상세 조회
+    @GET("club/{club_pk}/events/{event_pk}/")
+    fun getEventDetail(
+        @Path("club_pk") clubId: Int,
+        @Path("event_pk") eventId: Int
+    ): Call<EventDetailResponse>
+
+    data class EventDetailResponse(
+        val id: Int,
+        val name: String,
+        val start_date: String,
+        val end_date: String,
+        val description: String,
+        val budget: Long
+    )
+
+    // 멤버 삭제 (추방)
+    @DELETE("club/{club_pk}/members/{id}/")
+    fun deleteMember(
+        @Path("club_pk") clubId: Int,
+        @Path("id") memberId: Int
+    ): Call<okhttp3.ResponseBody>
+
+    // Note: getSimilarClubsByClub method already exists above with SimilarClubItem return type
 }
