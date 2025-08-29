@@ -58,19 +58,6 @@
                     
             </LinearLayout>
                 
-            <!-- 임시 루트 페이지 이동 버튼 -->
-            <Button
-                android:id="@+id/btn_temp_root"
-                android:layout_width="wrap_content"
-                android:layout_height="32dp"
-                android:text="루트 페이지"
-                android:textSize="12sp"
-                android:layout_gravity="end"
-                android:layout_marginTop="-44dp"
-                android:layout_marginEnd="16dp"
-                android:layout_marginBottom="12dp"
-                android:paddingStart="8dp"
-                android:paddingEnd="8dp"/>
 
             <!-- 내 동아리: RecyclerView + PagerSnapHelper로 한 장씩 스와이프 -->
             <androidx.recyclerview.widget.RecyclerView
@@ -80,8 +67,8 @@
                 android:overScrollMode="never"
                 android:layout_marginStart="0dp"
                 android:layout_marginEnd="0dp"
-                android:layout_marginTop="12dp"
-                android:layout_marginBottom="12dp"
+                android:layout_marginTop="6dp"
+                android:layout_marginBottom="6dp"
                 android:paddingStart="0dp"
                 android:paddingEnd="0dp"/>
 
@@ -93,7 +80,7 @@
                 android:gravity="center"
                 android:orientation="horizontal"
                 android:layout_marginTop="4dp"
-                android:layout_marginBottom="24dp">
+                android:layout_marginBottom="12dp">
                 <View
                     android:layout_width="8dp"
                     android:layout_height="8dp"
@@ -190,20 +177,6 @@
 
 
 
-    <!-- 오른쪽 중앙 고정 AI 버튼 -->
-    <TextView
-        android:id="@+id/fab_ai_helper"
-        android:layout_width="56dp"
-        android:layout_height="56dp"
-        android:layout_gravity="bottom|end"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="96dp"
-        android:background="@drawable/bg_fab_ai"
-        android:gravity="center"
-        android:text="AI"
-        android:textColor="#FFFFFF"
-        android:textStyle="bold"
-        android:textSize="20sp"
-        android:contentDescription="AI 추천" />
+    <!-- (리팩터링) AI 버튼은 코드에서 FAB와 함께 추가됨 -->
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
