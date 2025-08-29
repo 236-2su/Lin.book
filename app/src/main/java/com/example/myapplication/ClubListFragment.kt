@@ -980,57 +980,8 @@ class ClubListFragment : Fragment() {
                     completedCount++
                     if (detailResponse.isSuccessful && detailResponse.body() != null) {
                         val club = detailResponse.body()!!
-                        val metadata = aiMetadata?.get(clubId)
-                        
-                        // Create card for this recommended club
-                        val card = android.widget.LinearLayout(requireContext()).apply {
-                            orientation = android.widget.LinearLayout.VERTICAL
-                            setBackgroundResource(R.drawable.card_box_fafa)
-                            setPadding(40, 40, 40, 40)
-                            
-                            // Add AI score hint if available
-                            metadata?.first?.let { score ->
-                                val tvScore = android.widget.TextView(requireContext()).apply {
-                                    text = "🤖 AI 추천도: ${(score * 100).toInt()}%"
-                                    setTextColor(android.graphics.Color.parseColor("#1976D2"))
-                                    textSize = 12f
-                                    setTypeface(null, android.graphics.Typeface.BOLD)
-                                }
-                                addView(tvScore)
-                            }
-                            
-                            // AI snippet removed per user request
-                            
-                            val tvName = android.widget.TextView(requireContext()).apply {
-                                text = club.name
-                                setTextColor(android.graphics.Color.BLACK)
-                                textSize = 18f
-                                setTypeface(null, android.graphics.Typeface.BOLD)
-                            }
-                            val tvDept = android.widget.TextView(requireContext()).apply {
-                                text = "${club.department} / ${club.location}"
-                                setTextColor(android.graphics.Color.parseColor("#666666"))
-                                textSize = 12f
-                            }
-                            val tvDesc = android.widget.TextView(requireContext()).apply {
-                                text = club.shortDescription
-                                setTextColor(android.graphics.Color.parseColor("#333333"))
-                                textSize = 12f
-                            }
-                            
-                            addView(tvName)
-                            addView(tvDept)
-                            addView(tvDesc)
-                            
-                            setOnClickListener {
-                                val intent = Intent(requireContext(), ClubAnnouncementBoardListActivity::class.java)
-                                intent.putExtra("club_pk", club.id)
-                                startActivity(intent)
-                            }
-                        }
-                        val lp = android.widget.LinearLayout.LayoutParams(android.widget.LinearLayout.LayoutParams.MATCH_PARENT, android.widget.LinearLayout.LayoutParams.WRAP_CONTENT)
-                        lp.setMargins(4, 4, 4, 16)
-                        card.layoutParams = lp
+                        // 활동 중인 동아리 카드 화면과 동일한 UI를 사용합니다.
+                        val card = createClubCard(club)
                         listContainer.addView(card)
                     }
                     

@@ -316,10 +316,20 @@
                         android:id="@+id/empty_comments_placeholder"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
+                        android:orientation="vertical"
                         android:gravity="center"
                         android:paddingVertical="12dp"
                         android:visibility="gone">
+
+                        <ImageView
+                            android:id="@+id/img_batman_sol"
+                            android:layout_width="100dp"
+                            android:layout_height="100dp"
+                            android:src="@drawable/batman_sol_img"
+                            android:contentDescription="Batman_sol"
+                            android:layout_marginTop="16dp"
+                            android:layout_marginBottom="8dp"/>
+
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -328,17 +338,6 @@
                             android:textColor="#888888" />
                     </LinearLayout>
                 </LinearLayout>
-
-                <!-- 댓글 헤더 -->
-                <TextView
-                    android:id="@+id/tv_comment_header"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="댓글(0)"
-                    android:textStyle="bold"
-                    android:textSize="20sp"
-                    android:textColor="@android:color/black"
-                    android:layout_marginBottom="12dp" />
 
                 <!-- 동적 댓글 컨테이너 -->
                 <LinearLayout

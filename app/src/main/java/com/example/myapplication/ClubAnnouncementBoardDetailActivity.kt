@@ -212,8 +212,8 @@ class ClubAnnouncementBoardDetailActivity : AppCompatActivity() {
                     response: retrofit2.Response<List<com.example.myapplication.CommentItem>>
                 ) {
                     val comments = response.body() ?: emptyList()
-                    // 헤더 카운트 갱신
-                    findViewById<android.widget.TextView>(R.id.tv_comment_header)?.text = "댓글(${comments.size})"
+                    // 댓글 수 표시 텍스트뷰 갱신
+                    findViewById<android.widget.TextView>(R.id.tv_comments_count)?.text = comments.size.toString()
                     // 목록 렌더링
                     val container = findViewById<android.widget.LinearLayout>(R.id.comments_container)
                     container?.removeAllViews()
