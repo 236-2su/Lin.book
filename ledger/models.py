@@ -40,6 +40,9 @@ class LedgerTransactions(models.Model):
     description = models.TextField()
     vendor = models.CharField(max_length=100)
     event = models.ForeignKey(Event, on_delete=models.SET_NULL, null=True)
+    external_id = models.CharField(
+        max_length=50, unique=True, null=True, blank=True, help_text="외부 API의 거래 고유 ID"
+    )
     # account_transaction = models.ForeignKey(AccountTransaction, on_delete=models.SET_NULL, null=True, blank=True)
 
 

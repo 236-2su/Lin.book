@@ -131,6 +131,28 @@ def get_transaction_history(
     return payload.get("REC", {})
 
 
+"""
+거래 내역 조회 API 응답
+{
+    "totalCount": "1",
+    "list": [
+    {
+        "transactionUniqueNo": "104429",
+        "transactionDate": "20250830",
+        "transactionTime": "014735",
+        "transactionType": "1",
+        "transactionTypeName": "입금(이체)",
+        "transactionAccountNo": "0011461639385305",
+        "transactionBalance": "100",
+        "transactionAfterBalance": "100",
+        "transactionSummary": "류하준 1월 회비",
+        "transactionMemo": ""
+    }
+    ]
+}
+"""
+
+
 def transfer(member: ClubMember, to_account_no: str, amount: int, withdrawal_message: str, deposit_message: str):
     user = member.user
     user_account = user.accounts_set.first()
