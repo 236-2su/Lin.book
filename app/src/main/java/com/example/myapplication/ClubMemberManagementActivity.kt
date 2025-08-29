@@ -430,19 +430,31 @@ class ClubMemberManagementActivity : AppCompatActivity() {
     private fun showRoleChangeDialog(member: Member) {
         val dialogView = layoutInflater.inflate(R.layout.dialog_role_change, null)
         val radioGroup = dialogView.findViewById<RadioGroup>(R.id.radioGroup_roles)
+        val memberNameText = dialogView.findViewById<TextView>(R.id.tv_member_name)
+        val warningContainer = dialogView.findViewById<View>(R.id.warning_container)
+        
+        // 멤버 이름 설정
+        memberNameText.text = "${member.name}님"
         
         // 현재 권한에 따라 라디오 버튼 선택
         when (member.role) {
-            "회장" -> radioGroup.check(R.id.radio_leader)
-            "간부" -> radioGroup.check(R.id.radio_officer)
+            "leader", "회장" -> radioGroup.check(R.id.radio_leader)
+            "officer", "간부" -> radioGroup.check(R.id.radio_officer)
             else -> radioGroup.check(R.id.radio_member)
         }
         
-        val dialog = AlertDialog.Builder(this)
-            .setTitle("권한 변경")
-            .setMessage("${member.name}님의 권한을 변경하시겠습니까?")
+        // 라디오 버튼 변경 리스너 - 회장 선택 시 경고 메시지 표시
+        radioGroup.setOnCheckedChangeListener { _, checkedId ->
+            warningContainer.visibility = if (checkedId == R.id.radio_leader && member.role != "leader" && member.role != "회장") {
+                View.VISIBLE
+            } else {
+                View.GONE
+            }
+        }
+        
+        val dialog = AlertDialog.Builder(this, R.style.CustomAlertDialog)
             .setView(dialogView)
-            .setPositiveButton("확인") { _, _ ->
+            .setPositiveButton("변경하기") { _, _ ->
                 val selectedRadioId = radioGroup.checkedRadioButtonId
                 val newRole = when (selectedRadioId) {
                     R.id.radio_leader -> "leader"
@@ -452,8 +464,8 @@ class ClubMemberManagementActivity : AppCompatActivity() {
                 
                 // 현재 권한과 같으면 변경하지 않음
                 val currentRole = when (member.role) {
-                    "회장" -> "leader"
-                    "간부" -> "officer"
+                    "leader", "회장" -> "leader"
+                    "officer", "간부" -> "officer"
                     else -> "member"
                 }
                 
@@ -463,7 +475,9 @@ class ClubMemberManagementActivity : AppCompatActivity() {
             }
             .setNegativeButton("취소", null)
             .create()
-            
+        
+        // 다이얼로그 배경 투명하게 설정
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
         dialog.show()
     }
     
@@ -482,7 +496,7 @@ class ClubMemberManagementActivity : AppCompatActivity() {
                     val roleText = when (newRole) {
                         "leader" -> "회장"
                         "officer" -> "간부"
-                        else -> "일반"
+                        else -> "부원"
                     }
                     
                     // 멤버 리스트에서 해당 멤버의 권한 업데이트
@@ -499,10 +513,10 @@ class ClubMemberManagementActivity : AppCompatActivity() {
                     // 만약 회장으로 변경했다면, 현재 사용자는 일반 멤버가 됨
                     if (newRole == "leader") {
                         isCurrentUserPresident = false
-                        // 현재 사용자 찾아서 일반으로 변경
+                        // 현재 사용자 찾아서 부원으로 변경
                         val currentUserIndex = members.indexOfFirst { it.id == currentUserPk }
                         if (currentUserIndex != -1) {
-                            members[currentUserIndex] = members[currentUserIndex].copy(role = "일반")
+                            members[currentUserIndex] = members[currentUserIndex].copy(role = "부원")
                             memberAdapter.notifyItemChanged(currentUserIndex)
                         }
                     }
