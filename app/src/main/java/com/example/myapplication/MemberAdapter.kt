@@ -1,8 +1,11 @@
 package com.example.myapplication
 
+import android.content.Intent
+import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
@@ -66,6 +69,8 @@ class MemberAdapter(
         private val joinDate: TextView = itemView.findViewById(R.id.joinDate)
         private val roleChangeButton: TextView = itemView.findViewById(R.id.roleChangeButton)
         private val actionButtons: View = itemView.findViewById(R.id.actionButtons)
+        private val callButton: ImageView = itemView.findViewById(R.id.callButton)
+        private val messageButton: ImageView = itemView.findViewById(R.id.messageButton)
 
         fun bind(member: Member) {
             memberName.text = member.name
@@ -84,19 +89,27 @@ class MemberAdapter(
                 itemView.setBackgroundResource(android.R.color.transparent)
             }
 
-            // 역할에 따른 배지 텍스트 설정
+            // 역할에 따른 배지 텍스트 및 배경 설정
             when (member.role) {
                 "leader", "회장" -> {
                     roleBadge.text = "회장"
+                    roleBadge.setBackgroundResource(R.drawable.badge_leader)
+                    roleBadge.setTextColor(android.graphics.Color.WHITE)
                 }
                 "officer", "간부" -> {
                     roleBadge.text = "간부"
+                    roleBadge.setBackgroundResource(R.drawable.badge_officer)
+                    roleBadge.setTextColor(android.graphics.Color.WHITE)
                 }
                 "member", "일반", "부원" -> {
-                    roleBadge.text = "일반"
+                    roleBadge.text = "부원"
+                    roleBadge.setBackgroundResource(R.drawable.badge_general)
+                    roleBadge.setTextColor(android.graphics.Color.parseColor("#374151"))
                 }
                 else -> {
-                    roleBadge.text = "일반"
+                    roleBadge.text = "부원"
+                    roleBadge.setBackgroundResource(R.drawable.badge_general)
+                    roleBadge.setTextColor(android.graphics.Color.parseColor("#374151"))
                 }
             }
 
@@ -116,6 +129,22 @@ class MemberAdapter(
                 actionButtons.visibility = View.GONE
             } else {
                 actionButtons.visibility = View.VISIBLE
+                
+                // 전화 버튼 클릭 리스너
+                callButton.setOnClickListener {
+                    val intent = Intent(Intent.ACTION_DIAL).apply {
+                        data = Uri.parse("tel:${member.phone}")
+                    }
+                    itemView.context.startActivity(intent)
+                }
+                
+                // 문자 버튼 클릭 리스너
+                messageButton.setOnClickListener {
+                    val intent = Intent(Intent.ACTION_SENDTO).apply {
+                        data = Uri.parse("smsto:${member.phone}")
+                    }
+                    itemView.context.startActivity(intent)
+                }
             }
         }
     }
