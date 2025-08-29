@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Event, Ledger, LedgerTransactions, Receipt
+from .models import Event, Ledger, LedgerTransactions, LedgerTransactionsComment, Receipt
 
 
 class LedgerSerializer(serializers.ModelSerializer):
@@ -56,3 +56,19 @@ class EventTransactionSerializer(serializers.ModelSerializer):
 
     def get_transaction_date_time(self, obj):
         return obj.ledgertransactions.date_time
+
+
+class LedgerTransactionCommentSerializer(serializers.ModelSerializer):
+    author_name = serializers.SerializerMethodField()
+    author_major = serializers.SerializerMethodField()
+
+    class Meta:
+        model = LedgerTransactionsComment
+        fields = "__all__"
+        read_only_fields = ["id", "created_at", "updated_at", "transaction"]
+
+    def get_author_name(self, obj):
+        return obj.author.user.name
+
+    def get_author_major(self, obj):
+        return obj.author.user.major

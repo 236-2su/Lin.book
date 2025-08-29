@@ -4,7 +4,13 @@ from rest_framework_nested import routers as nested_routers
 
 from accounts.views import ClubAccountsViewSet
 from boards.views import BoardViewSet, CommentsViewSet
-from ledger.views import EventViewSet, LedgerTransactionsViewSet, LedgerViewSet, ReceiptViewSet
+from ledger.views import (
+    EventViewSet,
+    LedgerTransactionCommentsViewSet,
+    LedgerTransactionsViewSet,
+    LedgerViewSet,
+    ReceiptViewSet,
+)
 
 from .views import ClubMemberViewSet, ClubViewSet, ClubWelcomePageViewSet, SimilarClubsById, SimilarClubsByQuery
 
@@ -26,6 +32,15 @@ ledgers_router.register(r"ledger", LedgerViewSet, basename="club-ledgers")
 
 transactions_router = nested_routers.NestedSimpleRouter(ledgers_router, r"ledger", lookup="ledger")
 transactions_router.register(r"transactions", LedgerTransactionsViewSet, basename="ledger-transactions")
+
+# Register comments under transactions
+ledgertransactioncomments_router = nested_routers.NestedSimpleRouter(
+    transactions_router, r"transactions", lookup="transaction"
+)
+ledgertransactioncomments_router.register(
+    r"comments", LedgerTransactionCommentsViewSet, basename="transaction-comments"
+)
+
 
 receipts_router = nested_routers.NestedSimpleRouter(ledgers_router, r"ledger", lookup="ledger")
 receipts_router.register(r"receipts", ReceiptViewSet, basename="ledger-receipts")
@@ -50,6 +65,7 @@ urlpatterns = [
     path("", include(comments_router.urls)),
     path("", include(ledgers_router.urls)),
     path("", include(transactions_router.urls)),
+    path("", include(ledgertransactioncomments_router.urls)),
     path("", include(receipts_router.urls)),
     path("", include(welcome_router.urls)),
     path("", include(events_router.urls)),

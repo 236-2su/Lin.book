@@ -41,3 +41,11 @@ class LedgerTransactions(models.Model):
     vendor = models.CharField(max_length=100)
     event = models.ForeignKey(Event, on_delete=models.SET_NULL, null=True)
     # account_transaction = models.ForeignKey(AccountTransaction, on_delete=models.SET_NULL, null=True, blank=True)
+
+
+class LedgerTransactionsComment(models.Model):
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    author = models.ForeignKey(ClubMember, on_delete=models.CASCADE)
+    transaction = models.ForeignKey(LedgerTransactions, on_delete=models.CASCADE)

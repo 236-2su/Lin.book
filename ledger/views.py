@@ -1,4 +1,10 @@
-import json
+"""
+주의!!!
+이 프로젝트는 프로토타입으로서 일반적인 인증 기능이 전혀 구현되어 있지 않음!
+만약 프론트에서 오는 요청을 식별하기 위해서는
+request.user 같은 헤더가 아니라
+명시적으로 request body에 user_id를 받아서 그걸 기반으로 user를 식별해야 함!!
+"""
 
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema, extend_schema_view
@@ -9,12 +15,13 @@ from rest_framework.response import Response
 
 from club.models import Club
 
-from .models import Event, Ledger, LedgerTransactions, Receipt
+from .models import Event, Ledger, LedgerTransactions, LedgerTransactionsComment, Receipt
 from .serializers import (
     EventSerializer,
     EventTransactionSerializer,
     LedgerCreateSerializer,
     LedgerSerializer,
+    LedgerTransactionCommentSerializer,
     LedgerTransactionCreateSerializer,
     LedgerTransactionsSerializer,
     ReceiptSerializer,
@@ -582,3 +589,76 @@ class EventTransactionSummaryViewSet(viewsets.ReadOnlyModelViewSet):
     def get_queryset(self):
         club_pk = self.kwargs.get("club_pk")
         return Event.objects.filter(club_id=club_pk).prefetch_related("ledgertransactions_set")
+
+
+@extend_schema(
+    parameters=[
+        OpenApiParameter(name="club_pk", type=int, location=OpenApiParameter.PATH, description="Club ID"),
+        OpenApiParameter(name="ledger_pk", type=int, location=OpenApiParameter.PATH, description="Ledger ID"),
+        OpenApiParameter(name="transaction_pk", type=int, location=OpenApiParameter.PATH, description="Transaction ID"),
+    ],
+    tags=["Ledger Transaction Comments"],
+)
+@extend_schema_view(
+    list=extend_schema(
+        summary="거래 내역 댓글 전체 목록 조회",
+        description="특정 거래 내역에 달린 댓글 목록을 조회합니다.",
+        responses={200: OpenApiResponse(response=LedgerTransactionCommentSerializer, description="OK")},
+    ),
+    retrieve=extend_schema(
+        summary="특정 댓글 조회",
+        description="comment_pk로 특정 댓글의 상세 정보를 조회합니다.",
+        responses={
+            200: OpenApiResponse(LedgerTransactionCommentSerializer, description="OK"),
+            404: OpenApiResponse(description="Not Found"),
+        },
+    ),
+    create=extend_schema(
+        summary="거래 내역 댓글 등록",
+        description="특정 거래 내역에 새 댓글을 생성합니다. 요청 본문에 'content'와 'author'(ClubMember ID)를 포함해야 합니다.",
+        request=LedgerTransactionCommentSerializer,
+        responses={
+            201: OpenApiResponse(LedgerTransactionCommentSerializer, description="Created"),
+            400: OpenApiResponse(description="Bad Request"),
+        },
+    ),
+    update=extend_schema(
+        summary="댓글 전체 수정 (PUT)",
+        description="댓글의 모든 필드를 갱신합니다.",
+        request=LedgerTransactionCommentSerializer,
+        responses={
+            200: OpenApiResponse(LedgerTransactionCommentSerializer, description="OK"),
+            400: OpenApiResponse(description="Bad Request"),
+            404: OpenApiResponse(description="Not Found"),
+        },
+    ),
+    partial_update=extend_schema(
+        summary="댓글 부분 수정 (PATCH)",
+        description="댓글의 일부 필드만 부분 갱신합니다.",
+        request=LedgerTransactionCommentSerializer,
+        responses={
+            200: OpenApiResponse(LedgerTransactionCommentSerializer, description="OK"),
+            400: OpenApiResponse(description="Bad Request"),
+            404: OpenApiResponse(description="Not Found"),
+        },
+    ),
+    destroy=extend_schema(
+        summary="댓글 삭제",
+        description="comment_pk로 특정 댓글을 삭제합니다.",
+        responses={204: OpenApiResponse(description="No Content"), 404: OpenApiResponse(description="Not Found")},
+    ),
+)
+class LedgerTransactionCommentsViewSet(viewsets.ModelViewSet):
+    serializer_class = LedgerTransactionCommentSerializer
+
+    def get_queryset(self):
+        return (
+            LedgerTransactionsComment.objects.select_related("author__user")
+            .filter(transaction_id=self.kwargs["transaction_pk"])
+            .order_by("-created_at")
+        )
+
+    def perform_create(self, serializer):
+        transaction = get_object_or_404(LedgerTransactions, pk=self.kwargs["transaction_pk"])
+        # The 'author' field (ClubMember id) is expected to be provided in the request body.
+        serializer.save(transaction=transaction)
