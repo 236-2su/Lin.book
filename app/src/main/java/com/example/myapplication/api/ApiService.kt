@@ -5,6 +5,7 @@ import com.example.myapplication.ClubItem
 import com.example.myapplication.EventItem
 import com.example.myapplication.EventCreateRequest
 import com.example.myapplication.TransactionItem
+import com.example.myapplication.EventTransactionItem
 import com.example.myapplication.model.Ledger
 import com.example.myapplication.model.Transaction
 import retrofit2.Call
@@ -243,18 +244,6 @@ interface ApiService {
         @Path("club_id") clubId: Int
     ): Call<List<EventItem>>
 
-    @GET("clubs/{club_id}/events/{event_pk}/")
-    fun getEventDetail(
-        @Path("club_id") clubId: Int,
-        @Path("event_pk") eventId: Int
-    ): Call<EventItem>
-
-    @GET("clubs/{club_id}/events/{event_pk}/transactions/")
-    fun getEventTransactions(
-        @Path("club_id") clubId: Int,
-        @Path("event_pk") eventId: Int
-    ): Call<List<LedgerTransactionItem>>
-
     // 리포트 삭제
     @DELETE("report/reports/{report_pk}/")
     fun deleteReport(
@@ -412,4 +401,34 @@ interface ApiService {
         @Path("club_pk") clubId: Int,
         @Path("ledger_pk") ledgerId: Int
     ): List<TransactionItem>
+
+    // 행사 거래내역 조회
+    @GET("club/{club_pk}/events/{event_pk}/transactions/")
+    fun getEventTransactions(
+        @Path("club_pk") clubId: Int,
+        @Path("event_pk") eventId: Int
+    ): Call<List<EventTransactionItem>>
+
+    // 행사 상세 조회
+    @GET("club/{club_pk}/events/{event_pk}/")
+    fun getEventDetail(
+        @Path("club_pk") clubId: Int,
+        @Path("event_pk") eventId: Int
+    ): Call<EventDetailResponse>
+
+    data class EventDetailResponse(
+        val id: Int,
+        val name: String,
+        val start_date: String,
+        val end_date: String,
+        val description: String,
+        val budget: Long
+    )
+
+    // 멤버 삭제 (추방)
+    @DELETE("club/{club_pk}/members/{id}/")
+    fun deleteMember(
+        @Path("club_pk") clubId: Int,
+        @Path("id") memberId: Int
+    ): Call<okhttp3.ResponseBody>
 }

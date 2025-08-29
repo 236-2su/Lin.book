@@ -14,8 +14,8 @@ class SwipeToDeleteCallback(
 ) : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
 
     private val deleteIcon = ContextCompat.getDrawable(context, R.drawable.delete)
-    private val intrinsicWidth = deleteIcon?.intrinsicWidth ?: 0
-    private val intrinsicHeight = deleteIcon?.intrinsicHeight ?: 0
+    private val intrinsicWidth = (deleteIcon?.intrinsicWidth ?: 0) / 4  // 크기 1/4로 축소
+    private val intrinsicHeight = (deleteIcon?.intrinsicHeight ?: 0) / 4  // 크기 1/4로 축소
     private val background = ColorDrawable()
     private val backgroundColor = Color.parseColor("#DC2626")
     private val clearPaint = Paint().apply { xfermode = PorterDuffXfermode(PorterDuff.Mode.CLEAR) }
@@ -84,18 +84,6 @@ class SwipeToDeleteCallback(
             setTint(Color.WHITE)
             draw(c)
         }
-
-        // "삭제" 텍스트 그리기
-        val textPaint = Paint().apply {
-            color = Color.WHITE
-            textSize = 36f
-            isAntiAlias = true
-            textAlign = Paint.Align.CENTER
-        }
-        
-        val textX = itemView.right - deleteIconMargin - intrinsicWidth / 2f
-        val textY = deleteIconBottom + 40f
-        c.drawText("삭제", textX, textY, textPaint)
 
         super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
     }
