@@ -1,5 +1,5 @@
 # Python 3.12 slim 이미지
-FROM python:3.9.13
+FROM python:3.13.5
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
