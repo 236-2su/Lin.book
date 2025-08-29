@@ -439,7 +439,7 @@ class ReceiptViewSet(viewsets.ModelViewSet):
         LedgerTransactions.objects.create(
             ledger=ledger,
             date_time=receipt.date_time,
-            amount=receipt.amount,
+            amount=receipt.amount * -1,
             payment_method="카드",  # OCR로 알 수 없으므로 '카드'를 기본값으로 가정
             receipt=receipt,
             description=description,
