@@ -263,12 +263,13 @@ class ClubMemberManagementActivity : AppCompatActivity() {
                         }
                     }
                     
-                    // 정렬 순서: 본인(isMe) -> 회장(leader) -> 일반(member)
+                    // 정렬 순서: 본인(isMe) -> 회장(leader) -> 간부(officer) -> 일반(member)
                     members.sortBy { 
                         when {
                             it.isMe -> 0                    // 본인이 최우선 (최상단)
                             it.role == "leader" -> 1        // 회장이 두 번째
-                            else -> 2                        // 일반 멤버가 세 번째
+                            it.role == "officer" -> 2       // 간부가 세 번째
+                            else -> 3                        // 일반 멤버가 네 번째
                         }
                     }
                     
