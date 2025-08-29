@@ -13,6 +13,13 @@ import android.graphics.Color;
 import com.example.myapplication.LedgerListFragment;
 import com.example.myapplication.ReferenceFragment;
 import com.example.myapplication.LedgerContentFragment;
+import com.example.myapplication.MeetingAccountFragment;
+import com.example.myapplication.ClubListFragment;
+
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
+
 
 public abstract class BaseActivity extends AppCompatActivity {
     
@@ -29,6 +36,23 @@ public abstract class BaseActivity extends AppCompatActivity {
     // 게시판 버튼들 참조
     protected TextView btnNotice, btnFreeBoard, btnPublicAccount, btnEventAccount, btnMeetingAccount, btnAiReport;
     
+    // Fragment 교체를 위한 메서드
+    public void replaceFragment(Fragment fragment) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        transaction.replace(R.id.content_container, fragment);
+        transaction.commit();
+    }
+    
+    // Fragment 교체 (애니메이션 포함)
+    public void replaceFragmentWithAnimation(Fragment fragment, int enterAnim, int exitAnim) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        transaction.setCustomAnimations(enterAnim, exitAnim);
+        transaction.replace(R.id.content_container, fragment);
+        transaction.commit();
+    }
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -37,6 +61,14 @@ public abstract class BaseActivity extends AppCompatActivity {
             setContentView(R.layout.root_page);
             android.util.Log.d("BaseActivity", "setContentView(R.layout.root_page) 성공");
             
+            // 전역 스크롤바 비활성화 (현재 액티비티 뷰 트리)
+            try {
+                android.view.ViewGroup root = findViewById(android.R.id.content);
+                if (root != null) {
+                    disableScrollbarsRecursively(root);
+                }
+            } catch (Exception ignore) {}
+
             setupHeader();
             android.util.Log.d("BaseActivity", "setupHeader() 호출 성공");
             
@@ -151,6 +183,21 @@ public abstract class BaseActivity extends AppCompatActivity {
         params.topMargin = COMMON_MARGIN_TOP;
         view.setLayoutParams(params);
     }
+
+    // 스크롤바 비활성화 헬퍼
+    private void disableScrollbarsRecursively(android.view.View view) {
+        try {
+            view.setVerticalScrollBarEnabled(false);
+            view.setHorizontalScrollBarEnabled(false);
+        } catch (Throwable ignored) {}
+        if (view instanceof android.view.ViewGroup) {
+            android.view.ViewGroup vg = (android.view.ViewGroup) view;
+            for (int i = 0; i < vg.getChildCount(); i++) {
+                android.view.View child = vg.getChildAt(i);
+                if (child != null) disableScrollbarsRecursively(child);
+            }
+        }
+    }
     
     // 공통 기능들 (예: 뒤로가기, 메뉴 등)
     protected void setupCommonFeatures() {
@@ -226,7 +273,15 @@ public abstract class BaseActivity extends AppCompatActivity {
             btnFreeBoard.setOnClickListener(v -> {
                 updateBoardButton(btnFreeBoard, 
                     new TextView[]{btnNotice, btnPublicAccount, btnEventAccount, btnMeetingAccount, btnAiReport});
-                // TODO: FreeBoardFragment 만들어서 교체하는 로직 추가
+                
+                // 자유게시판 Fragment로 교체
+                // MainActivity로 이동하여 Fragment 교체
+                Intent intent = new Intent(this, MainActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                intent.putExtra("show_free_board", true);
+                intent.putExtra("club_pk", getCurrentClubId());
+                startActivity(intent);
+                overridePendingTransition(0, 0);
             });
         }
         
@@ -260,7 +315,17 @@ public abstract class BaseActivity extends AppCompatActivity {
             btnMeetingAccount.setOnClickListener(v -> {
                 updateBoardButton(btnMeetingAccount, 
                     new TextView[]{btnNotice, btnFreeBoard, btnPublicAccount, btnEventAccount, btnAiReport});
-                // TODO: MeetingAccountFragment 만들어서 교체하는 로직 추가
+
+                if (this instanceof MainActivity) {
+                    ((MainActivity) this).replaceFragment(MeetingAccountFragment.Companion.newInstance(getCurrentClubId()));
+                } else {
+                    Intent intent = new Intent(this, MainActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    intent.putExtra("show_meeting_account", true);
+                    intent.putExtra("club_pk", getCurrentClubId());
+                    startActivity(intent);
+                    overridePendingTransition(0, 0);
+                }
             });
         }
         
@@ -415,6 +480,32 @@ public abstract class BaseActivity extends AppCompatActivity {
         android.widget.HorizontalScrollView boardScrollView = findViewById(R.id.board_buttons_scroll_view);
         if (boardScrollView != null) {
             boardScrollView.post(() -> boardScrollView.scrollTo(scrollPosition, 0));
+        }
+    }
+
+    // 등록하기 버튼 숨기기
+    protected void hideRegisterButton() {
+        Button registerButton = findViewById(R.id.btn_register);
+        if (registerButton != null) {
+            registerButton.setVisibility(View.GONE);
+        }
+    }
+    
+    // 모든 등록하기 버튼을 전역적으로 숨기기
+    protected void hideAllRegisterButtonsGlobally() {
+        // root_page.xml의 등록하기 버튼 숨기기
+        Button registerButton = findViewById(R.id.btn_register);
+        if (registerButton != null) {
+            registerButton.setVisibility(View.GONE);
+        }
+        
+        // content_container 내부의 등록하기 버튼도 찾아서 숨기기
+        View contentContainer = findViewById(R.id.content_container);
+        if (contentContainer != null) {
+            Button contentRegisterButton = contentContainer.findViewById(R.id.btn_register);
+            if (contentRegisterButton != null) {
+                contentRegisterButton.setVisibility(View.GONE);
+            }
         }
     }
 

@@ -10,6 +10,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.myapplication.api.ApiClient
+import com.example.myapplication.api.ApiService.EventItem
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response

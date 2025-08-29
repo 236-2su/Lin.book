@@ -25,7 +25,8 @@
         android:label="@string/app_name"
         android:roundIcon="@drawable/logo"
         android:supportsRtl="true"
-        android:theme="@style/Theme.LinBook">
+        android:theme="@style/Theme.LinBook"
+        android:name=".App">
 
         <activity
             android:name=".SplashActivity"
@@ -74,6 +75,10 @@
             android:exported="false" />
 
         <activity
+            android:name=".ClubUpdateActivity"
+            android:exported="false" />
+
+        <activity
             android:name=".ClubForumBoardListActivity"
             android:exported="false" />
 
@@ -111,6 +116,14 @@
 
         <activity
             android:name=".ClubEventLedgerDetailActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".AccountCreatedActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".AccountHistoryActivity"
             android:exported="false" />
 
     </application>

@@ -7,6 +7,7 @@ import android.widget.Button
 import android.widget.Switch
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import com.example.myapplication.ClubForumBoardListFragment
 
 class MainActivity : BaseActivity() {
 
@@ -19,6 +20,37 @@ class MainActivity : BaseActivity() {
         if (showClubList) {
             replaceFragment(ClubListFragment())
             return
+        }
+
+        // 동아리 내에서 공개장부 버튼을 클릭한 경우 LedgerContentFragment 표시
+        val showPublicLedger = intent?.getBooleanExtra("show_public_ledger", false) == true
+        if (showPublicLedger) {
+            val clubPk = intent?.getIntExtra("club_pk", -1) ?: -1
+            val ledgerPk = intent?.getIntExtra("ledger_pk", 10) ?: 10 // ledger_pk도 Intent에서 받아옴
+            if (clubPk > 0) {
+                replaceFragment(LedgerContentFragment.newInstance(clubPk, ledgerPk))
+                return
+            }
+        }
+        
+        // 동아리 내에서 모임통장 버튼을 클릭한 경우 MeetingAccountFragment 표시
+        val showMeetingAccount = intent?.getBooleanExtra("show_meeting_account", false) == true
+        if (showMeetingAccount) {
+            val clubPk = intent?.getIntExtra("club_pk", -1) ?: -1
+            if (clubPk > 0) {
+                replaceFragment(MeetingAccountFragment.newInstance(clubPk))
+                return
+            }
+        }
+        
+        // 동아리 내에서 자유게시판 버튼을 클릭한 경우 ClubForumBoardListFragment 표시
+        val showFreeBoard = intent?.getBooleanExtra("show_free_board", false) == true
+        if (showFreeBoard) {
+            val clubPk = intent?.getIntExtra("club_pk", -1) ?: -1
+            if (clubPk > 0) {
+                replaceFragment(ClubForumBoardListFragment.newInstance(clubPk))
+                return
+            }
         }
 
         // 초기 상태에서는 ReferenceFragment를 표시 (reference.xml을 직접 추가하지 않음)
@@ -95,12 +127,29 @@ class MainActivity : BaseActivity() {
         }
     }
 
-    fun replaceFragment(fragment: Fragment) {
+
+
+    override fun replaceFragment(fragment: Fragment) {
         // supportFragmentManager를 사용하여 프래그먼트 트랜잭션을 시작합니다.
         val transaction = supportFragmentManager.beginTransaction()
-        // content_container ID를 가진 레이아웃을 새로운 프래그먼트로 교체합니다.
+        
+        // 현재 프래그먼트를 백스택에 추가 (뒤로가기 지원)
+        transaction.addToBackStack(null)
+        
+        // 프래그먼트 교체
         transaction.replace(R.id.content_container, fragment)
-        // 트랜잭션을 커밋하여 변경사항을 적용합니다.
         transaction.commit()
     }
+    
+    // 뒤로가기 처리
+    override fun onBackPressed() {
+        if (supportFragmentManager.backStackEntryCount > 1) {
+            // 백스택에 프래그먼트가 2개 이상 있으면 뒤로가기
+            supportFragmentManager.popBackStack()
+        } else {
+            // 백스택에 프래그먼트가 1개 이하면 앱 종료
+            super.onBackPressed()
+        }
+    }
+
 }

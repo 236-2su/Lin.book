@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@android:color/white"
-    android:paddingTop="24dp">
+    android:paddingTop="0dp">
 
     <!-- 페이지 제목 -->
     <LinearLayout
@@ -44,9 +44,10 @@
         android:id="@+id/spinner_type"
         android:layout_width="match_parent"
         android:layout_height="49dp"
-        android:background="@drawable/info_box"
-        android:padding="16dp"
-        android:layout_marginBottom="24dp" />
+        style="@style/DropdownSpinnerStyle"
+        android:layout_marginBottom="24dp"
+        android:dropDownWidth="match_parent"
+        android:background="@drawable/spinner_background" />
 
     <!-- 영수증 등록 (선택) -->
     <TextView
@@ -95,6 +96,29 @@
         android:textSize="12sp"
         android:textColor="#333333"
         android:padding="16dp"
+        android:layout_marginBottom="24dp" />
+
+    <!-- 내역 구분 -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="내역 구분"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textColor="#333333"
+        android:layout_marginBottom="8dp" />
+
+    <EditText
+        android:id="@+id/et_transaction_category"
+        android:layout_width="match_parent"
+        android:layout_height="49dp"
+        android:background="@drawable/info_box"
+        android:hint="내역을 입력하세요 (예: 회비, 소모품비, 행사비 등)"
+        android:textColorHint="#999999"
+        android:textSize="12sp"
+        android:textColor="#333333"
+        android:padding="16dp"
+        android:inputType="text"
         android:layout_marginBottom="24dp" />
 
     <!-- 금액 -->
@@ -161,15 +185,15 @@
         android:id="@+id/spinner_payment_method"
         android:layout_width="match_parent"
         android:layout_height="49dp"
-        android:background="@drawable/info_box"
-        android:padding="16dp"
-        android:layout_marginBottom="24dp" />
+        style="@style/DropdownSpinnerStyle"
+        android:layout_marginBottom="24dp"
+        android:background="@drawable/spinner_background" />
 
     <!-- 메모 (선택) -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="메모 (선택)"
+        android:text="메모"
         android:textSize="16sp"
         android:textStyle="bold"
         android:textColor="#333333"

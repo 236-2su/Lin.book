@@ -16,27 +16,27 @@ import okhttp3.*
 import java.io.IOException
 
 class ClubAnnouncementBoardListActivity : AppCompatActivity() {
-    
+
     private lateinit var recyclerView: RecyclerView
     private lateinit var boardAdapter: BoardAdapter
     private val boardList = mutableListOf<BoardItem>()
-    
+
     companion object {
         private const val EXTRA_CLUB_PK = "club_pk"
     }
-    
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_club_announcement_board_list)
-        
+
         // 뒤로가기 버튼 설정: 시스템 백스택으로 이전 페이지 이동
         findViewById<Button>(R.id.btn_back).setOnClickListener {
             onBackPressedDispatcher.onBackPressed()
         }
-        
+
         // 게시판 버튼 설정
         setupBoardButtons()
-        
+
         // Floating Action Button 설정
         findViewById<com.google.android.material.floatingactionbutton.FloatingActionButton>(R.id.fab_add_post).setOnClickListener {
             val currentClubPk = intent?.getIntExtra(EXTRA_CLUB_PK, -1) ?: -1
@@ -75,11 +75,11 @@ class ClubAnnouncementBoardListActivity : AppCompatActivity() {
             updateIntent.putExtra("club_pk", currentClubPk)
             startActivity(updateIntent)
         }
-        
+
         // RecyclerView 설정
         recyclerView = findViewById(R.id.rv_board_list)
         recyclerView.layoutManager = LinearLayoutManager(this)
-        
+
         boardAdapter = BoardAdapter(boardList) { boardItem ->
             // 아이템 클릭 시 상세 페이지로 이동
             val intent = Intent(this, ClubAnnouncementBoardDetailActivity::class.java)
@@ -88,9 +88,9 @@ class ClubAnnouncementBoardListActivity : AppCompatActivity() {
             intent.putExtra("club_pk", currentClubPk)
             startActivity(intent)
         }
-        
+
         recyclerView.adapter = boardAdapter
-        
+
         // API 호출
         val clubPk = intent?.getIntExtra(EXTRA_CLUB_PK, -1) ?: -1
         // 클럽 기본 정보 로드
@@ -103,13 +103,13 @@ class ClubAnnouncementBoardListActivity : AppCompatActivity() {
         val clubPk = intent?.getIntExtra(EXTRA_CLUB_PK, -1) ?: -1
         fetchBoardList(clubPk)
     }
-    
+
     private fun setupBoardButtons() {
         // 공지사항 버튼 (현재 화면이므로 아무것도 하지 않음)
         findViewById<TextView>(R.id.btn_notice).setOnClickListener {
             // 이미 공지사항 화면이므로 아무것도 하지 않음
         }
-        
+
         // 자유게시판 버튼
         findViewById<TextView>(R.id.btn_free_board).setOnClickListener {
             val currentClubPk = intent?.getIntExtra(EXTRA_CLUB_PK, -1) ?: -1
@@ -118,7 +118,7 @@ class ClubAnnouncementBoardListActivity : AppCompatActivity() {
             startActivity(intent)
             finish()
         }
-        
+
         // 행사장부 버튼
         findViewById<TextView>(R.id.btn_event_account).setOnClickListener {
             val currentClubPk = intent?.getIntExtra(EXTRA_CLUB_PK, -1) ?: -1
@@ -127,7 +127,7 @@ class ClubAnnouncementBoardListActivity : AppCompatActivity() {
             startActivity(intent)
             finish()
         }
-        
+
         // AI 리포트 버튼
         findViewById<TextView>(R.id.btn_ai_report).setOnClickListener {
             val currentClubPk = intent?.getIntExtra(EXTRA_CLUB_PK, -1) ?: -1
@@ -145,7 +145,7 @@ class ClubAnnouncementBoardListActivity : AppCompatActivity() {
             startActivity(intent)
         }
     }
-    
+
     private fun fetchBoardList(clubPk: Int) {
         if (clubPk <= 0) {
             android.util.Log.e("API_ERROR", "유효하지 않은 club_pk: $clubPk")
@@ -156,7 +156,7 @@ class ClubAnnouncementBoardListActivity : AppCompatActivity() {
         val primaryUrl = "$baseUrl/club/$clubPk/boards"
         val fallbackUrl = "$baseUrl/club/$clubPk/boards/"
         android.util.Log.d("API_REQUEST", "요청 URL(우선): $primaryUrl")
-        
+
         // HTTPS(자가서명 등) 환경에서도 동작하도록 개발용 클라이언트 사용
         val client = ApiClient.createUnsafeOkHttpClient()
         fun buildRequest(targetUrl: String): Request =
@@ -185,12 +185,12 @@ class ClubAnnouncementBoardListActivity : AppCompatActivity() {
                         boardAdapter.notifyDataSetChanged()
                     } catch (e: Exception) {
                         android.util.Log.e("API_ERROR", "데이터 파싱 오류: ${e.message}")
-                        Toast.makeText(this@ClubAnnouncementBoardListActivity, 
+                        Toast.makeText(this@ClubAnnouncementBoardListActivity,
                             "데이터 파싱 오류: ${e.message}", Toast.LENGTH_LONG).show()
                     }
                 } else {
                     android.util.Log.e("API_ERROR", "서버 오류: ${response.code} - $responseBody")
-                    Toast.makeText(this@ClubAnnouncementBoardListActivity, 
+                    Toast.makeText(this@ClubAnnouncementBoardListActivity,
                         "서버 오류: ${response.code} - ${responseBody ?: "응답 없음"}", Toast.LENGTH_LONG).show()
                 }
             }
@@ -200,11 +200,11 @@ class ClubAnnouncementBoardListActivity : AppCompatActivity() {
             override fun onFailure(call: Call, e: IOException) {
                 android.util.Log.e("API_ERROR", "네트워크 오류: ${e.message}")
                 runOnUiThread {
-                    Toast.makeText(this@ClubAnnouncementBoardListActivity, 
+                    Toast.makeText(this@ClubAnnouncementBoardListActivity,
                         "네트워크 오류: ${e.message}", Toast.LENGTH_LONG).show()
                 }
             }
-            
+
             override fun onResponse(call: Call, response: Response) {
                 if (!response.isSuccessful && response.code == 400) {
                     android.util.Log.w("API_RETRY", "400 발생. 대체 URL로 재시도: $fallbackUrl")
@@ -276,9 +276,157 @@ class ClubAnnouncementBoardListActivity : AppCompatActivity() {
 
     private fun bindClubHeader(club: com.example.myapplication.ClubItem) {
         findViewById<TextView>(R.id.tv_club_title)?.text = club.name
-        findViewById<TextView>(R.id.tv_welcome)?.text = "🎇 Welcome"
+        findViewById<TextView>(R.id.tv_welcome)?.text = "🖐🏻 Welcome"
         // Welcome 아래 설명은 short_description으로 표시
         findViewById<TextView>(R.id.tv_club_description)?.text = club.shortDescription
         // 커버 이미지가 API에 없다면 기본 이미지를 유지
+    }
+
+    // helper to request similar via OkHttp fallback (클래스 내부 메서드)
+    private fun requestSimilarFallback(selectedId: Int, listContainer: android.widget.LinearLayout, showLoading: (Boolean) -> Unit, api: ApiService) {
+        val client = ApiClient.createUnsafeOkHttpClient()
+        val baseUrl = BuildConfig.BASE_URL.trimEnd('/')
+        val url = "$baseUrl/club/$selectedId/similar/"
+        android.util.Log.d("AI_PERSONAL", "폴백 요청 URL: $url")
+        val req = okhttp3.Request.Builder()
+            .url(url)
+            .get()
+            .addHeader("Accept", "application/json")
+            .build()
+        client.newCall(req).enqueue(object : okhttp3.Callback {
+            override fun onFailure(call: okhttp3.Call, e: java.io.IOException) {
+                runOnUiThread {
+                    showLoading(false)
+                    Toast.makeText(this@ClubAnnouncementBoardListActivity, "추천 요청 실패: ${e.message ?: "네트워크 오류"}", Toast.LENGTH_SHORT).show()
+                }
+            }
+            override fun onResponse(call: okhttp3.Call, response: okhttp3.Response) {
+                response.use { resp ->
+                    val body = resp.body?.string()
+                    android.util.Log.d("AI_PERSONAL", "폴백 응답 코드=${resp.code} body=${body?.take(300)}")
+                    fun parseIdsFromJson(json: String): kotlin.collections.Set<Int> {
+                        return try {
+                            val element = com.google.gson.JsonParser().parse(json)
+                            fun extractFromArray(arr: com.google.gson.JsonArray): kotlin.collections.MutableSet<Int> {
+                                val out = mutableSetOf<Int>()
+                                var i = 0
+                                while (i < arr.size()) {
+                                    val el = arr.get(i)
+                                    try {
+                                        if (el.isJsonPrimitive) {
+                                            val prim = el.asJsonPrimitive
+                                            if (prim.isNumber) out.add(prim.asInt)
+                                            else if (prim.isString) prim.asString.toIntOrNull()?.let { out.add(it) }
+                                        } else if (el.isJsonObject) {
+                                            val obj = el.asJsonObject
+                                            val idVal = when {
+                                                obj.has("id") -> obj.get("id")
+                                                obj.has("club_id") -> obj.get("club_id")
+                                                obj.has("pk") -> obj.get("pk")
+                                                else -> null
+                                            }
+                                            if (idVal != null) {
+                                                if (idVal.isJsonPrimitive && idVal.asJsonPrimitive.isNumber) out.add(idVal.asInt)
+                                                else if (idVal.isJsonPrimitive && idVal.asJsonPrimitive.isString) idVal.asString.toIntOrNull()?.let { out.add(it) }
+                                            }
+                                        }
+                                    } catch (_: Exception) {}
+                                    i++
+                                }
+                                return out
+                            }
+                            if (element.isJsonArray) {
+                                extractFromArray(element.asJsonArray)
+                            } else if (element.isJsonObject) {
+                                val obj = element.asJsonObject
+                                val key = listOf("results", "items", "data").firstOrNull { k -> obj.has(k) && obj.get(k).isJsonArray }
+                                if (key != null) extractFromArray(obj.getAsJsonArray(key)) else {
+                                    val idVal = when {
+                                        obj.has("id") -> obj.get("id")
+                                        obj.has("club_id") -> obj.get("club_id")
+                                        obj.has("pk") -> obj.get("pk")
+                                        else -> null
+                                    }
+                                    val set = mutableSetOf<Int>()
+                                    if (idVal != null) {
+                                        if (idVal.isJsonPrimitive && idVal.asJsonPrimitive.isNumber) set.add(idVal.asInt)
+                                        else if (idVal.isJsonPrimitive && idVal.asJsonPrimitive.isString) idVal.asString.toIntOrNull()?.let { set.add(it) }
+                                    }
+                                    set
+                                }
+                            } else emptySet()
+                        } catch (_: Exception) { emptySet() }
+                    }
+                    val ids: kotlin.collections.Set<Int> = try {
+                        if (!resp.isSuccessful || body == null) emptySet() else parseIdsFromJson(body)
+                    } catch (_: Exception) { emptySet() }
+                    runOnUiThread {
+                        if (ids.isEmpty()) {
+                            showLoading(false)
+                            listContainer.removeAllViews()
+                            val empty = android.widget.TextView(this@ClubAnnouncementBoardListActivity).apply {
+                                text = "추천 결과가 없습니다."
+                                setTextColor(android.graphics.Color.parseColor("#666666"))
+                                textSize = 16f
+                                gravity = android.view.Gravity.CENTER
+                                setPadding(0, 100, 0, 100)
+                            }
+                            listContainer.addView(empty)
+                        } else {
+                            api.getClubList().enqueue(object : retrofit2.Callback<kotlin.collections.List<ClubItem>> {
+                                override fun onResponse(
+                                    call: retrofit2.Call<kotlin.collections.List<ClubItem>>,
+                                    response2: retrofit2.Response<kotlin.collections.List<ClubItem>>
+                                ) {
+                                    val all2 = response2.body() ?: emptyList()
+                                    val matched = all2.filter { ids.contains(it.id) }
+                                    listContainer.removeAllViews()
+                                    matched.forEach { club ->
+                                        val card = android.widget.LinearLayout(this@ClubAnnouncementBoardListActivity).apply {
+                                            orientation = android.widget.LinearLayout.VERTICAL
+                                            setBackgroundResource(R.drawable.card_box_fafa)
+                                            setPadding(40, 40, 40, 40)
+                                            val tvName = android.widget.TextView(this@ClubAnnouncementBoardListActivity).apply {
+                                                text = club.name
+                                                setTextColor(android.graphics.Color.BLACK)
+                                                textSize = 18f
+                                                setTypeface(null, android.graphics.Typeface.BOLD)
+                                            }
+                                            val tvDept = android.widget.TextView(this@ClubAnnouncementBoardListActivity).apply {
+                                                text = "${club.department} / ${club.location}"
+                                                setTextColor(android.graphics.Color.parseColor("#666666"))
+                                                textSize = 12f
+                                            }
+                                            val tvDesc = android.widget.TextView(this@ClubAnnouncementBoardListActivity).apply {
+                                                text = club.shortDescription
+                                                setTextColor(android.graphics.Color.parseColor("#333333"))
+                                                textSize = 12f
+                                            }
+                                            addView(tvName)
+                                            addView(tvDept)
+                                            addView(tvDesc)
+                                            setOnClickListener {
+                                                val intent = Intent(this@ClubAnnouncementBoardListActivity, ClubAnnouncementBoardListActivity::class.java)
+                                                intent.putExtra("club_pk", club.id)
+                                                startActivity(intent)
+                                            }
+                                        }
+                                        val lp = android.widget.LinearLayout.LayoutParams(android.widget.LinearLayout.LayoutParams.MATCH_PARENT, android.widget.LinearLayout.LayoutParams.WRAP_CONTENT)
+                                        lp.setMargins(4, 4, 4, 16)
+                                        card.layoutParams = lp
+                                        listContainer.addView(card)
+                                    }
+                                    showLoading(false)
+                                }
+                                override fun onFailure(call: retrofit2.Call<kotlin.collections.List<ClubItem>>, t: Throwable) {
+                                    showLoading(false)
+                                    Toast.makeText(this@ClubAnnouncementBoardListActivity, "클럽 목록 요청 실패", Toast.LENGTH_SHORT).show()
+                                }
+                            })
+                        }
+                    }
+                }
+            }
+        })
     }
 }

@@ -16,7 +16,7 @@ class EventTransactionAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): EventTransactionViewHolder {
         val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_transaction, parent, false)
+            .inflate(R.layout.item_event_transaction, parent, false)
         return EventTransactionViewHolder(view)
     }
 
