@@ -187,6 +187,21 @@ interface ApiService {
         val snippet: String?
     )
 
+    // Wrapper for API responses that return objects instead of arrays
+    data class SimilarClubResponse(
+        val results: List<SimilarClubItem>? = null,
+        val items: List<SimilarClubItem>? = null,
+        val data: List<SimilarClubItem>? = null,
+        val clubs: List<SimilarClubItem>? = null,
+        val recommendations: List<SimilarClubItem>? = null,
+        val similar: List<SimilarClubItem>? = null
+    ) {
+        // Get the actual list from whichever field is populated
+        fun getSimilarClubs(): List<SimilarClubItem> {
+            return results ?: items ?: data ?: clubs ?: recommendations ?: similar ?: emptyList()
+        }
+    }
+
     @GET("club/similar/")
     fun getSimilarClubs(
         @Query("query") query: String
@@ -195,7 +210,7 @@ interface ApiService {
     @GET("club/{id}/similar/")
     fun getSimilarClubsByClub(
         @Path("id") clubId: Int
-    ): Call<List<SimilarClubItem>>
+    ): Call<SimilarClubResponse>
 
     // 사용자 상세
     @GET("user/{id}/")

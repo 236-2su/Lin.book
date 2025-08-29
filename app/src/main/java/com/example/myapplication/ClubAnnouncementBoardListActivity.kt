@@ -5,6 +5,9 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -166,7 +169,7 @@ class ClubAnnouncementBoardListActivity : AppCompatActivity() {
                 .addHeader("Accept", "application/json")
                 .build()
 
-        fun handleResponse(response: Response, usedUrl: String) {
+        fun handleResponse(response: okhttp3.Response, usedUrl: String) {
             val responseBody = response.body?.string()
             android.util.Log.d("API_RESPONSE", "응답 코드: ${response.code} (URL: $usedUrl)")
             android.util.Log.d("API_RESPONSE", "응답 본문: $responseBody")
@@ -196,8 +199,8 @@ class ClubAnnouncementBoardListActivity : AppCompatActivity() {
             }
         }
 
-        client.newCall(buildRequest(primaryUrl)).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {
+        client.newCall(buildRequest(primaryUrl)).enqueue(object : okhttp3.Callback {
+            override fun onFailure(call: okhttp3.Call, e: IOException) {
                 android.util.Log.e("API_ERROR", "네트워크 오류: ${e.message}")
                 runOnUiThread {
                     Toast.makeText(this@ClubAnnouncementBoardListActivity,
@@ -205,18 +208,18 @@ class ClubAnnouncementBoardListActivity : AppCompatActivity() {
                 }
             }
 
-            override fun onResponse(call: Call, response: Response) {
+            override fun onResponse(call: okhttp3.Call, response: okhttp3.Response) {
                 if (!response.isSuccessful && response.code == 400) {
                     android.util.Log.w("API_RETRY", "400 발생. 대체 URL로 재시도: $fallbackUrl")
-                    client.newCall(buildRequest(fallbackUrl)).enqueue(object : Callback {
-                        override fun onFailure(call: Call, e: IOException) {
+                    client.newCall(buildRequest(fallbackUrl)).enqueue(object : okhttp3.Callback {
+                        override fun onFailure(call: okhttp3.Call, e: IOException) {
                             android.util.Log.e("API_ERROR", "재시도 네트워크 오류: ${e.message}")
                             runOnUiThread {
                                 Toast.makeText(this@ClubAnnouncementBoardListActivity,
                                     "재시도 네트워크 오류: ${e.message}", Toast.LENGTH_LONG).show()
                             }
                         }
-                        override fun onResponse(call: Call, retryResponse: Response) {
+                        override fun onResponse(call: okhttp3.Call, retryResponse: okhttp3.Response) {
                             handleResponse(retryResponse, fallbackUrl)
                         }
                     })
@@ -282,151 +285,4 @@ class ClubAnnouncementBoardListActivity : AppCompatActivity() {
         // 커버 이미지가 API에 없다면 기본 이미지를 유지
     }
 
-    // helper to request similar via OkHttp fallback (클래스 내부 메서드)
-    private fun requestSimilarFallback(selectedId: Int, listContainer: android.widget.LinearLayout, showLoading: (Boolean) -> Unit, api: ApiService) {
-        val client = ApiClient.createUnsafeOkHttpClient()
-        val baseUrl = BuildConfig.BASE_URL.trimEnd('/')
-        val url = "$baseUrl/club/$selectedId/similar/"
-        android.util.Log.d("AI_PERSONAL", "폴백 요청 URL: $url")
-        val req = okhttp3.Request.Builder()
-            .url(url)
-            .get()
-            .addHeader("Accept", "application/json")
-            .build()
-        client.newCall(req).enqueue(object : okhttp3.Callback {
-            override fun onFailure(call: okhttp3.Call, e: java.io.IOException) {
-                runOnUiThread {
-                    showLoading(false)
-                    Toast.makeText(this@ClubAnnouncementBoardListActivity, "추천 요청 실패: ${e.message ?: "네트워크 오류"}", Toast.LENGTH_SHORT).show()
-                }
-            }
-            override fun onResponse(call: okhttp3.Call, response: okhttp3.Response) {
-                response.use { resp ->
-                    val body = resp.body?.string()
-                    android.util.Log.d("AI_PERSONAL", "폴백 응답 코드=${resp.code} body=${body?.take(300)}")
-                    fun parseIdsFromJson(json: String): kotlin.collections.Set<Int> {
-                        return try {
-                            val element = com.google.gson.JsonParser().parse(json)
-                            fun extractFromArray(arr: com.google.gson.JsonArray): kotlin.collections.MutableSet<Int> {
-                                val out = mutableSetOf<Int>()
-                                var i = 0
-                                while (i < arr.size()) {
-                                    val el = arr.get(i)
-                                    try {
-                                        if (el.isJsonPrimitive) {
-                                            val prim = el.asJsonPrimitive
-                                            if (prim.isNumber) out.add(prim.asInt)
-                                            else if (prim.isString) prim.asString.toIntOrNull()?.let { out.add(it) }
-                                        } else if (el.isJsonObject) {
-                                            val obj = el.asJsonObject
-                                            val idVal = when {
-                                                obj.has("id") -> obj.get("id")
-                                                obj.has("club_id") -> obj.get("club_id")
-                                                obj.has("pk") -> obj.get("pk")
-                                                else -> null
-                                            }
-                                            if (idVal != null) {
-                                                if (idVal.isJsonPrimitive && idVal.asJsonPrimitive.isNumber) out.add(idVal.asInt)
-                                                else if (idVal.isJsonPrimitive && idVal.asJsonPrimitive.isString) idVal.asString.toIntOrNull()?.let { out.add(it) }
-                                            }
-                                        }
-                                    } catch (_: Exception) {}
-                                    i++
-                                }
-                                return out
-                            }
-                            if (element.isJsonArray) {
-                                extractFromArray(element.asJsonArray)
-                            } else if (element.isJsonObject) {
-                                val obj = element.asJsonObject
-                                val key = listOf("results", "items", "data").firstOrNull { k -> obj.has(k) && obj.get(k).isJsonArray }
-                                if (key != null) extractFromArray(obj.getAsJsonArray(key)) else {
-                                    val idVal = when {
-                                        obj.has("id") -> obj.get("id")
-                                        obj.has("club_id") -> obj.get("club_id")
-                                        obj.has("pk") -> obj.get("pk")
-                                        else -> null
-                                    }
-                                    val set = mutableSetOf<Int>()
-                                    if (idVal != null) {
-                                        if (idVal.isJsonPrimitive && idVal.asJsonPrimitive.isNumber) set.add(idVal.asInt)
-                                        else if (idVal.isJsonPrimitive && idVal.asJsonPrimitive.isString) idVal.asString.toIntOrNull()?.let { set.add(it) }
-                                    }
-                                    set
-                                }
-                            } else emptySet()
-                        } catch (_: Exception) { emptySet() }
-                    }
-                    val ids: kotlin.collections.Set<Int> = try {
-                        if (!resp.isSuccessful || body == null) emptySet() else parseIdsFromJson(body)
-                    } catch (_: Exception) { emptySet() }
-                    runOnUiThread {
-                        if (ids.isEmpty()) {
-                            showLoading(false)
-                            listContainer.removeAllViews()
-                            val empty = android.widget.TextView(this@ClubAnnouncementBoardListActivity).apply {
-                                text = "추천 결과가 없습니다."
-                                setTextColor(android.graphics.Color.parseColor("#666666"))
-                                textSize = 16f
-                                gravity = android.view.Gravity.CENTER
-                                setPadding(0, 100, 0, 100)
-                            }
-                            listContainer.addView(empty)
-                        } else {
-                            api.getClubList().enqueue(object : retrofit2.Callback<kotlin.collections.List<ClubItem>> {
-                                override fun onResponse(
-                                    call: retrofit2.Call<kotlin.collections.List<ClubItem>>,
-                                    response2: retrofit2.Response<kotlin.collections.List<ClubItem>>
-                                ) {
-                                    val all2 = response2.body() ?: emptyList()
-                                    val matched = all2.filter { ids.contains(it.id) }
-                                    listContainer.removeAllViews()
-                                    matched.forEach { club ->
-                                        val card = android.widget.LinearLayout(this@ClubAnnouncementBoardListActivity).apply {
-                                            orientation = android.widget.LinearLayout.VERTICAL
-                                            setBackgroundResource(R.drawable.card_box_fafa)
-                                            setPadding(40, 40, 40, 40)
-                                            val tvName = android.widget.TextView(this@ClubAnnouncementBoardListActivity).apply {
-                                                text = club.name
-                                                setTextColor(android.graphics.Color.BLACK)
-                                                textSize = 18f
-                                                setTypeface(null, android.graphics.Typeface.BOLD)
-                                            }
-                                            val tvDept = android.widget.TextView(this@ClubAnnouncementBoardListActivity).apply {
-                                                text = "${club.department} / ${club.location}"
-                                                setTextColor(android.graphics.Color.parseColor("#666666"))
-                                                textSize = 12f
-                                            }
-                                            val tvDesc = android.widget.TextView(this@ClubAnnouncementBoardListActivity).apply {
-                                                text = club.shortDescription
-                                                setTextColor(android.graphics.Color.parseColor("#333333"))
-                                                textSize = 12f
-                                            }
-                                            addView(tvName)
-                                            addView(tvDept)
-                                            addView(tvDesc)
-                                            setOnClickListener {
-                                                val intent = Intent(this@ClubAnnouncementBoardListActivity, ClubAnnouncementBoardListActivity::class.java)
-                                                intent.putExtra("club_pk", club.id)
-                                                startActivity(intent)
-                                            }
-                                        }
-                                        val lp = android.widget.LinearLayout.LayoutParams(android.widget.LinearLayout.LayoutParams.MATCH_PARENT, android.widget.LinearLayout.LayoutParams.WRAP_CONTENT)
-                                        lp.setMargins(4, 4, 4, 16)
-                                        card.layoutParams = lp
-                                        listContainer.addView(card)
-                                    }
-                                    showLoading(false)
-                                }
-                                override fun onFailure(call: retrofit2.Call<kotlin.collections.List<ClubItem>>, t: Throwable) {
-                                    showLoading(false)
-                                    Toast.makeText(this@ClubAnnouncementBoardListActivity, "클럽 목록 요청 실패", Toast.LENGTH_SHORT).show()
-                                }
-                            })
-                        }
-                    }
-                }
-            }
-        })
-    }
 }
