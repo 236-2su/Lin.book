@@ -13,10 +13,10 @@
 
     <style name="Theme.LinBook" parent="Base.Theme.LinBook" />
 
-    <!-- Splash 화면 전용 테마 -->
+    <!-- Splash 화면 전용 테마 (Android 11 이하에서도 배경을 앱 스플래시 색상과 일치) -->
     <style name="Theme.Splash" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <item name="android:windowBackground">@color/white</item>
-        <item name="android:statusBarColor">@color/white</item>
+        <item name="android:windowBackground">#8FC1FF</item>
+        <item name="android:statusBarColor">#8FC1FF</item>
         <item name="android:windowLightStatusBar">true</item>
         <item name="android:windowFullscreen">true</item>
     </style>

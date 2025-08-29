@@ -28,17 +28,7 @@ interface ApiService {
     data class LoginRequest(val email: String)
     data class LoginResponse(val pk: Int, val club_pks: List<Int>?)
 
-    // 동아리 생성
-    data class ClubCreateRequest(
-        val name: String,
-        val department: String,
-        val major_category: String,
-        val minor_category: String,
-        val description: String,
-        val hashtags: String,
-        val location: String,
-        val short_description: String
-    )
+    
 
     @POST("user/login/")
     fun login(@Body req: LoginRequest): Call<LoginResponse>
