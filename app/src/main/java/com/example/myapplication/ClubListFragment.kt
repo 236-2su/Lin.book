@@ -10,6 +10,8 @@ import android.widget.LinearLayout
 import android.widget.FrameLayout
 import android.widget.TextView
 import android.widget.ImageView
+import android.widget.Button
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
@@ -19,7 +21,11 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.*
 import com.example.myapplication.api.ApiClient
+import com.example.myapplication.api.ApiService
 import okhttp3.Request
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import com.example.myapplication.ClubItem
 
 class ClubListFragment : Fragment() {
@@ -53,6 +59,7 @@ class ClubListFragment : Fragment() {
         
         setupCategoryButtons()
         setupFloatingActionButton()
+        setupAIFab()
         setupTempRootButton()
         Log.d(TAG, "API 호출 시작")
         fetchClubData()
@@ -622,6 +629,429 @@ class ClubListFragment : Fragment() {
             rootLayout.addView(fab)
         }
     }
+
+    // AI 추천 버튼 설정
+    private fun setupAIFab() {
+        contentView.findViewById<android.widget.TextView>(R.id.fab_ai_helper)?.apply {
+            setOnClickListener {
+                val dialogView = layoutInflater.inflate(R.layout.dialog_ai_recommend, null)
+                val dialog = android.app.AlertDialog.Builder(requireContext())
+                    .setView(dialogView)
+                    .create()
+                dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+                dialog.setCanceledOnTouchOutside(true)
+                dialog.show()
+                dialog.window?.setGravity(android.view.Gravity.BOTTOM)
+                dialog.window?.attributes?.windowAnimations = R.style.Animation_Dialog
+
+                // 탭 전환: 맞춤추천 / 검색 추천
+                val tabPersonal = dialogView.findViewById<TextView>(R.id.tab_personal)
+                val tabSearch = dialogView.findViewById<TextView>(R.id.tab_search)
+                val panelPersonal = dialogView.findViewById<android.widget.LinearLayout>(R.id.panel_personal)
+                val panelSearch = dialogView.findViewById<android.widget.LinearLayout>(R.id.panel_search)
+
+                fun selectTab(personal: Boolean) {
+                    if (personal) {
+                        tabPersonal.setBackgroundResource(R.drawable.bg_ai_tab_selected)
+                        tabPersonal.setTextColor(android.graphics.Color.WHITE)
+                        tabSearch.setBackgroundResource(R.drawable.bg_ai_tab_unselected)
+                        tabSearch.setTextColor(android.graphics.Color.parseColor("#707070"))
+                        panelPersonal.visibility = android.view.View.VISIBLE
+                        panelSearch.visibility = android.view.View.GONE
+                    } else {
+                        tabSearch.setBackgroundResource(R.drawable.bg_ai_tab_selected_search)
+                        tabSearch.setTextColor(android.graphics.Color.WHITE)
+                        tabPersonal.setBackgroundResource(R.drawable.bg_ai_tab_unselected)
+                        tabPersonal.setTextColor(android.graphics.Color.parseColor("#707070"))
+                        panelPersonal.visibility = android.view.View.GONE
+                        panelSearch.visibility = android.view.View.VISIBLE
+                    }
+                }
+
+                tabPersonal.setOnClickListener { selectTab(true) }
+                tabSearch.setOnClickListener { selectTab(false) }
+                // 기본: 맞춤추천 탭
+                selectTab(true)
+
+                // 맞춤추천: 스피너 구성 및 호출
+                val spinner = dialogView.findViewById<android.widget.Spinner>(R.id.spinner_my_clubs)
+                val prefs = requireContext().getSharedPreferences("auth", android.content.Context.MODE_PRIVATE)
+                val pksStr = prefs.getString("club_pks", null)
+                val myClubIds = pksStr?.split(',')?.mapNotNull { it.trim().toIntOrNull() } ?: emptyList()
+                val api = ApiClient.getApiService()
+                api.getClubList().enqueue(object : retrofit2.Callback<kotlin.collections.List<ClubItem>> {
+                    override fun onResponse(
+                        call: retrofit2.Call<kotlin.collections.List<ClubItem>>,
+                        response: retrofit2.Response<kotlin.collections.List<ClubItem>>
+                    ) {
+                        val all = response.body() ?: emptyList()
+                        val mine = all.filter { myClubIds.contains(it.id) }
+                        data class SpinnerClub(val id: Int, val name: String) { override fun toString(): String = name }
+                        val items = mutableListOf(SpinnerClub(-1, "추천에 사용할 동아리를 선택하세요"))
+                        items.addAll(mine.map { SpinnerClub(it.id, it.name) })
+                        val adapter = android.widget.ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, items)
+                        spinner?.adapter = adapter
+                    }
+                    override fun onFailure(call: retrofit2.Call<kotlin.collections.List<ClubItem>>, t: Throwable) { }
+                })
+
+                dialogView.findViewById<Button>(R.id.btn_ai_personal)?.setOnClickListener {
+                    val selected = spinner?.selectedItem
+                    val selectedId = (selected as? Any)?.let {
+                        when (it) {
+                            is Int -> it
+                            is String -> -1
+                            else -> try { it.javaClass.getDeclaredField("id").apply { isAccessible = true }.get(it) as? Int ?: -1 } catch (_: Exception) { -1 }
+                        }
+                    } ?: -1
+                    val selectedIndex = spinner?.selectedItemPosition ?: 0
+                    if (selectedIndex <= 0 || selectedId <= 0) {
+                        Toast.makeText(requireContext(), "동아리를 선택하세요.", Toast.LENGTH_SHORT).show()
+                        return@setOnClickListener
+                    }
+
+                    showAIRecommendationResults(dialog, selectedId, api, isPersonalized = true)
+                }
+
+                dialogView.findViewById<Button>(R.id.btn_ai_search)?.setOnClickListener {
+                    val query = dialogView.findViewById<android.widget.EditText>(R.id.et_ai_query)?.text?.toString()?.trim()
+                    if (query.isNullOrEmpty()) {
+                        Toast.makeText(requireContext(), "질문을 입력해주세요.", Toast.LENGTH_SHORT).show()
+                        return@setOnClickListener
+                    }
+
+                    showAIRecommendationResults(dialog, query, api, isPersonalized = false)
+                }
+            }
+        }
+    }
+
+    // AI 추천 결과 표시
+    private fun showAIRecommendationResults(parentDialog: android.app.AlertDialog, queryOrId: Any, api: ApiService, isPersonalized: Boolean) {
+        val resultView = layoutInflater.inflate(R.layout.dialog_ai_search_results, null)
+        val resultDialog = android.app.AlertDialog.Builder(requireContext()).setView(resultView).create()
+        resultDialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        resultDialog.setCanceledOnTouchOutside(true)
+        resultDialog.show()
+        resultDialog.window?.setGravity(android.view.Gravity.BOTTOM)
+        resultDialog.window?.attributes?.windowAnimations = R.style.Animation_Dialog
+
+        val dragHandle = resultView.findViewById<android.view.View>(R.id.top_bar)
+        var startY = 0f
+        var totalDy = 0f
+        dragHandle?.setOnTouchListener { _, event ->
+            when (event.action) {
+                android.view.MotionEvent.ACTION_DOWN -> { startY = event.rawY; totalDy = 0f; true }
+                android.view.MotionEvent.ACTION_MOVE -> { val dy = event.rawY - startY; if (dy > 0) { resultView.translationY = dy; totalDy = dy }; true }
+                android.view.MotionEvent.ACTION_UP, android.view.MotionEvent.ACTION_CANCEL -> {
+                    if (totalDy > 200f) { resultView.animate().translationY(resultView.height.toFloat()).setDuration(180).withEndAction { resultDialog.dismiss() }.start() }
+                    else { resultView.animate().translationY(0f).setDuration(180).start() }
+                    true
+                }
+                else -> false
+            }
+        }
+        resultView.findViewById<android.widget.ImageView>(R.id.btn_close)?.setOnClickListener { resultDialog.dismiss() }
+
+        val panelLoading = resultView.findViewById<android.widget.LinearLayout>(R.id.panel_loading)
+        val scrollResults = resultView.findViewById<android.widget.ScrollView>(R.id.scroll_results)
+        val listContainer = resultView.findViewById<android.widget.LinearLayout>(R.id.club_list_container)
+        fun showLoading(show: Boolean) {
+            panelLoading.visibility = if (show) android.view.View.VISIBLE else android.view.View.GONE;
+            scrollResults.visibility = if (show) android.view.View.GONE else android.view.View.VISIBLE
+            val botImage = resultView.findViewById<android.widget.ImageView>(R.id.img_ai_bot)
+            if (show) {
+                try {
+                    val anim = android.view.animation.AnimationUtils.loadAnimation(requireContext(), R.anim.bounce_ai_bot)
+                    botImage?.startAnimation(anim)
+                } catch (_: Exception) { }
+            } else {
+                botImage?.clearAnimation()
+            }
+        }
+        showLoading(true)
+
+        if (isPersonalized) {
+            // 맞춤추천: getSimilarClubsByClub 사용
+            val selectedId = queryOrId as Int
+            api.getSimilarClubsByClub(selectedId).enqueue(object : retrofit2.Callback<ApiService.SimilarClubResponse> {
+                override fun onResponse(
+                    call: retrofit2.Call<ApiService.SimilarClubResponse>,
+                    response: retrofit2.Response<ApiService.SimilarClubResponse>
+                ) {
+                    if (!response.isSuccessful) {
+                        android.util.Log.w("AI_PERSONAL", "Retrofit 응답 비성공 code=${response.code()}")
+                        showLoading(false)
+                        Toast.makeText(requireContext(), "추천 요청 실패", Toast.LENGTH_SHORT).show()
+                        return
+                    }
+                    val responseBody = response.body()
+                    if (responseBody == null) {
+                        android.util.Log.w("AI_PERSONAL", "응답 본문이 null입니다")
+                        showLoading(false)
+                        Toast.makeText(requireContext(), "추천 결과가 없습니다", Toast.LENGTH_SHORT).show()
+                        return
+                    }
+
+                    val similarClubs = responseBody.getSimilarClubs()
+                    android.util.Log.d("AI_PERSONAL", "받은 추천 클럽 수: ${similarClubs.size}")
+
+                    // Extract club IDs and metadata from AI response
+                    val clubIds = similarClubs.map { it.id }.toSet()
+                    val aiMetadata = similarClubs.associate { it.id to Pair(it.score_hint, it.snippet) }
+
+                    // Use helper function to fetch club details efficiently
+                    fetchClubDetailsForRecommendation(clubIds, listContainer, ::showLoading, api, aiMetadata)
+                }
+                override fun onFailure(
+                    call: retrofit2.Call<ApiService.SimilarClubResponse>,
+                    t: Throwable
+                ) {
+                    android.util.Log.e("AI_PERSONAL", "Retrofit 실패: ${t.message}", t)
+                    showLoading(false)
+                    Toast.makeText(requireContext(), "추천 요청 실패: ${t.message}", Toast.LENGTH_SHORT).show()
+                }
+            })
+        } else {
+            // 검색 추천: HTTP 직접 호출 사용
+            val query = queryOrId as String
+            val client = ApiClient.createUnsafeOkHttpClient()
+            val baseUrl = BuildConfig.BASE_URL.trimEnd('/')
+
+            fun parseIdsFromJson(json: String): kotlin.collections.Set<Int> {
+                return try {
+                    android.util.Log.d("AI_SEARCH", "Parsing JSON: ${json.take(200)}")
+                    val element = com.google.gson.JsonParser().parse(json)
+                    android.util.Log.d("AI_SEARCH", "JSON element type: ${element.javaClass.simpleName}")
+
+                    fun extractFromArray(arr: com.google.gson.JsonArray): kotlin.collections.MutableSet<Int> {
+                        val out = mutableSetOf<Int>()
+                        android.util.Log.d("AI_SEARCH", "Extracting from array, size: ${arr.size()}")
+                        for (el in arr) {
+                            if (el.isJsonPrimitive && el.asJsonPrimitive.isNumber) {
+                                out.add(el.asInt)
+                            } else if (el.isJsonObject) {
+                                val obj = el.asJsonObject
+                                val idVal = when {
+                                    obj.has("id") -> obj.get("id")
+                                    obj.has("club_id") -> obj.get("club_id")
+                                    obj.has("pk") -> obj.get("pk")
+                                    else -> null
+                                }
+                                if (idVal != null && idVal.isJsonPrimitive) {
+                                    try { out.add(idVal.asInt) } catch (_: Exception) {}
+                                }
+                            }
+                        }
+                        android.util.Log.d("AI_SEARCH", "Extracted ${out.size} IDs from array")
+                        return out
+                    }
+
+                    fun extractFromObject(obj: com.google.gson.JsonObject): kotlin.collections.MutableSet<Int> {
+                        val out = mutableSetOf<Int>()
+                        android.util.Log.d("AI_SEARCH", "Extracting from object, keys: ${obj.keySet()}")
+
+                        // Try different possible keys for arrays
+                        val arrayKeys = listOf("results", "items", "data", "clubs", "recommendations", "similar")
+                        for (key in arrayKeys) {
+                            if (obj.has(key)) {
+                                val value = obj.get(key)
+                                android.util.Log.d("AI_SEARCH", "Found key '$key': ${value.javaClass.simpleName}")
+                                if (value.isJsonArray) {
+                                    return extractFromArray(value.asJsonArray)
+                                }
+                            }
+                        }
+
+                        // If object has direct id field
+                        val idVal = when {
+                            obj.has("id") -> obj.get("id")
+                            obj.has("club_id") -> obj.get("club_id")
+                            obj.has("pk") -> obj.get("pk")
+                            else -> null
+                        }
+                        if (idVal != null && idVal.isJsonPrimitive) {
+                            try {
+                                out.add(idVal.asInt)
+                                android.util.Log.d("AI_SEARCH", "Added single ID from object: ${idVal.asInt}")
+                            } catch (_: Exception) {}
+                        }
+                        return out
+                    }
+
+                    val result = if (element.isJsonArray) {
+                        extractFromArray(element.asJsonArray)
+                    } else if (element.isJsonObject) {
+                        extractFromObject(element.asJsonObject)
+                    } else {
+                        android.util.Log.w("AI_SEARCH", "Unexpected JSON element type: ${element.javaClass.simpleName}")
+                        emptySet()
+                    }
+
+                    android.util.Log.d("AI_SEARCH", "Final parsed IDs: $result")
+                    result
+                } catch (e: Exception) {
+                    android.util.Log.e("AI_SEARCH", "JSON parsing failed: ${e.message}", e)
+                    emptySet()
+                }
+            }
+
+            fun requestSimilar(url: String, onDone: (kotlin.collections.Set<Int>?) -> Unit) {
+                val req = okhttp3.Request.Builder()
+                    .url(url)
+                    .get()
+                    .addHeader("Accept", "application/json")
+                    .build()
+                client.newCall(req).enqueue(object : okhttp3.Callback {
+                    override fun onFailure(call: okhttp3.Call, e: java.io.IOException) {
+                        android.util.Log.e("AI_SEARCH", "similar request failed: ${e.message}")
+                        onDone(null)
+                    }
+                    override fun onResponse(call: okhttp3.Call, response: okhttp3.Response) {
+                        response.use { resp ->
+                            val body = resp.body?.string()
+                            android.util.Log.d("AI_SEARCH", "similar code=${resp.code} url=${url} body=${body?.take(300)}")
+                            if (!resp.isSuccessful || body == null) { onDone(null); return }
+                            val ids = parseIdsFromJson(body)
+                            android.util.Log.d("AI_SEARCH", "parsed ids size=${ids.size} ids=${ids}")
+                            onDone(ids)
+                        }
+                    }
+                })
+            }
+
+            val encoded = java.net.URLEncoder.encode(query, "UTF-8")
+            val urlPrimary = "$baseUrl/club/similar/?query=$encoded"
+            val urlFallback = "$baseUrl/club/similar/?text=$encoded"
+
+            requestSimilar(urlPrimary) { idsOrNull ->
+                if (idsOrNull == null) {
+                    requestSimilar(urlFallback) { idsOrNull2 ->
+                        activity?.runOnUiThread {
+                            val ids = idsOrNull2 ?: emptySet()
+                            // Use helper function for efficient club detail fetching
+                            fetchClubDetailsForRecommendation(ids, listContainer, ::showLoading, api)
+                        }
+                    }
+                } else {
+                    activity?.runOnUiThread {
+                        val ids = idsOrNull
+                        // Use helper function for efficient club detail fetching
+                        fetchClubDetailsForRecommendation(ids, listContainer, ::showLoading, api)
+                    }
+                }
+            }
+        }
+        parentDialog.dismiss()
+    }
+
+    // helper to fetch club details efficiently for AI recommendations
+    private fun fetchClubDetailsForRecommendation(
+        clubIds: Set<Int>,
+        listContainer: android.widget.LinearLayout,
+        showLoading: (Boolean) -> Unit,
+        api: ApiService,
+        aiMetadata: Map<Int, Pair<Float?, String?>>? = null
+    ) {
+        if (clubIds.isEmpty()) {
+            showLoading(false)
+            listContainer.removeAllViews()
+            val empty = android.widget.TextView(requireContext()).apply {
+                text = "추천 결과가 없습니다."
+                setTextColor(android.graphics.Color.parseColor("#666666"))
+                textSize = 16f
+                gravity = android.view.Gravity.CENTER
+                setPadding(0, 100, 0, 100)
+            }
+            listContainer.addView(empty)
+            return
+        }
+
+        var completedCount = 0
+        val totalCount = clubIds.size
+        listContainer.removeAllViews()
+
+        clubIds.forEach { clubId ->
+            api.getClubDetail(clubId).enqueue(object : retrofit2.Callback<ClubItem> {
+                override fun onResponse(
+                    call: retrofit2.Call<ClubItem>,
+                    detailResponse: retrofit2.Response<ClubItem>
+                ) {
+                    completedCount++
+                    if (detailResponse.isSuccessful && detailResponse.body() != null) {
+                        val club = detailResponse.body()!!
+                        val metadata = aiMetadata?.get(clubId)
+
+                        // Create card for this recommended club
+                        val card = android.widget.LinearLayout(requireContext()).apply {
+                            orientation = android.widget.LinearLayout.VERTICAL
+                            setBackgroundResource(R.drawable.card_box_fafa)
+                            setPadding(40, 40, 40, 40)
+
+                            // Add AI score hint if available
+                            metadata?.first?.let { score ->
+                                val tvScore = android.widget.TextView(requireContext()).apply {
+                                    text = "🤖 AI 추천도: ${(score * 100).toInt()}%"
+                                    setTextColor(android.graphics.Color.parseColor("#1976D2"))
+                                    textSize = 12f
+                                    setTypeface(null, android.graphics.Typeface.BOLD)
+                                }
+                                addView(tvScore)
+                            }
+
+                            // AI snippet removed per user request
+
+                            val tvName = android.widget.TextView(requireContext()).apply {
+                                text = club.name
+                                setTextColor(android.graphics.Color.BLACK)
+                                textSize = 18f
+                                setTypeface(null, android.graphics.Typeface.BOLD)
+                            }
+                            val tvDept = android.widget.TextView(requireContext()).apply {
+                                text = "${club.department} / ${club.location}"
+                                setTextColor(android.graphics.Color.parseColor("#666666"))
+                                textSize = 12f
+                            }
+                            val tvDesc = android.widget.TextView(requireContext()).apply {
+                                text = club.shortDescription
+                                setTextColor(android.graphics.Color.parseColor("#333333"))
+                                textSize = 12f
+                            }
+
+                            addView(tvName)
+                            addView(tvDept)
+                            addView(tvDesc)
+
+                            setOnClickListener {
+                                val intent = Intent(requireContext(), ClubAnnouncementBoardListActivity::class.java)
+                                intent.putExtra("club_pk", club.id)
+                                startActivity(intent)
+                            }
+                        }
+                        val lp = android.widget.LinearLayout.LayoutParams(android.widget.LinearLayout.LayoutParams.MATCH_PARENT, android.widget.LinearLayout.LayoutParams.WRAP_CONTENT)
+                        lp.setMargins(4, 4, 4, 16)
+                        card.layoutParams = lp
+                        listContainer.addView(card)
+                    }
+
+                    // Hide loading when all requests completed
+                    if (completedCount >= totalCount) {
+                        showLoading(false)
+                    }
+                }
+                override fun onFailure(call: retrofit2.Call<ClubItem>, t: Throwable) {
+                    completedCount++
+                    android.util.Log.e("AI_RECOMMENDATION", "Club detail request failed for ID $clubId: ${t.message}")
+
+                    // Hide loading when all requests completed
+                    if (completedCount >= totalCount) {
+                        showLoading(false)
+                    }
+                }
+            })
+        }
+    }
+
     private fun Int.dpToPx(): Int {
         return (this * resources.displayMetrics.density).toInt()
     }

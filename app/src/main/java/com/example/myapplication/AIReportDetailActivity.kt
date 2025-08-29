@@ -37,7 +37,7 @@ class AIReportDetailActivity : BaseActivity() {
             android.util.Log.d("AIReportDetail", "contentView 추가 성공")
             
             // Intent에서 리포트 데이터 받아오기
-            val reportData = intent.getStringExtra("report_data")
+            val reportData = intent.getStringExtra("report_content")
             android.util.Log.d("AIReportDetail", "Intent에서 받은 데이터 길이: ${reportData?.length ?: 0}")
             android.util.Log.d("AIReportDetail", "Intent에서 받은 데이터 내용: $reportData")
             
