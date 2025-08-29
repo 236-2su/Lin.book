@@ -46,10 +46,18 @@ data class UserResponse(
 
 class MemberAdapter(
     private val members: MutableList<Member>,
-    private val onMemberDeleted: (Member) -> Unit
+    private val onDeleted: (Member) -> Unit,
+    private val onRoleChange: (Member) -> Unit
 ) : RecyclerView.Adapter<MemberAdapter.MemberViewHolder>() {
+    
+    private var isPresidentMode = false // 현재 사용자가 회장인지 여부
+    
+    fun setPresidentMode(isPresident: Boolean) {
+        isPresidentMode = isPresident
+        notifyDataSetChanged()
+    }
 
-    class MemberViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    inner class MemberViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val meBadge: TextView = itemView.findViewById(R.id.meBadge)
         private val roleBadge: TextView = itemView.findViewById(R.id.roleBadge)
         private val memberName: TextView = itemView.findViewById(R.id.memberName)
@@ -78,24 +86,35 @@ class MemberAdapter(
 
             // 역할에 따른 배지 텍스트 설정
             when (member.role) {
-                "leader" -> {
+                "leader", "회장" -> {
                     roleBadge.text = "회장"
-                    // TODO: 회장 스타일 적용 (btn_president 드로어블 필요)
-                    // roleBadge.setBackgroundResource(R.drawable.btn_president)
                 }
-                "member" -> {
+                "officer", "간부" -> {
+                    roleBadge.text = "간부"
+                }
+                "member", "일반", "부원" -> {
                     roleBadge.text = "일반"
-                    // TODO: 일반 스타일 적용 (btn_general 드로어블 필요)
-                    // roleBadge.setBackgroundResource(R.drawable.btn_general)
+                }
+                else -> {
+                    roleBadge.text = "일반"
                 }
             }
 
-            // Me인 경우 권한 변경과 액션 버튼 숨기기
-            if (member.isMe) {
+            // 권한 변경 버튼 표시 및 클릭 리스너 설정
+            if (member.isMe || !isPresidentMode) {
+                // 본인이거나 회장이 아닌 경우 권한 변경 버튼 숨기기
                 roleChangeButton.visibility = View.GONE
-                actionButtons.visibility = View.GONE
             } else {
                 roleChangeButton.visibility = View.VISIBLE
+                roleChangeButton.setOnClickListener {
+                    onRoleChange(member)
+                }
+            }
+            
+            // Me인 경우 액션 버튼 숨기기
+            if (member.isMe) {
+                actionButtons.visibility = View.GONE
+            } else {
                 actionButtons.visibility = View.VISIBLE
             }
         }
@@ -118,7 +137,7 @@ class MemberAdapter(
             val deletedMember = members[position]
             members.removeAt(position)
             notifyItemRemoved(position)
-            onMemberDeleted(deletedMember)
+            onDeleted(deletedMember)
         }
     }
 

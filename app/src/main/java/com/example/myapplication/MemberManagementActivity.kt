@@ -49,10 +49,17 @@ class MemberManagementActivity : AppCompatActivity() {
 
     private fun setupRecyclerView() {
         recyclerView = findViewById(R.id.recyclerViewMembers)
-        memberAdapter = MemberAdapter(members) { deletedMember ->
-            // 삭제된 멤버 처리 로직
-            showDeletedSnackbar(deletedMember)
-        }
+        memberAdapter = MemberAdapter(
+            members,
+            onDeleted = { deletedMember ->
+                // 삭제된 멤버 처리 로직
+                showDeletedSnackbar(deletedMember)
+            },
+            onRoleChange = { member ->
+                // 권한 변경은 ClubMemberManagementActivity에서 처리
+                // 이 Activity에서는 권한 변경 기능을 사용하지 않음
+            }
+        )
         
         recyclerView.apply {
             layoutManager = LinearLayoutManager(this@MemberManagementActivity)

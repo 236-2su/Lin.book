@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="권한 선택"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textColor="#1F2937"
+        android:layout_marginBottom="16dp" />
+
+    <RadioGroup
+        android:id="@+id/radioGroup_roles"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <RadioButton
+            android:id="@+id/radio_leader"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="회장"
+            android:textSize="16sp"
+            android:textColor="#1F2937"
+            android:paddingVertical="12dp" />
+
+        <RadioButton
+            android:id="@+id/radio_officer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="간부"
+            android:textSize="16sp"
+            android:textColor="#1F2937"
+            android:paddingVertical="12dp" />
+
+        <RadioButton
+            android:id="@+id/radio_member"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="일반"
+            android:textSize="16sp"
+            android:textColor="#1F2937"
+            android:paddingVertical="12dp" />
+
+    </RadioGroup>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="* 회장 권한을 부여하면 현재 회장은 일반 멤버가 됩니다."
+        android:textSize="12sp"
+        android:textColor="#6B7280"
+        android:layout_marginTop="16dp"
+        android:visibility="visible" />
+
+</LinearLayout>
