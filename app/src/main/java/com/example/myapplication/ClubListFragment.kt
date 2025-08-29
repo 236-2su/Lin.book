@@ -11,6 +11,7 @@ import android.widget.FrameLayout
 import android.widget.TextView
 import android.widget.ImageView
 import androidx.fragment.app.Fragment
+import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
@@ -53,6 +54,7 @@ class ClubListFragment : Fragment() {
         
         setupCategoryButtons()
         setupFloatingActionButton()
+        setupAIHelperButton()
         setupTempRootButton()
         Log.d(TAG, "API 호출 시작")
         fetchClubData()
@@ -621,6 +623,24 @@ class ClubListFragment : Fragment() {
         if (rootLayout is ViewGroup) {
             rootLayout.addView(fab)
         }
+    }
+    
+    private fun setupAIHelperButton() {
+        val fabAiHelper = contentView.findViewById<TextView>(R.id.fab_ai_helper)
+        fabAiHelper?.setOnClickListener {
+            showAIRecommendDialog()
+        }
+    }
+    
+    private fun showAIRecommendDialog() {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_ai_recommend, null)
+        
+        val dialog = AlertDialog.Builder(requireContext())
+            .setView(dialogView)
+            .create()
+        
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.show()
     }
     
     private fun Int.dpToPx(): Int {
