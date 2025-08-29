@@ -9,6 +9,8 @@ import com.example.myapplication.EventTransactionItem
 import com.example.myapplication.model.Ledger
 import com.example.myapplication.model.Transaction
 import retrofit2.Call
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Body
@@ -26,17 +28,7 @@ interface ApiService {
     data class LoginRequest(val email: String)
     data class LoginResponse(val pk: Int, val club_pks: List<Int>?)
 
-    // 동아리 생성
-    data class ClubCreateRequest(
-        val name: String,
-        val department: String,
-        val major_category: String,
-        val minor_category: String,
-        val description: String,
-        val hashtags: String,
-        val location: String,
-        val short_description: String
-    )
+    
 
     @POST("user/login/")
     fun login(@Body req: LoginRequest): Call<LoginResponse>
@@ -50,6 +42,58 @@ interface ApiService {
     
     @GET("club/{id}/")
     fun getClubDetail(@Path("id") clubId: Int): Call<ClubItem>
+
+    // 동아리 생성
+    data class ClubCreateRequest(
+        val name: String,
+        val department: String,
+        val major_category: String,
+        val minor_category: String,
+        val description: String,
+        val hashtags: String,
+        val location: String,
+        val short_description: String,
+        val image: String? = null
+    )
+
+    // JSON 생성 API (서버가 허용하는 경우 유지)
+    @retrofit2.http.Headers(
+        "Content-Type: application/json",
+        "Accept: application/json"
+    )
+    @POST("club/")
+    fun createClub(@Body body: ClubCreateRequest): Call<ClubItem>
+
+    // 폼 인코딩 생성 API (일부 서버에서 JSON 미허용 대응)
+    @FormUrlEncoded
+    @POST("club/")
+    fun createClubForm(
+        @Field("name") name: String,
+        @Field("department") department: String,
+        @Field("major_category") majorCategory: String,
+        @Field("minor_category") minorCategory: String,
+        @Field("description") description: String,
+        @Field("hashtags") hashtags: String,
+        @Field("location") location: String,
+        @Field("short_description") shortDescription: String,
+        @Field("image") image: String?
+    ): Call<ClubItem>
+
+    // 멀티파트 생성 API (이미지 파일 업로드 및 admin 포함)
+    @retrofit2.http.Multipart
+    @POST("club/")
+    fun createClubMultipart(
+        @retrofit2.http.Part("name") name: RequestBody,
+        @retrofit2.http.Part("department") department: RequestBody,
+        @retrofit2.http.Part("major_category") majorCategory: RequestBody,
+        @retrofit2.http.Part("minor_category") minorCategory: RequestBody,
+        @retrofit2.http.Part("description") description: RequestBody,
+        @retrofit2.http.Part("hashtags") hashtags: RequestBody,
+        @retrofit2.http.Part("location") location: RequestBody,
+        @retrofit2.http.Part("short_description") shortDescription: RequestBody,
+        @retrofit2.http.Part("admin") admin: RequestBody,
+        @retrofit2.http.Part image: MultipartBody.Part?
+    ): Call<ClubItem>
     @retrofit2.http.Headers(
         "Content-Type: application/json",
         "Accept: application/json"

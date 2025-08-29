@@ -719,7 +719,7 @@ class ClubListFragment : Fragment() {
                         Toast.makeText(requireContext(), "질문을 입력해주세요.", Toast.LENGTH_SHORT).show()
                         return@setOnClickListener
                     }
-
+                    
                     showAIRecommendationResults(dialog, query, api, isPersonalized = false)
                 }
             }
@@ -756,8 +756,8 @@ class ClubListFragment : Fragment() {
         val panelLoading = resultView.findViewById<android.widget.LinearLayout>(R.id.panel_loading)
         val scrollResults = resultView.findViewById<android.widget.ScrollView>(R.id.scroll_results)
         val listContainer = resultView.findViewById<android.widget.LinearLayout>(R.id.club_list_container)
-        fun showLoading(show: Boolean) {
-            panelLoading.visibility = if (show) android.view.View.VISIBLE else android.view.View.GONE;
+        fun showLoading(show: Boolean) { 
+            panelLoading.visibility = if (show) android.view.View.VISIBLE else android.view.View.GONE; 
             scrollResults.visibility = if (show) android.view.View.GONE else android.view.View.VISIBLE
             val botImage = resultView.findViewById<android.widget.ImageView>(R.id.img_ai_bot)
             if (show) {
@@ -792,14 +792,14 @@ class ClubListFragment : Fragment() {
                         Toast.makeText(requireContext(), "추천 결과가 없습니다", Toast.LENGTH_SHORT).show()
                         return
                     }
-
+                    
                     val similarClubs = responseBody.getSimilarClubs()
                     android.util.Log.d("AI_PERSONAL", "받은 추천 클럽 수: ${similarClubs.size}")
-
+                    
                     // Extract club IDs and metadata from AI response
                     val clubIds = similarClubs.map { it.id }.toSet()
                     val aiMetadata = similarClubs.associate { it.id to Pair(it.score_hint, it.snippet) }
-
+                    
                     // Use helper function to fetch club details efficiently
                     fetchClubDetailsForRecommendation(clubIds, listContainer, ::showLoading, api, aiMetadata)
                 }
@@ -817,13 +817,13 @@ class ClubListFragment : Fragment() {
             val query = queryOrId as String
             val client = ApiClient.createUnsafeOkHttpClient()
             val baseUrl = BuildConfig.BASE_URL.trimEnd('/')
-
+            
             fun parseIdsFromJson(json: String): kotlin.collections.Set<Int> {
                 return try {
                     android.util.Log.d("AI_SEARCH", "Parsing JSON: ${json.take(200)}")
                     val element = com.google.gson.JsonParser().parse(json)
                     android.util.Log.d("AI_SEARCH", "JSON element type: ${element.javaClass.simpleName}")
-
+                    
                     fun extractFromArray(arr: com.google.gson.JsonArray): kotlin.collections.MutableSet<Int> {
                         val out = mutableSetOf<Int>()
                         android.util.Log.d("AI_SEARCH", "Extracting from array, size: ${arr.size()}")
@@ -846,11 +846,11 @@ class ClubListFragment : Fragment() {
                         android.util.Log.d("AI_SEARCH", "Extracted ${out.size} IDs from array")
                         return out
                     }
-
+                    
                     fun extractFromObject(obj: com.google.gson.JsonObject): kotlin.collections.MutableSet<Int> {
                         val out = mutableSetOf<Int>()
                         android.util.Log.d("AI_SEARCH", "Extracting from object, keys: ${obj.keySet()}")
-
+                        
                         // Try different possible keys for arrays
                         val arrayKeys = listOf("results", "items", "data", "clubs", "recommendations", "similar")
                         for (key in arrayKeys) {
@@ -862,7 +862,7 @@ class ClubListFragment : Fragment() {
                                 }
                             }
                         }
-
+                        
                         // If object has direct id field
                         val idVal = when {
                             obj.has("id") -> obj.get("id")
@@ -871,14 +871,14 @@ class ClubListFragment : Fragment() {
                             else -> null
                         }
                         if (idVal != null && idVal.isJsonPrimitive) {
-                            try {
+                            try { 
                                 out.add(idVal.asInt)
                                 android.util.Log.d("AI_SEARCH", "Added single ID from object: ${idVal.asInt}")
                             } catch (_: Exception) {}
                         }
                         return out
                     }
-
+                    
                     val result = if (element.isJsonArray) {
                         extractFromArray(element.asJsonArray)
                     } else if (element.isJsonObject) {
@@ -887,12 +887,12 @@ class ClubListFragment : Fragment() {
                         android.util.Log.w("AI_SEARCH", "Unexpected JSON element type: ${element.javaClass.simpleName}")
                         emptySet()
                     }
-
+                    
                     android.util.Log.d("AI_SEARCH", "Final parsed IDs: $result")
                     result
-                } catch (e: Exception) {
+                } catch (e: Exception) { 
                     android.util.Log.e("AI_SEARCH", "JSON parsing failed: ${e.message}", e)
-                    emptySet()
+                    emptySet() 
                 }
             }
 
@@ -947,8 +947,8 @@ class ClubListFragment : Fragment() {
 
     // helper to fetch club details efficiently for AI recommendations
     private fun fetchClubDetailsForRecommendation(
-        clubIds: Set<Int>,
-        listContainer: android.widget.LinearLayout,
+        clubIds: Set<Int>, 
+        listContainer: android.widget.LinearLayout, 
         showLoading: (Boolean) -> Unit,
         api: ApiService,
         aiMetadata: Map<Int, Pair<Float?, String?>>? = null
@@ -980,60 +980,11 @@ class ClubListFragment : Fragment() {
                     completedCount++
                     if (detailResponse.isSuccessful && detailResponse.body() != null) {
                         val club = detailResponse.body()!!
-                        val metadata = aiMetadata?.get(clubId)
-
-                        // Create card for this recommended club
-                        val card = android.widget.LinearLayout(requireContext()).apply {
-                            orientation = android.widget.LinearLayout.VERTICAL
-                            setBackgroundResource(R.drawable.card_box_fafa)
-                            setPadding(40, 40, 40, 40)
-
-                            // Add AI score hint if available
-                            metadata?.first?.let { score ->
-                                val tvScore = android.widget.TextView(requireContext()).apply {
-                                    text = "🤖 AI 추천도: ${(score * 100).toInt()}%"
-                                    setTextColor(android.graphics.Color.parseColor("#1976D2"))
-                                    textSize = 12f
-                                    setTypeface(null, android.graphics.Typeface.BOLD)
-                                }
-                                addView(tvScore)
-                            }
-
-                            // AI snippet removed per user request
-
-                            val tvName = android.widget.TextView(requireContext()).apply {
-                                text = club.name
-                                setTextColor(android.graphics.Color.BLACK)
-                                textSize = 18f
-                                setTypeface(null, android.graphics.Typeface.BOLD)
-                            }
-                            val tvDept = android.widget.TextView(requireContext()).apply {
-                                text = "${club.department} / ${club.location}"
-                                setTextColor(android.graphics.Color.parseColor("#666666"))
-                                textSize = 12f
-                            }
-                            val tvDesc = android.widget.TextView(requireContext()).apply {
-                                text = club.shortDescription
-                                setTextColor(android.graphics.Color.parseColor("#333333"))
-                                textSize = 12f
-                            }
-
-                            addView(tvName)
-                            addView(tvDept)
-                            addView(tvDesc)
-
-                            setOnClickListener {
-                                val intent = Intent(requireContext(), ClubAnnouncementBoardListActivity::class.java)
-                                intent.putExtra("club_pk", club.id)
-                                startActivity(intent)
-                            }
-                        }
-                        val lp = android.widget.LinearLayout.LayoutParams(android.widget.LinearLayout.LayoutParams.MATCH_PARENT, android.widget.LinearLayout.LayoutParams.WRAP_CONTENT)
-                        lp.setMargins(4, 4, 4, 16)
-                        card.layoutParams = lp
+                        // 활동 중인 동아리 카드 화면과 동일한 UI를 사용합니다.
+                        val card = createClubCard(club)
                         listContainer.addView(card)
                     }
-
+                    
                     // Hide loading when all requests completed
                     if (completedCount >= totalCount) {
                         showLoading(false)
@@ -1042,7 +993,7 @@ class ClubListFragment : Fragment() {
                 override fun onFailure(call: retrofit2.Call<ClubItem>, t: Throwable) {
                     completedCount++
                     android.util.Log.e("AI_RECOMMENDATION", "Club detail request failed for ID $clubId: ${t.message}")
-
+                    
                     // Hide loading when all requests completed
                     if (completedCount >= totalCount) {
                         showLoading(false)
@@ -1051,7 +1002,7 @@ class ClubListFragment : Fragment() {
             })
         }
     }
-
+    
     private fun Int.dpToPx(): Int {
         return (this * resources.displayMetrics.density).toInt()
     }

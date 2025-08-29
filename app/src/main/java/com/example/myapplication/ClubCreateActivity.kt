@@ -15,10 +15,15 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.json.JSONObject
-import java.io.OutputStreamWriter
-import java.net.HttpURLConnection
-import java.net.URL
+import com.example.myapplication.api.ApiClient
+import com.example.myapplication.api.ApiService
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class ClubCreateActivity : BaseActivity() {
 
@@ -193,76 +198,96 @@ class ClubCreateActivity : BaseActivity() {
 
     private fun createClub() {
         Log.d("ClubCreateActivity", "createClub 시작")
-        
+
         val majorCategory = when (spinnerMajorCategory.selectedItemPosition) {
-            0 -> "academic"      // 학술
-            1 -> "sports"        // 체육
-            2 -> "culture"       // 문화예술
-            3 -> "volunteer"     // 봉사
-            4 -> "entrepreneur"  // 창업
-            5 -> "religion"      // 종교
+            0 -> "academic"
+            1 -> "sports"
+            2 -> "culture"
+            3 -> "volunteer"
+            4 -> "entrepreneur"
+            5 -> "religion"
             else -> "academic"
         }
 
-        val clubData = JSONObject().apply {
-            put("name", etClubName.text.toString())
-            put("department", etDepartment.text.toString())
-            put("major_category", majorCategory)
-            put("minor_category", etMinorCategory.text.toString())
-            put("description", etDescription.text.toString())
-            put("hashtags", etHashtags.text.toString())
-            put("location", etLocation.text.toString())
-            // 웰컴 문구
-            val welcomeIntro = etWelcomeIntro.text?.toString()?.trim().orEmpty()
-            put("short_description", if (welcomeIntro.isNotBlank()) welcomeIntro else etDescription.text.toString().take(50))
-            // 웰컴 이미지 (파일 선택 시 Base64 문자열)
-            pickedImageBase64?.let { base64 ->
-                if (base64.isNotBlank()) put("image", base64)
-            }
+        val welcomeIntro = etWelcomeIntro.text?.toString()?.trim().orEmpty()
+
+        val service = ApiClient.getApiService()
+
+        // admin(user pk) 확보
+        val adminPk = UserManager.getUserPk(this)
+        if (adminPk == null) {
+            Toast.makeText(this, "로그인이 필요합니다.", Toast.LENGTH_LONG).show()
+            return
         }
 
-        Log.d("ClubCreateActivity", "POST 요청 데이터: ${clubData}")
+        // 텍스트 필드들을 RequestBody로 변환
+        fun textBody(text: String): RequestBody = text.toRequestBody("text/plain".toMediaTypeOrNull())
 
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                val baseUrl = com.example.myapplication.BuildConfig.BASE_URL.trimEnd('/')
-                Log.d("ClubCreateActivity", "API 호출 시작: $baseUrl/club")
-                
-                val url = URL("$baseUrl/club")
-                val connection = url.openConnection() as HttpURLConnection
-                
-                connection.requestMethod = "POST"
-                connection.setRequestProperty("Content-Type", "application/json")
-                connection.doOutput = true
+        val nameBody = textBody(etClubName.text.toString())
+        val deptBody = textBody(etDepartment.text.toString())
+        val majorBody = textBody(majorCategory)
+        val minorBody = textBody(etMinorCategory.text.toString())
+        val descBody = textBody(etDescription.text.toString())
+        val hashtagsBody = textBody(etHashtags.text.toString())
+        val locationBody = textBody(etLocation.text.toString())
+        val shortDescBody = textBody(if (welcomeIntro.isNotBlank()) welcomeIntro else etDescription.text.toString().take(50))
+        val adminBody = textBody(adminPk.toString())
 
-                val outputStream = connection.outputStream
-                val writer = OutputStreamWriter(outputStream)
-                writer.write(clubData.toString())
-                writer.flush()
-                writer.close()
+        // 이미지 파트 구성: 사용자가 업로드하지 않으면 기본 이미지 사용
+        val imageBytes: ByteArray? = try {
+            if (!pickedImageBase64.isNullOrBlank()) {
+                Base64.decode(pickedImageBase64, Base64.NO_WRAP)
+            } else {
+                val ins = resources.openRawResource(R.drawable.default_club_welcome_img)
+                val bytes = ins.readBytes()
+                ins.close()
+                bytes
+            }
+        } catch (e: Exception) {
+            Log.w("ClubCreateActivity", "이미지 준비 중 오류. 이미지 없이 전송합니다.", e)
+            null
+        }
 
-                val responseCode = connection.responseCode
-                Log.d("ClubCreateActivity", "응답 코드: $responseCode")
-                
-                withContext(Dispatchers.Main) {
-                    if (responseCode == HttpURLConnection.HTTP_OK || responseCode == HttpURLConnection.HTTP_CREATED) {
-                        Toast.makeText(this@ClubCreateActivity, "동아리가 성공적으로 등록되었습니다!", Toast.LENGTH_LONG).show()
-                        Log.d("ClubCreateActivity", "동아리 등록 성공")
-                        finish() // 액티비티 종료
-                    } else {
-                        Toast.makeText(this@ClubCreateActivity, "동아리 등록에 실패했습니다. (응답 코드: $responseCode)", Toast.LENGTH_LONG).show()
-                        Log.e("ClubCreateActivity", "동아리 등록 실패 - 응답 코드: $responseCode")
-                    }
-                }
-                
-                connection.disconnect()
-                
-            } catch (e: Exception) {
-                Log.e("ClubCreateActivity", "동아리 생성 중 오류 발생", e)
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(this@ClubCreateActivity, "동아리 등록 중 오류가 발생했습니다: ${e.message}", Toast.LENGTH_LONG).show()
+        val imagePart: MultipartBody.Part? = imageBytes?.let { bytes ->
+            val mediaType = "image/jpeg".toMediaTypeOrNull()
+            val body = bytes.toRequestBody(mediaType)
+            MultipartBody.Part.createFormData("image", "welcome.jpg", body)
+        }
+
+        Log.d("ClubCreateActivity", "멀티파트로 동아리 생성 요청 전송 (admin 포함)")
+
+        service.createClubMultipart(
+            name = nameBody,
+            department = deptBody,
+            majorCategory = majorBody,
+            minorCategory = minorBody,
+            description = descBody,
+            hashtags = hashtagsBody,
+            location = locationBody,
+            shortDescription = shortDescBody,
+            admin = adminBody,
+            image = imagePart
+        ).enqueue(object : Callback<com.example.myapplication.ClubItem> {
+            override fun onResponse(
+                call: Call<com.example.myapplication.ClubItem>,
+                response: Response<com.example.myapplication.ClubItem>
+            ) {
+                if (response.isSuccessful) {
+                    Toast.makeText(this@ClubCreateActivity, "동아리가 성공적으로 등록되었습니다!", Toast.LENGTH_LONG).show()
+                    Log.d("ClubCreateActivity", "동아리 등록 성공: ${response.body()}")
+                    finish()
+                } else {
+                    val code = response.code()
+                    val err = try { response.errorBody()?.string() } catch (_: Exception) { null }
+                    Log.e("ClubCreateActivity", "동아리 등록 실패: code=$code, body=$err")
+                    Toast.makeText(this@ClubCreateActivity, "동아리 등록 실패 ($code)", Toast.LENGTH_LONG).show()
                 }
             }
-        }
+
+            override fun onFailure(call: Call<com.example.myapplication.ClubItem>, t: Throwable) {
+                Log.e("ClubCreateActivity", "동아리 등록 네트워크 오류", t)
+                Toast.makeText(this@ClubCreateActivity, "동아리 등록 중 오류: ${t.message}", Toast.LENGTH_LONG).show()
+            }
+        })
     }
 }

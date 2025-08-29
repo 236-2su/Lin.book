@@ -1,0 +1,13 @@
+<resources>
+    <!-- Android 12+ 시스템 스플래시를 앱 스플래시와 동일한 배경으로 맞추고 아이콘을 숨김 -->
+    <style name="Theme.Splash" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="android:windowBackground">#8FC1FF</item>
+        <item name="android:windowSplashScreenBackground">#8FC1FF</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/transparent_splash_icon</item>
+        <item name="android:windowSplashScreenIconBackgroundColor">@android:color/transparent</item>
+        <item name="android:statusBarColor">#8FC1FF</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowFullscreen">true</item>
+    </style>
+</resources>
+

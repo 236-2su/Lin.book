@@ -1,16 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white">
+    android:background="#8FC1FF">
 
-    <ImageView
-        android:id="@+id/logo_image"
-        android:layout_width="200dp"
-        android:layout_height="200dp"
-        android:layout_centerInParent="true"
-        android:src="@drawable/home_logo"
-        android:scaleType="fitCenter"
-        android:contentDescription="로고" />
+    <LinearLayout
+        android:id="@+id/splash_group"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:orientation="vertical"
+        android:gravity="center_horizontal">
 
-</RelativeLayout>
+        <ImageView
+            android:id="@+id/logo_whtie_image"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:src="@drawable/heyyoung_white_logo"
+            android:scaleType="fitCenter"
+            android:contentDescription="로고" />
+
+        <ImageView
+            android:id="@+id/shinhan_friends_1"
+            android:layout_width="300dp"
+            android:layout_height="200dp"
+            android:src="@drawable/shinhan_friends_1"
+            android:layout_marginTop="16dp"
+            android:scaleType="fitCenter"
+            android:contentDescription="신한프렌즈 캐릭터" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="캠퍼스 생활을 더 편리하고 재미있게"
+            android:layout_marginTop="12dp"
+            android:textColor="#FFFFFF" />
+
+    </LinearLayout>
+
+</FrameLayout>

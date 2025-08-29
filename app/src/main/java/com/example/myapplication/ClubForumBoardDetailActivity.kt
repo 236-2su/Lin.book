@@ -151,7 +151,7 @@ class ClubForumBoardDetailActivity : AppCompatActivity() {
                     response: retrofit2.Response<List<com.example.myapplication.CommentItem>>
                 ) {
                     val comments = response.body() ?: emptyList()
-                    findViewById<android.widget.TextView>(R.id.tv_comment_header)?.text = "댓글(${comments.size})"
+                    findViewById<android.widget.TextView>(R.id.tv_comments_count)?.text = comments.size.toString()
                     val container = findViewById<android.widget.LinearLayout>(R.id.comments_container)
                     container?.removeAllViews()
                     val emptyView = findViewById<android.widget.LinearLayout>(R.id.empty_comments_placeholder)
