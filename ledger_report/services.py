@@ -5,9 +5,9 @@ from calendar import monthrange
 from datetime import date as dt_date
 from typing import Optional
 
-import google.generativeai as genai
 from django.db.models import Case, IntegerField, Sum, Value, When
 from django.db.models.functions import TruncDate
+from langchain_google_genai import ChatGoogleGenerativeAI
 
 from club.models import Club
 from club.services import similar_by_club
@@ -251,7 +251,7 @@ def generate_similar_clubs_yearly_report(club_id: int, year: int):
         try:
             # 각 동아리에는 하나의 대표 장부(Ledger)만 있다고 가정합니다.
             # 만약 여러 개일 경우, 어떤 장부를 선택할지에 대한 로직이 필요합니다.
-            ledger = Ledger.objects.get(club_id=c_id)
+            ledger: Ledger = Ledger.objects.filter(club_id=c_id).first  # type: ignore
             report = yearly_ledger_stats(ledger_id=ledger.id, year=year)
 
             if c_id == club_id:
@@ -281,18 +281,18 @@ def generate_similar_clubs_yearly_report(club_id: int, year: int):
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 CHATBOT_LLM_MODEL = "gemini-2.5-pro"
 
-genai.configure(api_key=GEMINI_API_KEY)
-
 
 # === LLM Definition === #
 class GeminiLLM:
     def __init__(self, model_name=CHATBOT_LLM_MODEL):
-        self.model = genai.GenerativeModel(model_name)
+        self.model = ChatGoogleGenerativeAI(
+            model=model_name, google_api_key=GEMINI_API_KEY, response_mime_type="application/json"
+        )
 
-    def __call__(self, prompt: str, **kwargs) -> str:
+    def __call__(self, prompt: str, **kwargs):
         try:
-            response = self.model.generate_content(prompt, **kwargs)
-            return response.text
+            response = self.model.invoke(prompt)
+            return response.content
         except Exception as e:
             return f"[Gemini API Error] {str(e)}"
 
@@ -301,7 +301,7 @@ def get_gemini_llm() -> GeminiLLM:
     return GeminiLLM()
 
 
-def generate_report_advice_with_llm(report_data: dict) -> str:
+def generate_report_advice_with_llm(report_data: dict):
     """
     연간 보고서 데이터를 LLM에 전달하여 재무 조언을 생성합니다.
     """

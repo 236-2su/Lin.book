@@ -14,10 +14,9 @@ class Ledger(models.Model):
 
 class Receipt(models.Model):
     image = models.ImageField(upload_to="receipts/", max_length=None)
-    ocr_text = models.TextField()
     amount = models.IntegerField()
-    created_at = models.DateTimeField(auto_now_add=True)
-    processed_text = models.JSONField()
+    date_time = models.DateTimeField(auto_now_add=True)
+    items = models.JSONField()
 
 
 class Event(models.Model):
@@ -41,4 +40,4 @@ class LedgerTransactions(models.Model):
     description = models.TextField()
     vendor = models.CharField(max_length=100)
     event = models.ForeignKey(Event, on_delete=models.SET_NULL, null=True)
-    # account_transaction = models.ForeignKey(AccountTransaction, on_delete=models.SET_NULL)
+    # account_transaction = models.ForeignKey(AccountTransaction, on_delete=models.SET_NULL, null=True, blank=True)

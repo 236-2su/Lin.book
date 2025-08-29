@@ -9,7 +9,7 @@ from ledger_report.services import get_gemini_llm
 
 
 def process_ocr_text(text):
-    system_prompt = "당신은 전문적인 OCR 텍스트 판독가입니다. 당신은 처리된 OCR 텍스트로부터 항목과 금액을 추론해내 JSON 형태로 응답해야 합니다."
+    system_prompt = "당신은 전문적인 OCR 텍스트 판독가입니다. 다음 규칙을 반드시 지켜야 합니다:\n 1. 오직 JSON 데이터만 출력할 것\n . 마크다운 문법(예: ```json, ``` 등) 절대 금지\n 3. JSON 외의 다른 텍스트나 설명도 절대 출력하지 말 것\n"
 
     prompt = f"""
     {system_prompt}
@@ -23,12 +23,14 @@ def process_ocr_text(text):
     각각의 구매 항목과 그 금액
     가게 이름
     당신의 추론 결과는 API 응답으로 제공되어야 하기 때문에 반드시 다음 형식을 따라야 합니다.
+    지정된 형식 외에 마크다운 표시를 하지 말아 주세요.
     {{
         "amount" : 구매 금액의 총액,
         "vendor" : 가게 이름,
+        "date_time" : 거래 일시,
         "details" : {{
-            구매 항목 : 구매 금액,
-            구매 항목 : 구매 금액
+            "구매 항목" : 구매 금액,
+            "구매 항목" : 구매 금액
         }}
     }}
     """
@@ -67,4 +69,4 @@ def ocr_from_file(image_file, lang="ko"):
     raw_text = "".join(res_text)
     processed_data = process_ocr_text(raw_text)
 
-    return {"raw_text": raw_text, "processed_data": processed_data}
+    return {"raw_text": raw_text, "processed_data": json.loads(processed_data)}  # type: ignore

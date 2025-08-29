@@ -308,8 +308,13 @@ class LedgerTransactionsViewSet(viewsets.ModelViewSet):
             ),
         ],
         summary="영수증 생성 및 OCR",
-        description="새로운 영수증을 생성하고 OCR을 수행합니다.",
-        request=ReceiptSerializer,  # This will be ignored due to MultiPartParser
+        description="새로운 영수증을 생성하고 OCR을 수행합니다. 요청 본문은 'multipart/form-data' 형식이어야 하며, 'image' 필드에 이미지 파일을 포함해야 합니다.",
+        request={
+            "multipart/form-data": {
+                "type": "object",
+                "properties": {"image": {"type": "string", "format": "binary"}},
+            }
+        },
         responses={
             201: OpenApiResponse(ReceiptSerializer, description="Created"),
             400: OpenApiResponse(description="Bad Request"),
@@ -394,21 +399,48 @@ class ReceiptViewSet(viewsets.ModelViewSet):
         if not ocr_result:
             return Response({"error": "OCR processing failed."}, status=500)
 
-        raw_text = ocr_result.get("raw_text")
-        processed_data_str = ocr_result.get("processed_data")
-
-        # try:
-        #     processed_data = json.loads(processed_data_str.strip('```json
-        #     ').strip('```'))
-        # except json.JSONDecodeError:
-        #     return Response({"error": "Failed to parse processed data from LLM."}, status=500)
-        processed_data = ""
+        processed_data = ocr_result.get("processed_data")
+        if not processed_data:
+            return Response({"error": "Failed to get processed data from OCR result."}, status=500)
 
         amount = processed_data.get("amount")
+        date_time_str = processed_data.get("date_time")
+        items = processed_data.get("details")
+        vendor = processed_data.get("vendor", "알 수 없음")  # 가게 이름이 없으면 기본값 설정
 
-        receipt = Receipt.objects.create(
-            image=image_file, ocr_text=raw_text, processed_text=processed_data, amount=amount
+        # 빈 문자열도 체크하도록 수정하고, 디버깅을 위해 OCR 결과도 응답에 포함
+        if amount is None or not date_time_str or items is None:
+            return Response(
+                {
+                    "error": "OCR result is missing required fields (amount, date_time, details).",
+                    "ocr_data": processed_data,
+                },
+                status=400,
+            )
+
+        # 1. Receipt 인스턴스 생성
+        receipt = Receipt.objects.create(image=image_file, amount=amount, date_time=date_time_str, items=items)
+
+        # 2. 연관된 LedgerTransactions 레코드 생성
+        ledger_pk = self.kwargs.get("ledger_pk")
+        ledger = get_object_or_404(Ledger, pk=ledger_pk)
+
+        # 구매 항목으로 설명 생성
+        items_description = ", ".join([f"{item}: {price}원" for item, price in items.items()])
+        description = f"{vendor} - {items_description}"
+
+        LedgerTransactions.objects.create(
+            ledger=ledger,
+            date_time=receipt.date_time,
+            amount=receipt.amount,
+            payment_method="카드",  # OCR로 알 수 없으므로 '카드'를 기본값으로 가정
+            receipt=receipt,
+            description=description,
+            vendor=vendor,
         )
+
+        # 3. 장부 총액 동기화
+        sync_ledger_amount(ledger)
 
         serializer = self.get_serializer(receipt)
         return Response(serializer.data, status=201)

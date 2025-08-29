@@ -4,7 +4,7 @@ from rest_framework.decorators import api_view, parser_classes
 from rest_framework.parsers import MultiPartParser
 from rest_framework.response import Response
 
-from ledger.services import ocr_from_file, ocr_from_url
+from ledger.services import ocr_from_file
 
 from .serializers import (
     PingSerializer,
@@ -18,30 +18,6 @@ from .serializers import (
 @api_view(["GET"])
 def ping(request):
     return Response({"response": "pong"})
-
-
-@extend_schema(
-    methods=["GET"],
-    responses=TestRestGetResponseSerializer,
-)
-@extend_schema(
-    methods=["POST"],
-    request=TestRestRequestSerializer,
-    responses=TestRestResponseSerializer,
-)
-@api_view(["GET", "POST"])
-def test_rest(request):
-    if request.method == "GET":
-        return Response({"message": "You called me!"})
-
-    if request.method == "POST":
-        try:
-            serializer = TestRestRequestSerializer(data=request.data)
-            serializer.is_valid(raise_exception=True)
-            response_data = {"response": serializer.validated_data["message"]}
-            return Response(response_data, status=status.HTTP_200_OK)
-        except:
-            return Response({"error": "invalid request"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 @extend_schema(methods=["POST"], request=TestRestRequestSerializer, responses=TestRestResponseSerializer)
