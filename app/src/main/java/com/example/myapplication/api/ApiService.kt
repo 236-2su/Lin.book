@@ -491,5 +491,38 @@ interface ApiService {
         @Path("id") memberId: Int
     ): Call<okhttp3.ResponseBody>
 
+    // 멤버 권한 변경
+    data class MemberRoleUpdateRequest(
+        val role: String // "leader", "officer", "member"
+    )
+
+    data class MemberRoleUpdateResponse(
+        val status: String,
+        val role: String,
+        val amount_fee: Int,
+        val paid_fee: Int,
+        val club: Int,
+        val user: Int
+    )
+
+    @PATCH("club/{club_pk}/members/{id}/")
+    fun updateMemberRole(
+        @Path("club_pk") clubId: Int,
+        @Path("id") memberId: Int,
+        @Body request: MemberRoleUpdateRequest
+    ): Call<MemberRoleUpdateResponse>
+
+    // 멤버 승인 (status를 waiting -> active로 변경)
+    data class MemberApproveRequest(
+        val status: String = "active"
+    )
+
+    @PATCH("club/{club_pk}/members/{id}/")
+    fun approveMember(
+        @Path("club_pk") clubId: Int,
+        @Path("id") memberId: Int,
+        @Body request: MemberApproveRequest
+    ): Call<MemberRoleUpdateResponse>
+
     // Note: getSimilarClubsByClub method already exists above with SimilarClubItem return type
 }
