@@ -58,9 +58,7 @@ class ClubListFragment : Fragment() {
         (activity as? BaseActivity)?.setAppTitle("동아리")
         
         setupCategoryButtons()
-        setupFloatingActionButton()
-        setupAIFab()
-        setupTempRootButton()
+        setupFabPair()
         Log.d(TAG, "API 호출 시작")
         fetchClubData()
     }
@@ -598,51 +596,92 @@ class ClubListFragment : Fragment() {
         selectedButton?.setTextColor(android.graphics.Color.WHITE)
     }
     
-    private fun setupTempRootButton() {
-        val btnTempRoot = contentView.findViewById<android.widget.Button>(R.id.btn_temp_root)
-        btnTempRoot?.setOnClickListener {
-            // ReferenceFragment로 이동
-            (activity as? MainActivity)?.replaceFragment(ReferenceFragment())
-        }
-    }
     
-    private fun setupFloatingActionButton() {
-        val rootLayout = activity?.findViewById<View>(android.R.id.content)
-        val fab = FloatingActionButton(requireContext()).apply {
-            layoutParams = FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT).apply {
+    private fun setupFabPair() {
+        val rootLayout = activity?.findViewById<View>(android.R.id.content) as? ViewGroup ?: return
+
+        // 컨테이너: 하단 우측 정렬
+        val container = FrameLayout(requireContext()).apply {
+            layoutParams = FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.WRAP_CONTENT,
+                FrameLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
                 gravity = android.view.Gravity.BOTTOM or android.view.Gravity.END
-                setMargins(0, 0, 40.dpToPx(), 40.dpToPx())
+                setMargins(0, 0, 16.dpToPx(), 24.dpToPx())
             }
-            setImageResource(R.drawable.pencil)
+        }
+
+        // 파란색 FAB (플러스)
+        val fabMain = FloatingActionButton(requireContext()).apply {
+            layoutParams = FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.WRAP_CONTENT,
+                FrameLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                gravity = android.view.Gravity.BOTTOM or android.view.Gravity.END
+            }
+            setImageResource(android.R.drawable.ic_input_add)
             backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#2457C5"))
             imageTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.WHITE)
             elevation = 8f
             translationZ = 8f
-            
             setOnClickListener {
                 val intent = Intent(activity, ClubCreateActivity::class.java)
                 startActivity(intent)
             }
         }
-        
-        if (rootLayout is ViewGroup) {
-            rootLayout.addView(fab)
+
+        // 말풍선: AI 버튼 위에 표시되며, 클릭 시 숨김
+        val tooltip = android.widget.TextView(requireContext()).apply {
+            layoutParams = FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.WRAP_CONTENT,
+                FrameLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                gravity = android.view.Gravity.END or android.view.Gravity.BOTTOM
+                // AI 버튼(72dp) + AI 버튼 높이(56dp) + 간격(8dp) = 136dp 위로 배치
+                bottomMargin = (60 + 56 + 8).dpToPx()
+            }
+            background = resources.getDrawable(R.drawable.bg_ai_tooltip, null)
+            setTextColor(android.graphics.Color.WHITE)
+            textSize = 12f
+            text = "Hey-Bi 동아리 추천"
+            setPadding(12.dpToPx(), 8.dpToPx(), 12.dpToPx(), 8.dpToPx())
         }
+
+        // AI 버튼 (텍스트 버튼) — 메인 FAB 위 72dp 위치
+        val aiButton = android.widget.TextView(requireContext()).apply {
+            layoutParams = FrameLayout.LayoutParams(56.dpToPx(), 56.dpToPx()).apply {
+                gravity = android.view.Gravity.END or android.view.Gravity.BOTTOM
+                bottomMargin = 72.dpToPx()
+            }
+            background = resources.getDrawable(R.drawable.bg_fab_ai, null)
+            text = "AI"
+            setTextColor(android.graphics.Color.WHITE)
+            setTypeface(null, android.graphics.Typeface.BOLD)
+            textSize = 20f
+            gravity = android.view.Gravity.CENTER
+            contentDescription = "AI 추천"
+            setOnClickListener {
+                tooltip.visibility = android.view.View.GONE
+                showAIRecommendDialog()
+            }
+        }
+
+        container.addView(fabMain)
+        container.addView(tooltip)
+        container.addView(aiButton)
+        rootLayout.addView(container)
     }
 
-    // AI 추천 버튼 설정
-    private fun setupAIFab() {
-        contentView.findViewById<android.widget.TextView>(R.id.fab_ai_helper)?.apply {
-            setOnClickListener {
-                val dialogView = layoutInflater.inflate(R.layout.dialog_ai_recommend, null)
-                val dialog = android.app.AlertDialog.Builder(requireContext())
-                    .setView(dialogView)
-                    .create()
-                dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-                dialog.setCanceledOnTouchOutside(true)
-                dialog.show()
-                dialog.window?.setGravity(android.view.Gravity.BOTTOM)
-                dialog.window?.attributes?.windowAnimations = R.style.Animation_Dialog
+    private fun showAIRecommendDialog() {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_ai_recommend, null)
+        val dialog = android.app.AlertDialog.Builder(requireContext())
+            .setView(dialogView)
+            .create()
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog.setCanceledOnTouchOutside(true)
+        dialog.show()
+        dialog.window?.setGravity(android.view.Gravity.BOTTOM)
+        dialog.window?.attributes?.windowAnimations = R.style.Animation_Dialog
 
                 // 탭 전환: 맞춤추천 / 검색 추천
                 val tabPersonal = dialogView.findViewById<TextView>(R.id.tab_personal)
@@ -668,10 +707,10 @@ class ClubListFragment : Fragment() {
                     }
                 }
 
-                tabPersonal.setOnClickListener { selectTab(true) }
-                tabSearch.setOnClickListener { selectTab(false) }
-                // 기본: 맞춤추천 탭
-                selectTab(true)
+        tabPersonal.setOnClickListener { selectTab(true) }
+        tabSearch.setOnClickListener { selectTab(false) }
+        // 기본: 맞춤추천 탭
+        selectTab(true)
 
                 // 맞춤추천: 스피너 구성 및 호출
                 val spinner = dialogView.findViewById<android.widget.Spinner>(R.id.spinner_my_clubs)
@@ -695,7 +734,7 @@ class ClubListFragment : Fragment() {
                     override fun onFailure(call: retrofit2.Call<kotlin.collections.List<ClubItem>>, t: Throwable) { }
                 })
 
-                dialogView.findViewById<Button>(R.id.btn_ai_personal)?.setOnClickListener {
+        dialogView.findViewById<Button>(R.id.btn_ai_personal)?.setOnClickListener {
                     val selected = spinner?.selectedItem
                     val selectedId = (selected as? Any)?.let {
                         when (it) {
@@ -713,7 +752,7 @@ class ClubListFragment : Fragment() {
                     showAIRecommendationResults(dialog, selectedId, api, isPersonalized = true)
                 }
 
-                dialogView.findViewById<Button>(R.id.btn_ai_search)?.setOnClickListener {
+        dialogView.findViewById<Button>(R.id.btn_ai_search)?.setOnClickListener {
                     val query = dialogView.findViewById<android.widget.EditText>(R.id.et_ai_query)?.text?.toString()?.trim()
                     if (query.isNullOrEmpty()) {
                         Toast.makeText(requireContext(), "질문을 입력해주세요.", Toast.LENGTH_SHORT).show()
@@ -722,8 +761,6 @@ class ClubListFragment : Fragment() {
                     
                     showAIRecommendationResults(dialog, query, api, isPersonalized = false)
                 }
-            }
-        }
     }
 
     // AI 추천 결과 표시
