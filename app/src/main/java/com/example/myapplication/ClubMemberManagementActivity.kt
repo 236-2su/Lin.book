@@ -4,13 +4,17 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Button
+import android.widget.RadioButton
+import android.widget.RadioGroup
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.myapplication.api.ApiClient
+import com.example.myapplication.api.ApiService
 import com.google.android.material.snackbar.Snackbar
 import retrofit2.Call
 import retrofit2.Callback
@@ -28,6 +32,7 @@ class ClubMemberManagementActivity : AppCompatActivity() {
     private var clubPk: Int = -1
     private var currentUserPk: Int = -1
     private var isShowingAll = true
+    private var isCurrentUserPresident = false // 현재 사용자가 회장인지 여부
 
     companion object {
         const val EXTRA_CLUB_PK = "club_pk"
@@ -89,20 +94,27 @@ class ClubMemberManagementActivity : AppCompatActivity() {
         recyclerView = findViewById(R.id.recyclerViewMembers)
         
         // 멤버 어댑터 초기화
-        memberAdapter = MemberAdapter(members) { deletedMember ->
-            showDeletedSnackbar(deletedMember)
-        }
+        memberAdapter = MemberAdapter(
+            members,
+            onDeleted = { deletedMember ->
+                showDeletedSnackbar(deletedMember)
+            },
+            onRoleChange = { member ->
+                // 권한 변경 다이얼로그 표시
+                if (isCurrentUserPresident) {
+                    showRoleChangeDialog(member)
+                }
+            }
+        )
         
         // 가입 요청 어댑터 초기화
         joinRequestAdapter = JoinRequestAdapter(
             joinRequests,
             onApprove = { joinRequest ->
-                // TODO: 승인 API 호출
-                Log.d("JOIN_REQUEST", "승인: ${joinRequest.name}")
+                approveMember(joinRequest)
             },
             onReject = { joinRequest ->
-                // TODO: 거절 API 호출
-                Log.d("JOIN_REQUEST", "거절: ${joinRequest.name}")
+                rejectMember(joinRequest)
             }
         )
         
@@ -241,6 +253,13 @@ class ClubMemberManagementActivity : AppCompatActivity() {
                                 isMe = isCurrentUser
                             )
                             members.add(member)
+                            
+                            // 현재 사용자가 회장인지 확인
+                            if (isCurrentUser && memberResponse.role == "leader") {
+                                isCurrentUserPresident = true
+                                // MemberAdapter에 회장 권한 전달
+                                memberAdapter.setPresidentMode(true)
+                            }
                         }
                     }
                     
@@ -402,6 +421,181 @@ class ClubMemberManagementActivity : AppCompatActivity() {
             override fun onFailure(call: Call<List<UserResponse>>, t: Throwable) {
                 Log.e("API_ERROR", "네트워크 오류: ${t.message}")
                 Toast.makeText(this@ClubMemberManagementActivity, "네트워크 오류가 발생했습니다.", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
+    // 권한 변경 다이얼로그 표시
+    private fun showRoleChangeDialog(member: Member) {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_role_change, null)
+        val radioGroup = dialogView.findViewById<RadioGroup>(R.id.radioGroup_roles)
+        
+        // 현재 권한에 따라 라디오 버튼 선택
+        when (member.role) {
+            "회장" -> radioGroup.check(R.id.radio_leader)
+            "간부" -> radioGroup.check(R.id.radio_officer)
+            else -> radioGroup.check(R.id.radio_member)
+        }
+        
+        val dialog = AlertDialog.Builder(this)
+            .setTitle("권한 변경")
+            .setMessage("${member.name}님의 권한을 변경하시겠습니까?")
+            .setView(dialogView)
+            .setPositiveButton("확인") { _, _ ->
+                val selectedRadioId = radioGroup.checkedRadioButtonId
+                val newRole = when (selectedRadioId) {
+                    R.id.radio_leader -> "leader"
+                    R.id.radio_officer -> "officer"
+                    else -> "member"
+                }
+                
+                // 현재 권한과 같으면 변경하지 않음
+                val currentRole = when (member.role) {
+                    "회장" -> "leader"
+                    "간부" -> "officer"
+                    else -> "member"
+                }
+                
+                if (currentRole != newRole) {
+                    updateMemberRole(member, newRole)
+                }
+            }
+            .setNegativeButton("취소", null)
+            .create()
+            
+        dialog.show()
+    }
+    
+    // 권한 변경 API 호출
+    private fun updateMemberRole(member: Member, newRole: String) {
+        val apiService = ApiClient.getApiService()
+        val request = ApiService.MemberRoleUpdateRequest(role = newRole)
+        
+        apiService.updateMemberRole(clubPk, member.id, request).enqueue(object : Callback<ApiService.MemberRoleUpdateResponse> {
+            override fun onResponse(
+                call: Call<ApiService.MemberRoleUpdateResponse>,
+                response: Response<ApiService.MemberRoleUpdateResponse>
+            ) {
+                if (response.isSuccessful) {
+                    // 성공 시 UI 업데이트
+                    val roleText = when (newRole) {
+                        "leader" -> "회장"
+                        "officer" -> "간부"
+                        else -> "일반"
+                    }
+                    
+                    // 멤버 리스트에서 해당 멤버의 권한 업데이트
+                    val index = members.indexOf(member)
+                    if (index != -1) {
+                        members[index] = member.copy(role = roleText)
+                        memberAdapter.notifyItemChanged(index)
+                    }
+                    
+                    Toast.makeText(this@ClubMemberManagementActivity, 
+                        "${member.name}님의 권한이 ${roleText}(으)로 변경되었습니다.", 
+                        Toast.LENGTH_SHORT).show()
+                        
+                    // 만약 회장으로 변경했다면, 현재 사용자는 일반 멤버가 됨
+                    if (newRole == "leader") {
+                        isCurrentUserPresident = false
+                        // 현재 사용자 찾아서 일반으로 변경
+                        val currentUserIndex = members.indexOfFirst { it.id == currentUserPk }
+                        if (currentUserIndex != -1) {
+                            members[currentUserIndex] = members[currentUserIndex].copy(role = "일반")
+                            memberAdapter.notifyItemChanged(currentUserIndex)
+                        }
+                    }
+                } else {
+                    Log.e("API_ERROR", "권한 변경 실패: ${response.code()}")
+                    Toast.makeText(this@ClubMemberManagementActivity, 
+                        "권한 변경에 실패했습니다.", 
+                        Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<ApiService.MemberRoleUpdateResponse>, t: Throwable) {
+                Log.e("API_ERROR", "네트워크 오류: ${t.message}")
+                Toast.makeText(this@ClubMemberManagementActivity, 
+                    "네트워크 오류가 발생했습니다.", 
+                    Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
+    // 멤버 승인 API 호출
+    private fun approveMember(joinRequest: JoinRequest) {
+        val apiService = ApiClient.getApiService()
+        val request = ApiService.MemberApproveRequest(status = "active")
+        
+        apiService.approveMember(clubPk, joinRequest.id, request).enqueue(object : Callback<ApiService.MemberRoleUpdateResponse> {
+            override fun onResponse(
+                call: Call<ApiService.MemberRoleUpdateResponse>,
+                response: Response<ApiService.MemberRoleUpdateResponse>
+            ) {
+                if (response.isSuccessful) {
+                    Toast.makeText(this@ClubMemberManagementActivity, 
+                        "${joinRequest.name}님의 가입이 승인되었습니다.", 
+                        Toast.LENGTH_SHORT).show()
+                    
+                    // 가입 요청 목록에서 제거
+                    val index = joinRequests.indexOf(joinRequest)
+                    if (index != -1) {
+                        joinRequests.removeAt(index)
+                        joinRequestAdapter.notifyItemRemoved(index)
+                    }
+                    
+                    // 멤버 목록 새로고침 (새 멤버가 추가되었으므로)
+                    loadMembersFromApi()
+                } else {
+                    Log.e("API_ERROR", "멤버 승인 실패: ${response.code()}")
+                    Toast.makeText(this@ClubMemberManagementActivity, 
+                        "멤버 승인에 실패했습니다.", 
+                        Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<ApiService.MemberRoleUpdateResponse>, t: Throwable) {
+                Log.e("API_ERROR", "네트워크 오류: ${t.message}")
+                Toast.makeText(this@ClubMemberManagementActivity, 
+                    "네트워크 오류가 발생했습니다.", 
+                    Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
+    // 멤버 거절 API 호출
+    private fun rejectMember(joinRequest: JoinRequest) {
+        val apiService = ApiClient.getApiService()
+        
+        apiService.deleteMember(clubPk, joinRequest.id).enqueue(object : Callback<okhttp3.ResponseBody> {
+            override fun onResponse(
+                call: Call<okhttp3.ResponseBody>,
+                response: Response<okhttp3.ResponseBody>
+            ) {
+                if (response.isSuccessful) {
+                    Toast.makeText(this@ClubMemberManagementActivity, 
+                        "${joinRequest.name}님의 가입이 거절되었습니다.", 
+                        Toast.LENGTH_SHORT).show()
+                    
+                    // 가입 요청 목록에서 제거
+                    val index = joinRequests.indexOf(joinRequest)
+                    if (index != -1) {
+                        joinRequests.removeAt(index)
+                        joinRequestAdapter.notifyItemRemoved(index)
+                    }
+                } else {
+                    Log.e("API_ERROR", "멤버 거절 실패: ${response.code()}")
+                    Toast.makeText(this@ClubMemberManagementActivity, 
+                        "멤버 거절에 실패했습니다.", 
+                        Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<okhttp3.ResponseBody>, t: Throwable) {
+                Log.e("API_ERROR", "네트워크 오류: ${t.message}")
+                Toast.makeText(this@ClubMemberManagementActivity, 
+                    "네트워크 오류가 발생했습니다.", 
+                    Toast.LENGTH_SHORT).show()
             }
         })
     }

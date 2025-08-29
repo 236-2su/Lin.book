@@ -20,7 +20,7 @@
             android:id="@+id/tv_request_date"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="가입 요청: 2025년 08월 27일"
+            android:text="가입 요청일: 2025년 08월 27일"
             android:textSize="12sp"
             android:textColor="#9CA3AF"
             android:layout_marginBottom="6dp" />
