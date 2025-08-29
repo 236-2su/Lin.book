@@ -1,130 +1,160 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="@android:color/white">
+    android:background="@android:color/white"
+    android:fillViewport="true">
 
-    <!-- 동아리명 -->
-    <TextView
-        style="@style/SectionTitleTextStyle"
-        android:text="동아리명"/>
-    <EditText
-        android:id="@+id/et_club_name"
-        android:hint="방구석 경제, 프로그래밍 동아리"
-        android:textColorHint="#999999"
-        android:background="@drawable/info_box"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="16dp"
-        android:textSize="@dimen/text_size_medium"
-        android:textColor="#333333"
-        android:layout_marginBottom="24dp"/>
+        android:orientation="vertical">
 
-    <!-- 학과/부문 -->
-    <TextView
-        style="@style/SectionTitleTextStyle"
-        android:text="학과/부문"/>
-    <EditText
-        android:id="@+id/et_department"
-        android:hint="컴퓨터공학과, 경영학과"
-        android:textColorHint="#999999"
-        android:background="@drawable/info_box"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="16dp"
-        android:textSize="@dimen/text_size_medium"
-        android:textColor="#333333"
-        android:layout_marginBottom="24dp"/>
+        <TextView
+            style="@style/SectionTitleTextStyle"
+            android:text="동아리명"/>
+        <EditText
+            android:id="@+id/et_club_name"
+            android:hint="방구석 경제, 프로그래밍 동아리"
+            android:textColorHint="#999999"
+            android:background="@drawable/info_box"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:textSize="@dimen/text_size_medium"
+            android:textColor="#333333"
+            android:layout_marginBottom="24dp"/>
 
-    <!-- 대분류 -->
-    <TextView
-        style="@style/SectionTitleTextStyle"
-        android:text="대분류"/>
-    <Spinner
-        android:id="@+id/spinner_major_category"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@drawable/spinner_background"
-        android:entries="@array/club_categories"
-        android:padding="16dp"
-        android:layout_marginBottom="24dp" />
+        <TextView
+            style="@style/SectionTitleTextStyle"
+            android:text="학과/부문"/>
+        <EditText
+            android:id="@+id/et_department"
+            android:hint="컴퓨터공학과, 경영학과"
+            android:textColorHint="#999999"
+            android:background="@drawable/info_box"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:textSize="@dimen/text_size_medium"
+            android:textColor="#333333"
+            android:layout_marginBottom="24dp"/>
 
-    <!-- 소분류 -->
-    <TextView
-        style="@style/SectionTitleTextStyle"
-        android:text="소분류"/>
-    <EditText
-        android:id="@+id/et_minor_category"
-        android:hint="프로그래밍, 경제학, 미술"
-        android:textColorHint="#999999"
-        android:background="@drawable/info_box"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="16dp"
-        android:textSize="@dimen/text_size_medium"
-        android:textColor="#333333"
-        android:layout_marginBottom="24dp"/>
+        <TextView
+            style="@style/SectionTitleTextStyle"
+            android:text="대분류"/>
+        <Spinner
+            android:id="@+id/spinner_major_category"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/spinner_background"
+            android:entries="@array/club_categories"
+            android:padding="16dp"
+            android:layout_marginBottom="24dp" />
 
-    <!-- 해시태그 -->
-    <TextView
-        style="@style/SectionTitleTextStyle"
-        android:text="해시태그"/>
-    <EditText
-        android:id="@+id/et_hashtags"
-        android:hint="#코딩 #알고리즘"
-        android:textColorHint="#999999"
-        android:background="@drawable/info_box"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="16dp"
-        android:textSize="@dimen/text_size_medium"
-        android:textColor="#333333"
-        android:layout_marginBottom="24dp"/>
+        <TextView
+            style="@style/SectionTitleTextStyle"
+            android:text="소분류"/>
+        <EditText
+            android:id="@+id/et_minor_category"
+            android:hint="프로그래밍, 경제학, 미술"
+            android:textColorHint="#999999"
+            android:background="@drawable/info_box"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:textSize="@dimen/text_size_medium"
+            android:textColor="#333333"
+            android:layout_marginBottom="24dp"/>
 
-    <!-- 동아리실 위치 -->
-    <TextView
-        style="@style/SectionTitleTextStyle"
-        android:text="동아리실 위치"/>
-    <EditText
-        android:id="@+id/et_location"
-        android:hint="공학관 301호, 경영관 2층"
-        android:textColorHint="#999999"
-        android:background="@drawable/info_box"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="16dp"
-        android:textSize="@dimen/text_size_medium"
-        android:textColor="#333333"
-        android:layout_marginBottom="24dp"/>
+        <TextView
+            style="@style/SectionTitleTextStyle"
+            android:text="해시태그"/>
+        <EditText
+            android:id="@+id/et_hashtags"
+            android:hint="#코딩 #알고리즘"
+            android:textColorHint="#999999"
+            android:background="@drawable/info_box"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:textSize="@dimen/text_size_medium"
+            android:textColor="#333333"
+            android:layout_marginBottom="24dp"/>
 
-    <!-- 소개 -->
-    <TextView
-        style="@style/SectionTitleTextStyle"
-        android:text="소개"/>
-    <EditText
-        android:id="@+id/et_description"
-        android:inputType="textMultiLine"
-        android:hint="한 줄 소개를 간단하게 입력해주세요"
-        android:textColorHint="#999999"
-        android:background="@drawable/info_box"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="16dp"
-        android:textSize="@dimen/text_size_medium"
-        android:textColor="#333333"
-        android:layout_marginBottom="24dp"/>
+        <TextView
+            style="@style/SectionTitleTextStyle"
+            android:text="동아리실 위치"/>
+        <EditText
+            android:id="@+id/et_location"
+            android:hint="공학관 301호, 경영관 2층"
+            android:textColorHint="#999999"
+            android:background="@drawable/info_box"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:textSize="@dimen/text_size_medium"
+            android:textColor="#333333"
+            android:layout_marginBottom="24dp"/>
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1" />
+        <TextView
+            style="@style/SectionTitleTextStyle"
+            android:text="소개"/>
+        <EditText
+            android:id="@+id/et_description"
+            android:inputType="textMultiLine"
+            android:hint="한 줄 소개를 간단하게 입력해주세요"
+            android:textColorHint="#999999"
+            android:background="@drawable/info_box"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:textSize="@dimen/text_size_medium"
+            android:textColor="#333333"
+            android:layout_marginBottom="24dp"/>
 
-    <Button
-        android:id="@+id/btn_create_club"
-        style="@style/ReferenceRegisterButton"
-        android:layout_width="match_parent"
-        android:layout_marginTop="24dp"
-        android:text="등록하기" />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
 
-</LinearLayout>
+        <TextView
+            style="@style/SectionTitleTextStyle"
+            android:text="웰컴 이미지"/>
+        <TextView
+            android:id="@+id/btn_pick_welcome_image"
+            android:layout_width="match_parent"
+            android:layout_height="51dp"
+            android:gravity="center"
+            android:background="#F0F0F0"
+            android:text="눌러서 파일 첨부하기"
+            android:textColor="#6A6A6A"
+            android:textStyle="bold"
+            android:textSize="14sp"
+            android:layout_marginBottom="24dp"/>
+
+        <TextView
+            style="@style/SectionTitleTextStyle"
+            android:text="웰컴 문구"/>
+        <EditText
+            android:id="@+id/et_welcome_intro_text"
+            android:inputType="textMultiLine"
+            android:hint="웰컴 문구를 입력해주세요."
+            android:textColorHint="#999999"
+            android:background="@drawable/info_box"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:textSize="@dimen/text_size_medium"
+            android:textColor="#333333"
+            android:layout_marginBottom="24dp"/>
+
+        <Button
+            android:id="@+id/btn_create_club"
+            style="@style/ReferenceRegisterButton"
+            android:layout_width="match_parent"
+            android:layout_marginTop="24dp"
+            android:text="등록하기" />
+
+    </LinearLayout>
+</ScrollView>

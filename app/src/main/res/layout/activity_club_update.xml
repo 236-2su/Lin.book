@@ -11,9 +11,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginTop="16dp"
-        android:layout_marginBottom="8dp"
-        android:paddingStart="16dp"
+        android:paddingTop="60dp"
+        android:paddingBottom="8dp"
+        android:paddingStart="24dp"
         android:paddingEnd="16dp"
         android:gravity="center_vertical">
 
@@ -49,18 +49,6 @@
             android:textStyle="bold"
             android:textSize="24sp"
             android:textColor="@android:color/black" />
-
-        <androidx.appcompat.widget.AppCompatImageButton
-            android:id="@+id/btn_member"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:backgroundTint="#FFFFFF"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            app:srcCompat="@drawable/ic_person"
-            android:scaleType="centerInside"
-            android:adjustViewBounds="true"
-            android:padding="6dp"
-            android:contentDescription="멤버 관리" />
     </LinearLayout>
 
     <ScrollView
@@ -192,6 +180,22 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1" />
+
+        <!-- 대문 이미지 -->
+        <TextView
+            style="@style/SectionTitleTextStyle"
+            android:text="웰컴 이미지"/>
+        <TextView
+            android:id="@+id/btn_pick_welcome_image"
+            android:layout_width="match_parent"
+            android:layout_height="51dp"
+            android:gravity="center"
+            android:background="#F0F0F0"
+            android:text="눌러서 파일 첨부하기"
+            android:textColor="#6A6A6A"
+            android:textStyle="bold"
+            android:textSize="14sp"
+            android:layout_marginBottom="24dp"/>
 
         <!-- 대문 소개 -->
         <TextView

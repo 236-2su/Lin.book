@@ -61,6 +61,14 @@ public abstract class BaseActivity extends AppCompatActivity {
             setContentView(R.layout.root_page);
             android.util.Log.d("BaseActivity", "setContentView(R.layout.root_page) 성공");
             
+            // 전역 스크롤바 비활성화 (현재 액티비티 뷰 트리)
+            try {
+                android.view.ViewGroup root = findViewById(android.R.id.content);
+                if (root != null) {
+                    disableScrollbarsRecursively(root);
+                }
+            } catch (Exception ignore) {}
+
             setupHeader();
             android.util.Log.d("BaseActivity", "setupHeader() 호출 성공");
             
@@ -174,6 +182,21 @@ public abstract class BaseActivity extends AppCompatActivity {
         );
         params.topMargin = COMMON_MARGIN_TOP;
         view.setLayoutParams(params);
+    }
+
+    // 스크롤바 비활성화 헬퍼
+    private void disableScrollbarsRecursively(android.view.View view) {
+        try {
+            view.setVerticalScrollBarEnabled(false);
+            view.setHorizontalScrollBarEnabled(false);
+        } catch (Throwable ignored) {}
+        if (view instanceof android.view.ViewGroup) {
+            android.view.ViewGroup vg = (android.view.ViewGroup) view;
+            for (int i = 0; i < vg.getChildCount(); i++) {
+                android.view.View child = vg.getChildAt(i);
+                if (child != null) disableScrollbarsRecursively(child);
+            }
+        }
     }
     
     // 공통 기능들 (예: 뒤로가기, 메뉴 등)

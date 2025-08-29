@@ -45,8 +45,8 @@ class TransactionDetailFragment : Fragment() {
     private lateinit var receiptContainer: View
     private lateinit var receiptDivider: View
     private lateinit var ivReceipt: ImageView
-    private lateinit var ivHeart: ImageView
-    private lateinit var tvLikeCount: TextView
+    // private lateinit var ivHeart: ImageView
+    // private lateinit var tvLikeCount: TextView
 
     private var currentTransactionIndex: Int = 0
     private var allTransactions: List<TransactionItem> = listOf() // 전체 거래 목록
@@ -136,8 +136,12 @@ class TransactionDetailFragment : Fragment() {
         btnModify.visibility = View.GONE
         btnDelete.visibility = View.GONE
         
+        // 초기에는 지출/수입 버튼도 숨기기 (데이터 로드 후 표시)
+        btnExpense.visibility = View.GONE
+        btnIncome.visibility = View.GONE
+        
         // 하트 초기 상태 설정
-        ivHeart.tag = "unliked"
+        // ivHeart.tag = "unliked"
     }
 
     private fun setupClickListeners() {
@@ -169,9 +173,9 @@ class TransactionDetailFragment : Fragment() {
         }
 
         // 하트 클릭 이벤트
-        ivHeart.setOnClickListener {
-            toggleHeartLike()
-        }
+        // ivHeart.setOnClickListener {
+        //     toggleHeartLike()
+        // }
     }
 
     // 거래 수정 페이지로 이동
@@ -262,30 +266,31 @@ class TransactionDetailFragment : Fragment() {
 
     // 하트 좋아요 토글
     private fun toggleHeartLike() {
-        try {
-            // 현재 하트 상태에 따라 이미지 변경
-            val currentTag = ivHeart.tag as? String ?: "unliked"
-            
-            if (currentTag == "liked") {
-                // 좋아요 취소
-                ivHeart.setImageResource(R.drawable.ic_heart_outline)
-                ivHeart.tag = "unliked"
-                // 좋아요 수 감소
-                val currentCount = tvLikeCount.text.toString().toIntOrNull() ?: 0
-                if (currentCount > 0) {
-                    tvLikeCount.text = (currentCount - 1).toString()
-                }
-            } else {
-                // 좋아요 추가
-                ivHeart.setImageResource(R.drawable.ic_heart_filled)
-                ivHeart.tag = "liked"
-                // 좋아요 수 증가
-                val currentCount = tvLikeCount.text.toString().toIntOrNull() ?: 0
-                tvLikeCount.text = (currentCount + 1).toString()
-            }
-        } catch (e: Exception) {
-            Log.e("TransactionDetailFragment", "하트 토글 실패", e)
-        }
+        // 하트 기능은 현재 사용하지 않음
+        // try {
+        //     // 현재 하트 상태에 따라 이미지 변경
+        //     val currentTag = ivHeart.tag as? String ?: "unliked"
+        //     
+        //     if (currentTag == "liked") {
+        //         // 좋아요 취소
+        //         ivHeart.setImageResource(R.drawable.ic_heart_outline)
+        //         ivHeart.tag = "unliked"
+        //         // 좋아요 수 감소
+        //         val currentCount = tvLikeCount.text.toString().toIntOrNull() ?: 0
+        //         if (currentCount > 0) {
+        //             tvLikeCount.text = (currentCount - 1).toString()
+        //         }
+        //     } else {
+        //         // 좋아요 추가
+        //         ivHeart.setImageResource(R.drawable.ic_heart_filled)
+        //         ivHeart.tag = "liked"
+        //         // 좋아요 수 증가
+        //         val currentCount = tvLikeCount.text.toString().toIntOrNull() ?: 0
+        //         tvLikeCount.text = (currentCount + 1).toString()
+        //     }
+        // } catch (e: Exception) {
+        //     Log.e("TransactionDetailFragment", "하트 토글 실패", e)
+        // }
     }
 
     private fun loadAllTransactionsAndDisplayCurrent() {

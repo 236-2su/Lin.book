@@ -70,6 +70,7 @@
                 android:textColorHint="#CCCCCC"
                 android:textColor="#333333" />
 
+
             <!-- 분석 리포트 종류 -->
             <TextView
                 android:layout_width="wrap_content"
@@ -91,7 +92,6 @@
                 android:gravity="center_vertical"
                 android:paddingHorizontal="16dp"
                 android:layout_marginBottom="40dp"
-                android:foreground="?android:attr/selectableItemBackground"
                 android:clickable="true"
                 android:focusable="true">
 

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/dialog_background"
+    android:padding="24dp"
+    android:layout_margin="16dp"
+    android:layout_gravity="bottom|center_horizontal">
+
+    <RelativeLayout
+        android:id="@+id/top_bar"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginBottom="6dp">
+
+        <TextView
+            android:id="@+id/tv_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Hey-Bi 동아리 추천"
+            android:textColor="#000000"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:layout_centerInParent="true"/>
+
+        <ImageView
+            android:id="@+id/btn_close"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:src="@drawable/ic_chevron_down_thin"
+            android:contentDescription="닫기"
+            android:clickable="true"
+            android:focusable="true"/>
+
+    </RelativeLayout>
+
+    <FrameLayout
+        android:id="@+id/state_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clipChildren="false">
+
+        <!-- 로딩 상태 -->
+        <LinearLayout
+            android:id="@+id/panel_loading"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:clipChildren="false"
+            android:clipToPadding="false"
+            android:paddingTop="36dp"
+            android:paddingBottom="24dp">
+            <ImageView
+                android:id="@+id/img_ai_bot"
+                android:layout_width="72dp"
+                android:layout_height="72dp"
+                android:src="@drawable/ic_ai_bot"
+                android:contentDescription="AI Bot"
+                android:layout_marginBottom="8dp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="당신의 AI, Hey-Bi가 추천중입니다.\n잠시만 기다려주세요."
+                android:textColor="#333333"
+                android:textSize="14sp"
+                android:textAlignment="center"
+                android:layout_marginTop="12dp"/>
+        </LinearLayout>
+
+        <!-- 결과 목록 -->
+        <ScrollView
+            android:id="@+id/scroll_results"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:scrollbars="none">
+            <LinearLayout
+                android:id="@+id/club_list_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"/>
+        </ScrollView>
+    </FrameLayout>
+
+</LinearLayout>

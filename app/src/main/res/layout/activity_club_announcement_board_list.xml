@@ -10,14 +10,16 @@
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:gravity="center_horizontal"
-        android:padding="16dp">
+        android:paddingStart="24dp"
+        android:paddingTop="60dp"
+        android:paddingEnd="24dp"
+        android:paddingBottom="8dp">
 
     <!-- 뒤로가기 버튼 -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginTop="16dp"
         android:layout_marginBottom="24dp"
         android:layout_gravity="center_vertical">
 
@@ -182,7 +184,7 @@
 
                 <TextView
                     android:id="@+id/btn_notice"
-                    style="@style/ReferenceCategoryButton.Selected"
+                    style="@style/BoardButtonSelectedStyle"
                     android:text="공지사항" />
 
                 <TextView
@@ -217,25 +219,26 @@
     </LinearLayout>
 
     <!-- 공지사항 목록 -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_board_list"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:scrollbars="none" />
-    
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_board_list"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:scrollbars="none" />
+
     </LinearLayout>
 
-    <!-- Floating Action Button -->
+    <!-- FAB 컨테이너: 오른쪽 하단 고정 (공지 목록은 글쓰기만 유지) -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab_add_post"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
-        android:layout_margin="24dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginBottom="24dp"
         android:src="@drawable/ic_add"
         app:backgroundTint="#1976D2"
-        app:tint="#FFFFFF"
-        app:fabSize="normal" />
+        app:fabSize="normal"
+        app:tint="#FFFFFF" />
     
 </FrameLayout>

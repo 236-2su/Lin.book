@@ -116,10 +116,11 @@ class AIReportDetailActivity : BaseActivity() {
                 android.util.Log.d("AIReportDetail", "생성자 설정 완료")
             }
             
-            // 내용 설정
+            // 내용 설정 (향상된 포매팅)
             if (tvReportContent != null) {
-                tvReportContent.text = content
-                android.util.Log.d("AIReportDetail", "내용 설정 완료 (길이: ${content.length})")
+                val formattedContent = formatReportContent(content, title)
+                tvReportContent.text = formattedContent
+                android.util.Log.d("AIReportDetail", "내용 설정 완료 (길이: ${formattedContent.length})")
             }
             
         } catch (e: Exception) {
@@ -189,5 +190,67 @@ class AIReportDetailActivity : BaseActivity() {
         mainContainer.addView(scrollView)
         
         return mainContainer
+    }
+    
+    private fun formatReportContent(content: String, title: String): String {
+        return try {
+            android.util.Log.d("AIReportDetail", "리포트 내용 포매팅 시작")
+            android.util.Log.d("AIReportDetail", "제목: $title")
+            android.util.Log.d("AIReportDetail", "원본 내용 길이: ${content.length}")
+            
+            // 제목에 따라 리포트 타입 구분
+            val reportType = when {
+                title.contains("연간") -> "yearly"
+                title.contains("비교") -> "comparison"
+                title.contains("AI") || title.contains("Gemini") -> "ai_analysis"
+                title.contains("종합") -> "comprehensive"
+                else -> "general"
+            }
+            
+            android.util.Log.d("AIReportDetail", "감지된 리포트 타입: $reportType")
+            
+            // 한국어 표시 및 가독성 향상
+            val formattedContent = content
+                .replace("=".repeat(50), "━".repeat(30))
+                .replace("=".repeat(40), "━".repeat(25))  
+                .replace("=".repeat(30), "━".repeat(20))
+                .replace("\\*\\*(.+?)\\*\\*".toRegex(), "【$1】")  // **텍스트** -> 【텍스트】
+                .replace("###\\s*(.+)".toRegex(), "\n▶ $1\n")     // ### 헤딩 -> ▶ 헤딩
+                .replace("##\\s*(.+)".toRegex(), "\n■ $1\n")      // ## 헤딩 -> ■ 헤딩  
+                .replace("#\\s*(.+)".toRegex(), "\n◆ $1\n")       // # 헤딩 -> ◆ 헤딩
+                .replace("•", "▪") // 불릿 포인트 한국어 스타일
+                .replace("- ", "▪ ") // 하이픈 불릿을 한국어 스타일로
+            
+            // 숫자 포맷팅 (천단위 콤마)
+            val numberPattern = "\\b(\\d{4,})원?\\b".toRegex()
+            val finalContent = numberPattern.replace(formattedContent) { matchResult ->
+                val number = matchResult.groupValues[1].toLongOrNull()
+                if (number != null) {
+                    String.format("%,d", number) + "원"
+                } else {
+                    matchResult.value
+                }
+            }
+            
+            // 빈 줄 정리 (3개 이상의 연속 줄바꿈을 2개로 제한)
+            val cleanedContent = finalContent
+                .replace("\n{3,}".toRegex(), "\n\n")
+                .trim()
+            
+            android.util.Log.d("AIReportDetail", "포매팅 완료 - 최종 길이: ${cleanedContent.length}")
+            
+            // 최종 검증
+            if (cleanedContent.isBlank()) {
+                android.util.Log.w("AIReportDetail", "포매팅 후 내용이 비어있음, 원본 반환")
+                return content
+            }
+            
+            cleanedContent
+            
+        } catch (e: Exception) {
+            android.util.Log.e("AIReportDetail", "리포트 내용 포매팅 실패", e)
+            // 포매팅 실패 시 원본 반환
+            content
+        }
     }
 }

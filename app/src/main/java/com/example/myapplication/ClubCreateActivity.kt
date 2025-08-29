@@ -6,6 +6,11 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.Spinner
 import android.widget.Toast
+import android.net.Uri
+import androidx.activity.result.contract.ActivityResultContracts
+import android.graphics.BitmapFactory
+import java.io.InputStream
+import android.util.Base64
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -24,7 +29,29 @@ class ClubCreateActivity : BaseActivity() {
     private lateinit var etHashtags: EditText
     private lateinit var etLocation: EditText
     private lateinit var etDescription: EditText
+    private lateinit var etWelcomeImage: EditText
+    private lateinit var etWelcomeIntro: EditText
     private lateinit var btnRegister: Button
+    private var pickedImageBase64: String? = null
+
+    private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        if (uri != null) {
+            try {
+                val inputStream: InputStream? = contentResolver.openInputStream(uri)
+                val bytes = inputStream?.readBytes()
+                inputStream?.close()
+                if (bytes != null) {
+                    pickedImageBase64 = Base64.encodeToString(bytes, Base64.NO_WRAP)
+                    Toast.makeText(this, "이미지 첨부 완료", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this, "이미지를 읽을 수 없습니다", Toast.LENGTH_SHORT).show()
+                }
+            } catch (e: Exception) {
+                Log.e("ClubCreateActivity", "이미지 인코딩 실패", e)
+                Toast.makeText(this, "이미지 처리 중 오류", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
 
     override fun setupContent(savedInstanceState: Bundle?) {
         Log.d("ClubCreateActivity", "setupContent 시작")
@@ -86,12 +113,18 @@ class ClubCreateActivity : BaseActivity() {
                     etHashtags = clubCreateView.findViewById(R.id.et_hashtags)
                     etLocation = clubCreateView.findViewById(R.id.et_location)
                     etDescription = clubCreateView.findViewById(R.id.et_description)
+                    // 파일 첨부 버튼
+                    val pickWelcomeImageBtn: android.widget.TextView = clubCreateView.findViewById(R.id.btn_pick_welcome_image)
+                    pickWelcomeImageBtn.setOnClickListener {
+                        pickImageLauncher.launch("image/*")
+                    }
+                    etWelcomeIntro = clubCreateView.findViewById(R.id.et_welcome_intro_text)
                     btnRegister = clubCreateView.findViewById(R.id.btn_create_club)
                     
                     // 모든 필드가 제대로 찾아졌는지 확인
                     if (etClubName != null && etDepartment != null && spinnerMajorCategory != null && 
                         etMinorCategory != null && etHashtags != null && etLocation != null && 
-                        etDescription != null && btnRegister != null) {
+                        etDescription != null && etWelcomeIntro != null && btnRegister != null) {
                         Log.d("ClubCreateActivity", "모든 입력 필드 초기화 완료")
                         return true
                     } else {
@@ -179,7 +212,13 @@ class ClubCreateActivity : BaseActivity() {
             put("description", etDescription.text.toString())
             put("hashtags", etHashtags.text.toString())
             put("location", etLocation.text.toString())
-            put("short_description", etDescription.text.toString().take(50)) // 소개에서 50자만 추출
+            // 웰컴 문구
+            val welcomeIntro = etWelcomeIntro.text?.toString()?.trim().orEmpty()
+            put("short_description", if (welcomeIntro.isNotBlank()) welcomeIntro else etDescription.text.toString().take(50))
+            // 웰컴 이미지 (파일 선택 시 Base64 문자열)
+            pickedImageBase64?.let { base64 ->
+                if (base64.isNotBlank()) put("image", base64)
+            }
         }
 
         Log.d("ClubCreateActivity", "POST 요청 데이터: ${clubData}")
