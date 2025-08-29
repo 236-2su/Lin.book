@@ -21,6 +21,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import com.example.myapplication.PublicLedgerTransactionAdapter
 import com.example.myapplication.UserManager
+import com.example.myapplication.TransactionDetailFragment
 
 class LedgerContentFragment : Fragment() {
 
@@ -47,8 +48,8 @@ class LedgerContentFragment : Fragment() {
 
     private var allTransactions: List<TransactionItem> = listOf() // 전체 거래 내역 저장
 
-    private var clubId: Int = -1
-    private var ledgerId: Int = -1
+    private var clubId: Int = 4  // 하드코딩
+    private var ledgerId: Int = 10  // 하드코딩
 
     companion object {
         private const val ARG_CLUB_ID = "club_id"
@@ -71,6 +72,9 @@ class LedgerContentFragment : Fragment() {
             ledgerId = it.getInt(ARG_LEDGER_ID)
         }
     }
+    
+    // clubId를 반환하는 메서드 (MainActivity에서 이모티콘 버튼 클릭 시 사용)
+    fun getClubPk(): Int = clubId
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -82,10 +86,35 @@ class LedgerContentFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        
+        // 현재 FAB 제거
         fab?.let {
-            (activity?.findViewById<View>(android.R.id.content) as? ViewGroup)?.removeView(it)
+            try {
+                val parent = it.parent as? ViewGroup
+                parent?.removeView(it)
+            } catch (e: Exception) {
+                Log.e("LedgerContentFragment", "FAB 제거 실패", e)
+            }
         }
+        
+        // root_layout에서 모든 FloatingActionButton 제거 (중복 방지)
+        val rootLayout = activity?.findViewById<View>(R.id.content_container) as? ViewGroup
+        rootLayout?.let { layout ->
+            for (i in layout.childCount - 1 downTo 0) {
+                val child = layout.getChildAt(i)
+                if (child is FloatingActionButton) {
+                    try {
+                        layout.removeView(child)
+                        Log.d("LedgerContentFragment", "FAB 제거됨: ${child.id}")
+                    } catch (e: Exception) {
+                        Log.e("LedgerContentFragment", "FAB 제거 중 오류", e)
+                    }
+                }
+            }
+        }
+        
         fab = null
+        Log.d("LedgerContentFragment", "onDestroyView 완료: 모든 FAB 제거됨")
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -124,6 +153,9 @@ class LedgerContentFragment : Fragment() {
              
              // 스와이프 삭제 기능 설정
              setupSwipeToDelete()
+             
+             // RecyclerView 항목 클릭 이벤트 설정
+             setupRecyclerViewClickListeners()
              
              updateDate() // 이제 transactionAdapter가 초기화된 후에 호출
 
@@ -367,16 +399,40 @@ class LedgerContentFragment : Fragment() {
      }
  
      private fun setupFloatingActionButton() {
+        // 기존 FAB이 있다면 제거
+        fab?.let { existingFab ->
+            try {
+                (activity?.findViewById<View>(android.R.id.content) as? ViewGroup)?.removeView(existingFab)
+            } catch (e: Exception) {
+                Log.e("LedgerContentFragment", "기존 FAB 제거 실패", e)
+            }
+        }
+        
+        // root_layout에서 기존 FAB들 모두 제거 (중복 방지)
         val rootLayout = activity?.findViewById<View>(android.R.id.content) as? ViewGroup
+        rootLayout?.let { layout ->
+            // FAB ID로 등록된 모든 뷰 제거
+            val existingFabs = layout.findViewById<FloatingActionButton>(R.id.fab_register)
+            existingFabs?.let { layout.removeView(it) }
+            
+            // 또는 모든 FloatingActionButton 찾아서 제거
+            for (i in layout.childCount - 1 downTo 0) {
+                val child = layout.getChildAt(i)
+                if (child is FloatingActionButton) {
+                    layout.removeView(child)
+                }
+            }
+        }
         
         fab = FloatingActionButton(requireContext()).apply {
+            id = R.id.fab_register  // ID 설정
             layoutParams = FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.WRAP_CONTENT,
                 FrameLayout.LayoutParams.WRAP_CONTENT
-                         ).apply {
-                 gravity = android.view.Gravity.BOTTOM or android.view.Gravity.END
-                 setMargins(0, 0, 80, 80)
-             }
+            ).apply {
+                gravity = android.view.Gravity.BOTTOM or android.view.Gravity.END
+                setMargins(0, 0, 80, 80)
+            }
             setImageResource(R.drawable.pencil)
             backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#2457C5"))
             imageTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.WHITE)
@@ -390,6 +446,7 @@ class LedgerContentFragment : Fragment() {
         }
         
         rootLayout?.addView(fab)
+        Log.d("LedgerContentFragment", "FAB 생성 완료: id=${fab?.id}")
     }
 
     private fun fetchTransactions() {
@@ -433,5 +490,39 @@ class LedgerContentFragment : Fragment() {
                 }
             }
         }
+    }
+
+    private fun setupRecyclerViewClickListeners() {
+        Log.d("LedgerContentFragment", "setupRecyclerViewClickListeners 호출됨")
+        transactionAdapter.setOnItemClickListener { position ->
+            Log.d("LedgerContentFragment", "아이템 클릭 이벤트 발생: position=$position")
+            
+            // 현재 표시된 거래 목록에서 해당 위치의 거래 ID 가져오기
+            val currentList = transactionAdapter.getCurrentList()
+            Log.d("LedgerContentFragment", "현재 리스트 크기: ${currentList.size}")
+            
+            if (position < currentList.size) {
+                val clickedTransaction = currentList[position]
+                Log.d("LedgerContentFragment", "거래 클릭: position=$position, transactionId=${clickedTransaction.id}, amount=${clickedTransaction.amount}")
+                
+                // 거래 상세 페이지로 이동
+                val transactionDetailFragment = TransactionDetailFragment.newInstance(
+                    clubId, 
+                    ledgerId, 
+                    clickedTransaction.id  // position 대신 실제 거래 ID 전달
+                )
+                Log.d("LedgerContentFragment", "TransactionDetailFragment 생성됨: clubId=$clubId, ledgerId=$ledgerId, transactionId=${clickedTransaction.id}")
+                
+                if (activity is MainActivity) {
+                    Log.d("LedgerContentFragment", "MainActivity로 캐스팅 성공, replaceFragment 호출")
+                    (activity as MainActivity).replaceFragment(transactionDetailFragment)
+                } else {
+                    Log.e("LedgerContentFragment", "activity가 MainActivity가 아님: ${activity?.javaClass?.simpleName}")
+                }
+            } else {
+                Log.e("LedgerContentFragment", "잘못된 position: $position, 리스트 크기: ${currentList.size}")
+            }
+        }
+        Log.d("LedgerContentFragment", "클릭 리스너 설정 완료")
     }
 }

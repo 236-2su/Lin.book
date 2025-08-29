@@ -32,6 +32,7 @@ class LedgerCreateActivity : BaseActivity() {
 
     private lateinit var etTransactionDateTime: EditText
     private lateinit var etAmount: EditText
+    private lateinit var etTransactionCategory: EditText
     private lateinit var contentView: android.view.View
     private val calendar: Calendar = Calendar.getInstance()
     private val dateFormat = SimpleDateFormat("yyyy년 MM월 dd일", Locale.getDefault())
@@ -53,7 +54,10 @@ class LedgerCreateActivity : BaseActivity() {
         contentView = layoutInflater.inflate(R.layout.activity_ledger_create, contentContainer, false)
         contentContainer.addView(contentView)
         
-        setAppTitle("공개장부")
+        setAppTitle("장부 작성")
+        
+        // 뒤로가기 버튼 표시
+        showBackButton()
         
         setupViews(contentView)
         setupDateTimePicker()
@@ -62,6 +66,7 @@ class LedgerCreateActivity : BaseActivity() {
     private fun setupViews(contentView: android.view.View) {
         etTransactionDateTime = contentView.findViewById(R.id.et_transaction_datetime)
         etAmount = contentView.findViewById(R.id.et_amount)
+        etTransactionCategory = contentView.findViewById(R.id.et_transaction_category)
         
         // 금액 입력창에 쉼표 자동 포맷팅 적용
         setupAmountFormatting()

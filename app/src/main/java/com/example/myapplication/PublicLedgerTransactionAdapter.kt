@@ -15,6 +15,12 @@ class PublicLedgerTransactionAdapter(
     private var transactions: List<TransactionItem>
 ) : RecyclerView.Adapter<PublicLedgerTransactionAdapter.TransactionViewHolder>() {
 
+    private var onItemClickListener: ((Int) -> Unit)? = null
+
+    fun setOnItemClickListener(listener: (Int) -> Unit) {
+        onItemClickListener = listener
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TransactionViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.item_transaction_public_ledger, parent, false)
@@ -44,6 +50,15 @@ class PublicLedgerTransactionAdapter(
         private val author: TextView = itemView.findViewById(R.id.tv_author)
         private val memo: TextView = itemView.findViewById(R.id.tv_memo)
         private val receipt: ImageView = itemView.findViewById(R.id.iv_receipt)
+
+        init {
+            itemView.setOnClickListener {
+                val position = adapterPosition
+                if (position != RecyclerView.NO_POSITION) {
+                    onItemClickListener?.invoke(position)
+                }
+            }
+        }
 
         fun bind(transaction: TransactionItem) {
             // 거래 타입 설정 (수입/지출) - amount 값에 따라 결정

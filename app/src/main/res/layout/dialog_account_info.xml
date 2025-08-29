@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@android:color/white"
+    android:layout_margin="24dp"
+    android:padding="24dp">
+
+    <!-- 연한 로고 배경 -->
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:src="@drawable/shinhan_logo"
+        android:scaleType="centerInside"
+        android:background="#F0F8FF"
+        android:alpha="0.3"
+        android:layout_marginBottom="24dp" />
+
+    <!-- 신한은행 (파란색, 큰 글씨) -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="신한은행"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:textColor="#0066CC"
+        android:gravity="center"
+        android:layout_marginBottom="16dp" />
+
+    <!-- 슈퍼 돈.워리 입출금 통장 (큰 글씨) -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="슈퍼 돈.워리 입출금 통장"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:textColor="#333333"
+        android:gravity="center"
+        android:layout_marginBottom="20dp" />
+
+    <!-- 통장 설명 (Body Text) -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="입출금이 자유로운 대학생 전용 통장으로, ATM 수수료 면제 혜택과 모바일 뱅킹, 자동이체 서비스를 제공합니다. 학업과 생활에 편리하도록 다양한 금융 거래가 간편하게 이루어질 수 있게 설계되었으며, 학생들의 재정 관리를 돕는 맞춤형 금융 상품입니다."
+        android:textSize="12sp"
+        android:textColor="#666666"
+        android:lineSpacingExtra="4dp"
+        android:layout_marginBottom="24dp" />
+
+    <!-- 계좌 개설하기 버튼 -->
+    <Button
+        android:id="@+id/btn_confirm"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:text="계좌 개설하기"
+        android:textSize="12sp"
+        android:textColor="#FFFFFF"
+        android:background="@drawable/btn_register"
+        android:layout_gravity="center_horizontal" />
+
+</LinearLayout>

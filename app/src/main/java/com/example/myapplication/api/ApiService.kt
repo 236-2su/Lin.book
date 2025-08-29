@@ -25,6 +25,18 @@ interface ApiService {
     data class LoginRequest(val email: String)
     data class LoginResponse(val pk: Int, val club_pks: List<Int>?)
 
+    // 동아리 생성
+    data class ClubCreateRequest(
+        val name: String,
+        val department: String,
+        val major_category: String,
+        val minor_category: String,
+        val description: String,
+        val hashtags: String,
+        val location: String,
+        val short_description: String
+    )
+
     @POST("user/login/")
     fun login(@Body req: LoginRequest): Call<LoginResponse>
 
@@ -138,10 +150,6 @@ interface ApiService {
     ): Call<okhttp3.ResponseBody>
 
     // 댓글 좋아요 (백엔드 스펙: { user_id })
-    @retrofit2.http.Headers(
-        "Content-Type: application/json",
-        "Accept: application/json"
-    )
     @POST("/club/{club_pk}/boards/{board_pk}/comments/{id}/like/")
     fun likeComment(
         @Path("club_pk") clubId: Int,
@@ -151,11 +159,6 @@ interface ApiService {
     ): Call<okhttp3.ResponseBody>
 
     data class LikeRequest(val user_id: Int)
-
-    @retrofit2.http.Headers(
-        "Content-Type: application/json",
-        "Accept: application/json"
-    )
     @POST("/club/{club_pk}/boards/{id}/like/")
     fun toggleBoardLike(
         @Path("club_pk") clubId: Int,
@@ -257,13 +260,13 @@ interface ApiService {
     fun deleteReport(
         @Path("report_pk") reportId: Int
     ): Call<okhttp3.ResponseBody>
-    
+
     // Gemini AI 리포트 조언 생성 (기존)
     @POST("report/reports/{report_pk}/advice/")
     fun getReportAdvice(
         @Path("report_pk") reportId: Int
     ): Call<GeminiAdviceResponse>
-    
+
     // 장부 기반 AI 재무 조언 생성 (새로운 API)
     @POST("report/clubs/{club_pk}/ledgers/{ledger_pk}/advice/")
     fun getLedgerAdvice(
@@ -360,7 +363,7 @@ interface ApiService {
         val budget: Int
     )
 
-    // 장부 거래 API 응답 클래스  
+    // 장부 거래 API 응답 클래스
     data class LedgerTransactionItem(
         val id: Int,
         val ledger: Int,
@@ -395,4 +398,18 @@ interface ApiService {
         @Path("user_pk") userPk: Int,
         @Path("accounts_id") accountId: Int
     ): Call<AccountItem>
+
+    // Transaction Detail API
+    @GET("club/{club_pk}/ledger/{ledger_pk}/transactions/{transaction_id}/")
+    suspend fun getTransactionDetail(
+        @Path("club_pk") clubId: Int,
+        @Path("ledger_pk") ledgerId: Int,
+        @Path("transaction_id") transactionId: Int
+    ): TransactionDetailResponse
+
+    @GET("club/{club_pk}/ledger/{ledger_pk}/transactions/")
+    suspend fun getTransactionsForLedger(
+        @Path("club_pk") clubId: Int,
+        @Path("ledger_pk") ledgerId: Int
+    ): List<TransactionItem>
 }

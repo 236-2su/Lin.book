@@ -9,6 +9,7 @@ import com.example.myapplication.api.ApiClient
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import android.content.Intent
 
 class ClubEventLedgerDetailActivity : AppCompatActivity() {
     
@@ -79,6 +80,13 @@ class ClubEventLedgerDetailActivity : AppCompatActivity() {
         }
         
         findViewById<TextView>(R.id.btn_meeting_account).setOnClickListener {
+            // MainActivity로 이동하여 MeetingAccountFragment 표시 (root_page와 동일한 과정)
+            val intent = Intent(this, MainActivity::class.java)
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            intent.putExtra("show_meeting_account", true)
+            intent.putExtra("club_pk", clubPk)
+            startActivity(intent)
+            finish()
         }
         
         findViewById<TextView>(R.id.btn_ai_report).setOnClickListener {

@@ -3,15 +3,15 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="12dp">
 
     <!-- 안내사항 제목 섹션 -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="#F5F5F5"
-        android:padding="16dp"
-        android:layout_marginBottom="24dp"
+        android:padding="12dp"
+        android:layout_marginBottom="16dp"
         android:orientation="vertical">
 
         <!-- 제목 -->
@@ -19,7 +19,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginBottom="16dp"
+            android:layout_marginBottom="12dp"
             android:gravity="center_vertical">
 
             <TextView
@@ -50,7 +50,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:layout_marginBottom="8dp">
+                android:layout_marginBottom="6dp">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -62,10 +62,11 @@
                     android:layout_marginTop="2dp" />
 
                 <TextView
+                    android:id="@+id/tv_first_guideline"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="싸피은행에서 발급받은 모임통장만 연동가능합니다."
+                    android:text="신한은행 모임통장만 연동가능합니다."
                     android:textSize="14sp"
                     android:textColor="#666666"
                     android:lineSpacingExtra="2dp" />
@@ -77,7 +78,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:layout_marginBottom="8dp">
+                android:layout_marginBottom="6dp">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -89,37 +90,43 @@
                     android:layout_marginTop="2dp" />
 
                 <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1" />
-
-            </LinearLayout>
-
-            <!-- 세 번째 안내사항 -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="•"
-                    android:textSize="16sp"
-                    android:textColor="#666666"
-                    android:layout_marginEnd="8dp"
-                    android:layout_marginTop="2dp" />
-
-                <TextView
+                    android:id="@+id/tv_second_guideline"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="싸피은행 모임통장을 개설해야하는 경우, 신분증이 필요합니다."
+                    android:text="기존 신한은행 모임통장이 있으시면 '연동하기'를 이용해주세요."
                     android:textSize="14sp"
                     android:textColor="#666666"
                     android:lineSpacingExtra="2dp" />
 
             </LinearLayout>
+
+            <!-- 세 번째 안내사항 -->
+<!--            <LinearLayout-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:orientation="horizontal">-->
+
+<!--&lt;!&ndash;                <TextView&ndash;&gt;-->
+<!--&lt;!&ndash;                    android:layout_width="wrap_content"&ndash;&gt;-->
+<!--&lt;!&ndash;                    android:layout_height="wrap_content"&ndash;&gt;-->
+<!--&lt;!&ndash;                    android:text="•"&ndash;&gt;-->
+<!--&lt;!&ndash;                    android:textSize="16sp"&ndash;&gt;-->
+<!--&lt;!&ndash;                    android:textColor="#666666"&ndash;&gt;-->
+<!--&lt;!&ndash;                    android:layout_marginEnd="8dp"&ndash;&gt;-->
+<!--&lt;!&ndash;                    android:layout_marginTop="2dp" />&ndash;&gt;-->
+
+<!--&lt;!&ndash;                <TextView&ndash;&gt;-->
+<!--&lt;!&ndash;                    android:id="@+id/tv_third_guideline"&ndash;&gt;-->
+<!--&lt;!&ndash;                    android:layout_width="0dp"&ndash;&gt;-->
+<!--&lt;!&ndash;                    android:layout_height="wrap_content"&ndash;&gt;-->
+<!--&lt;!&ndash;                    android:layout_weight="1"&ndash;&gt;-->
+<!--&lt;!&ndash;                    android:text="새 모임통장 개설 시 신분증이 필요합니다."&ndash;&gt;-->
+<!--&lt;!&ndash;                    android:textSize="14sp"&ndash;&gt;-->
+<!--&lt;!&ndash;                    android:textColor="#666666"&ndash;&gt;-->
+<!--&lt;!&ndash;                    android:lineSpacingExtra="2dp" />&ndash;&gt;-->
+
+<!--            </LinearLayout>-->
 
         </LinearLayout>
 
@@ -127,13 +134,15 @@
 
     <!-- 연동하기 버튼 -->
     <LinearLayout
+        android:id="@+id/btn_link"
         style="@style/ReferenceCardButton.Link"
         android:layout_marginBottom="8dp">
 
         <ImageView
-            style="@style/ReferenceIcon"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:src="@drawable/connection"
-            android:layout_marginBottom="8dp"
+            android:layout_marginBottom="12dp"
             android:rotation="-45" />
 
         <TextView
@@ -144,12 +153,14 @@
 
     <!-- 개설하기 버튼 -->
     <LinearLayout
+        android:id="@+id/btn_create"
         style="@style/ReferenceCardButton.Create">
 
         <ImageView
-            style="@style/ReferenceIcon"
-            android:src="@drawable/profile_default"
-            android:layout_marginBottom="8dp" />
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/account"
+            android:layout_marginBottom="12dp" />
 
         <TextView
             style="@style/ReferenceLikeCommentText"
