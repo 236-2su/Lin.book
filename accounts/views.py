@@ -35,6 +35,8 @@ from .services import create_account, get_account_balance, get_transaction_histo
         responses={204: OpenApiResponse(description="No Content")},
         tags=["Accounts"],
     ),
+    update=extend_schema(exclude=True),
+    partial_update=extend_schema(exclude=True),
 )
 class ClubAccountsViewSet(viewsets.ModelViewSet):
     queryset = Accounts.objects.select_related("user", "club")

@@ -1,5 +1,16 @@
+"""
+주의!!!
+이 프로젝트는 프로토타입으로서 일반적인 인증 기능이 전혀 구현되어 있지 않음!
+만약 프론트에서 오는 요청을 식별하기 위해서는
+request.user 같은 헤더가 아니라
+명시적으로 request body에 user_id를 받아서 그걸 기반으로 user를 식별해야 함!!
+"""
+
+import calendar
+
 from django.db import transaction
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema, extend_schema_view
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
@@ -7,11 +18,12 @@ from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from accounts.services import transfer
 from ledger.models import Event
 from ledger.serializers import EventSerializer
 from user.models import User
 
-from .models import Club, ClubMember, ClubWelcomePage
+from .models import Club, ClubMember, ClubWelcomePage, Dues
 from .serializers import (
     ClubCreateSerializer,
     ClubLoginRequestSerializer,
@@ -20,6 +32,9 @@ from .serializers import (
     ClubMemberSerializer,
     ClubSerializer,
     ClubWelcomePageSerializer,
+    DuePaySerializer,
+    DuesBatchClaimSerializer,
+    DueSerializer,
 )
 from .services import similar_by_club, similar_by_text
 
@@ -378,3 +393,121 @@ class EventViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         club = get_object_or_404(Club, pk=self.kwargs["club_pk"])
         serializer.save(club=club)
+
+
+from datetime import date
+
+from rest_framework.exceptions import ValidationError
+
+
+@extend_schema_view(
+    batch_claim=extend_schema(
+        summary="회비 일괄 청구",
+        description="해당 월의 회비를 클럽의 모든 활성 멤버에게 일괄 청구합니다.",
+        request=DuesBatchClaimSerializer,
+        responses={201: OpenApiResponse(description="성공적으로 회비가 청구되었습니다.")},
+        tags=["Dues"],
+    ),
+    pay=extend_schema(
+        summary="회비 납부",
+        description="특정 유저가 특정 월의 회비를 납부합니다. 요청자(user_id)의 계좌에서 클럽 계좌로 이체합니다.",
+        request=DuePaySerializer,
+        responses={
+            200: OpenApiResponse(description="이체에 성공했습니다."),
+            400: OpenApiResponse(description="잘못된 요청입니다."),
+            404: OpenApiResponse(description="관련 정보를 찾을 수 없습니다."),
+            500: OpenApiResponse(description="이체 실패"),
+        },
+        tags=["Dues"],
+    ),
+)
+class DueViewSet(viewsets.ViewSet):
+    def get_club(self):
+        return get_object_or_404(Club, pk=self.kwargs["club_pk"])
+
+    @action(detail=False, methods=["post"])
+    @transaction.atomic
+    def batch_claim(self, request, club_pk=None):
+        club = self.get_club()
+        serializer = DuesBatchClaimSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        month = serializer.validated_data["month"]
+        amount = serializer.validated_data["amount"]
+
+        current_year = timezone.now().year
+        last_day = calendar.monthrange(current_year, month)[1]
+        due_to_date = date(current_year, month, last_day)
+
+        club_members = club.clubmember_set.filter(status="active")
+
+        dues_to_create = []
+        members_to_update = []
+        for member in club_members:
+            if not Dues.objects.filter(member=member, due_to__year=current_year, due_to__month=month).exists():
+                dues_to_create.append(
+                    Dues(
+                        member=member,
+                        amount=amount,
+                        description=f"{current_year}년 {month}월 회비",
+                        due_to=due_to_date,
+                    )
+                )
+                member.amount_fee += amount
+                members_to_update.append(member)
+
+        Dues.objects.bulk_create(dues_to_create)
+        ClubMember.objects.bulk_update(members_to_update, ["amount_fee"])
+
+        return Response(
+            {"detail": f"{len(dues_to_create)}명의 멤버에게 회비가 청구되었습니다."}, status=status.HTTP_201_CREATED
+        )
+
+    @action(detail=False, methods=["post"])
+    @transaction.atomic
+    def pay(self, request, club_pk=None):
+        club = self.get_club()
+        serializer = DuePaySerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        user_id = serializer.validated_data["user_id"]
+        month = serializer.validated_data["month"]
+
+        member = get_object_or_404(ClubMember, club=club, user_id=user_id)
+
+        club_account = club.accounts_set.first()
+        if not club_account:
+            raise ValidationError("클럽 계좌가 존재하지 않습니다.")
+
+        current_year = timezone.now().year
+        try:
+            due = Dues.objects.get(member=member, due_to__year=current_year, due_to__month=month, paid_at__isnull=True)
+        except Dues.DoesNotExist:
+            return Response(
+                {"detail": f"{current_year}년 {month}월에 납부할 회비가 없거나 이미 납부했습니다."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        except Dues.MultipleObjectsReturned:
+            return Response(
+                {"detail": f"{current_year}년 {month}월에 중복 청구된 회비가 있습니다. 관리자에게 문의하세요."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            transfer(
+                member=member,
+                to_account_no=club_account.code,
+                amount=due.amount,
+                withdrawal_message=f"{club.name} {month}월 회비",
+                deposit_message=f"{member.user.name} {month}월 회비",
+            )
+        except ValidationError as e:
+            return Response({"detail": f"이체 실패: {e.detail}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        due.paid_at = timezone.now().date()
+        due.save(update_fields=["paid_at"])
+
+        member.amount_fee -= due.amount
+        member.paid_fee += due.amount
+        member.save(update_fields=["amount_fee", "paid_fee"])
+
+        return Response({"detail": "이체에 성공했습니다."}, status=status.HTTP_200_OK)

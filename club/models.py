@@ -60,4 +60,5 @@ class Dues(models.Model):
     member = models.ForeignKey(ClubMember, on_delete=models.CASCADE)
     amount = models.IntegerField()
     due_to = models.DateField()
+    description = models.TextField(blank=True)
     paid_at = models.DateField(null=True, blank=True)

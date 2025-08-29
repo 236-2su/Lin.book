@@ -1,7 +1,7 @@
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
-from .models import Club, ClubMember, ClubWelcomePage
+from .models import Club, ClubMember, ClubWelcomePage, Dues
 
 
 class ClubSerializer(serializers.ModelSerializer):
@@ -58,3 +58,19 @@ class ClubLoginRequestSerializer(serializers.Serializer):
 
 class ClubLoginResponseSerializer(serializers.Serializer):
     pk = serializers.IntegerField()
+
+
+class DueSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Dues
+        read_only_fields = ["description", "paid_at", "due_to", "amount", "member"]
+
+
+class DuesBatchClaimSerializer(serializers.Serializer):
+    month = serializers.IntegerField(min_value=1, max_value=12, help_text="회비를 청구할 월")
+    amount = serializers.IntegerField(min_value=1, help_text="청구할 회비 금액")
+
+
+class DuePaySerializer(serializers.Serializer):
+    user_id = serializers.IntegerField(help_text="회비를 납부하는 유저의 ID")
+    month = serializers.IntegerField(min_value=1, max_value=12, help_text="납부 대상 월")

@@ -12,7 +12,14 @@ from ledger.views import (
     ReceiptViewSet,
 )
 
-from .views import ClubMemberViewSet, ClubViewSet, ClubWelcomePageViewSet, SimilarClubsById, SimilarClubsByQuery
+from .views import (
+    ClubMemberViewSet,
+    ClubViewSet,
+    ClubWelcomePageViewSet,
+    DueViewSet,
+    SimilarClubsById,
+    SimilarClubsByQuery,
+)
 
 router = routers.SimpleRouter()
 router.lookup_value_regex = r"\d+"
@@ -55,6 +62,9 @@ events_router.register(r"events", EventViewSet, basename="club-events")
 accounts_router = nested_routers.NestedSimpleRouter(router, r"", lookup="club")
 accounts_router.register(r"accounts", ClubAccountsViewSet, basename="club-accounts")
 
+dues_router = nested_routers.NestedSimpleRouter(router, r"", lookup="club")
+dues_router.register(r"dues", DueViewSet, basename="club-dues")
+
 
 urlpatterns = [
     path("similar/", SimilarClubsByQuery.as_view(), name="club-similar-by-query"),
@@ -70,4 +80,5 @@ urlpatterns = [
     path("", include(welcome_router.urls)),
     path("", include(events_router.urls)),
     path("", include(accounts_router.urls)),
+    path("", include(dues_router.urls)),
 ]

@@ -4,6 +4,7 @@ from datetime import date, datetime, timedelta
 import requests
 from rest_framework.exceptions import ValidationError
 
+from club.models import ClubMember
 from user.models import User
 
 
@@ -29,7 +30,7 @@ def _make_request(url, data):
         return response.json()
     except requests.exceptions.RequestException as e:
         # It's good practice to log the error here
-        raise ValidationError({"error": f"External API request failed: {str(e)}"})
+        raise ValidationError({"error": f"External API request failed: {str(e), response.json()}"})
 
 
 def _build_header(api_name, user_key):
@@ -103,8 +104,8 @@ def get_account_balance(user: User, account_no: str):
 def get_transaction_history(
     user: User,
     account_no: str,
-    start_date: str = None,
-    end_date: str = None,
+    start_date: str | None = None,
+    end_date: str | None = None,
     transaction_type: str = "A",
     order_by: str = "DESC",
 ):
@@ -125,8 +126,48 @@ def get_transaction_history(
         "transactionType": transaction_type,
         "orderByType": order_by,
     }
-    print(f"요청 진행... url: {url}")
-    print(data)
 
     payload = _make_request(url, data)
     return payload.get("REC", {})
+
+
+def transfer(member: ClubMember, to_account_no: str, amount: int, withdrawal_message: str, deposit_message: str):
+    user = member.user
+    user_account = user.accounts_set.first()
+    if not user_account:
+        raise ValidationError("사용자에게 계좌가 없습니다.")
+
+    api_name = "updateDemandDepositAccountTransfer"
+    url = "https://finopenapi.ssafy.io/ssafy/api/v1/edu/demandDeposit/updateDemandDepositAccountTransfer"
+
+    data = {
+        "Header": _build_header(api_name, member.user.user_key),
+        "depositAccountNo": to_account_no,
+        "depositTransactionSummary": deposit_message,
+        "transactionBalance": amount,
+        "withdrawalAccountNo": user_account.code,
+        "withdrawalTransactionSummary": withdrawal_message,
+    }
+    print(f"request for transfer, data:{data}")
+    payload = _make_request(url, data)
+    return payload
+
+
+def deposit(user: User, amount: int, summary: str = "입금"):
+    """
+    Calls the external API to deposit into a user's account.
+    """
+    user_account = user.accounts_set.first()
+    if not user_account:
+        raise ValidationError(f"User {user.email} does not have an account.")
+
+    api_name = "updateDemandDepositAccountDeposit"
+    url = "https://finopenapi.ssafy.io/ssafy/api/v1/edu/demandDeposit/updateDemandDepositAccountDeposit"
+    data = {
+        "Header": _build_header(api_name, user.user_key),
+        "accountNo": user_account.code,
+        "transactionBalance": amount,
+        "transactionSummary": summary,
+    }
+
+    return _make_request(url, data)
