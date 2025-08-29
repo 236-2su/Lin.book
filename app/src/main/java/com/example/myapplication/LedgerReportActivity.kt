@@ -297,6 +297,12 @@ class LedgerReportActivity : BaseActivity() {
                     Log.d("LedgerReportActivity", "${currentYear}년 연간 리포트 수: ${yearlyReports.size}")
                     
                     yearlyReports.forEach { backendReport ->
+                        // 자동 생성된 버전 리포트는 제외 (ver_ 포함)
+                        if (backendReport.title.contains("_ver_") || backendReport.title.contains("ver_")) {
+                            Log.d("LedgerReportActivity", "❌ 자동 버전 리포트 제외: ${backendReport.title}")
+                            return@forEach
+                        }
+                        
                         Log.d("LedgerReportActivity", "🔍 백엔드 리포트 분석 중...")
                         Log.d("LedgerReportActivity", "   제목: ${backendReport.title}")
                         Log.d("LedgerReportActivity", "   ID: ${backendReport.id}")
@@ -953,6 +959,12 @@ class LedgerReportActivity : BaseActivity() {
                         Log.d("LedgerReportActivity", "✅ ${year}년 백엔드 리포트 수: ${reports.size}")
                         
                         reports.forEach { backendReport ->
+                            // 자동 생성된 버전 리포트는 제외 (ver_ 포함)
+                            if (backendReport.title.contains("_ver_") || backendReport.title.contains("ver_")) {
+                                Log.d("LedgerReportActivity", "❌ 자동 버전 리포트 제외: ${backendReport.title}")
+                                return@forEach
+                            }
+                            
                             Log.d("LedgerReportActivity", "📝 백엔드 리포트: ${backendReport.title}")
                             
                             // 백엔드 리포트를 프론트엔드 형식으로 변환
@@ -1062,15 +1074,32 @@ class LedgerReportActivity : BaseActivity() {
             // 기존 리포트들을 Set으로 변환
             val allReports = mutableSetOf<String>()
             
-            // 1. 기존 로컬 리포트 추가
+            // 1. 기존 로컬 리포트 추가 (버전 리포트 제외)
             for (i in 0 until existingReportsArray.length()) {
-                allReports.add(existingReportsArray.getJSONObject(i).toString())
+                val reportObj = existingReportsArray.getJSONObject(i)
+                val reportTitle = reportObj.optString("title", "")
+                
+                // 자동 생성된 버전 리포트는 제외 (ver_ 포함)
+                if (reportTitle.contains("_ver_") || reportTitle.contains("ver_")) {
+                    Log.d("LedgerReportActivity", "❌ 로컬 자동 버전 리포트 제외: $reportTitle")
+                    continue
+                }
+                
+                allReports.add(reportObj.toString())
             }
             
             // 2. 백엔드 리포트 추가 (중복 체크)
             backendReports.forEach { backendReport ->
                 try {
                     val backendReportObj = JSONObject(backendReport)
+                    val reportTitle = backendReportObj.optString("title", "")
+                    
+                    // 자동 생성된 버전 리포트는 제외 (ver_ 포함)
+                    if (reportTitle.contains("_ver_") || reportTitle.contains("ver_")) {
+                        Log.d("LedgerReportActivity", "❌ 자동 버전 리포트 제외: $reportTitle")
+                        return@forEach
+                    }
+                    
                     val backendId = backendReportObj.optInt("backend_id", -1)
                     
                     // 중복 체크: 같은 backend_id가 이미 있는지 확인

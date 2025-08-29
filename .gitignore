@@ -1,15 +1,286 @@
-*.iml
+# =================================================================
+# Android Frontend .gitignore
+# Updated for modern Android development (2025)
+# =================================================================
+
+# =================================================================
+# BUILT APPLICATION FILES
+# =================================================================
+*.apk
+*.ap_
+*.aab
+
+# Files for the ART/Dalvik VM
+*.dex
+
+# Java class files
+*.class
+
+# Generated files
+bin/
+gen/
+out/
+#  Uncomment the following line in case you need and you don't have the release build type files in your app
+# release/
+
+# =================================================================
+# GRADLE FILES
+# =================================================================
 .gradle
-/local.properties
+.gradle/
+/build
+/captures
+build/
+gradle-app.setting
+!gradle-wrapper.jar
+
+# =================================================================
+# LOCAL CONFIGURATION FILES
+# =================================================================
+# Local configuration file (sdk path, etc)
+local.properties
+
+# =================================================================
+# ANDROID STUDIO / INTELLIJ
+# =================================================================
+*.iml
+.idea/
 /.idea/caches
 /.idea/libraries
 /.idea/modules.xml
 /.idea/workspace.xml
 /.idea/navEditor.xml
 /.idea/assetWizardSettings.xml
-.DS_Store
-/build
-/captures
+/.idea/deploymentTargetDropDown.xml
+/.idea/render.experimental.xml
+/.idea/misc.xml
+/.idea/runConfigurations.xml
+/.idea/compiler.xml
+/.idea/gradle.xml
+/.idea/jarRepositories.xml
+/.idea/vcs.xml
+
+# Android Studio 3 in .gitignore file.
+.idea/caches/
+.idea/modules.xml
+# Comment next line if keeping position of elements in Navigation Editor is relevant for you
+.idea/navEditor.xml
+
+# =================================================================
+# KEYSTORE FILES
+# =================================================================
+*.jks
+*.keystore
+# Google Services (e.g. APIs or Firebase)
+google-services.json
+debug.keystore
+release.keystore
+key.properties
+
+# =================================================================
+# EXTERNAL NATIVE BUILD
+# =================================================================
 .externalNativeBuild
-.cxx
-local.properties
+.cxx/
+cmake-build-*/
+
+# =================================================================
+# ANDROID PROFILING
+# =================================================================
+*.hprof
+
+# =================================================================
+# FASTLANE
+# =================================================================
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots
+fastlane/test_output
+fastlane/readme.md
+fastlane/Fastfile.lock
+
+# =================================================================
+# VERSION CONTROL
+# =================================================================
+.svn/
+.hg/
+
+# =================================================================
+# OPERATING SYSTEM FILES
+# =================================================================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Icon must end with two \r
+Icon
+
+
+# Thumbnails
+._*
+
+# Files that might appear in the root of a volume
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Directories potentially created on remote AFP share
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# =================================================================
+# LOG FILES
+# =================================================================
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# =================================================================
+# TESTING
+# =================================================================
+# Unit test reports
+TEST-*.xml
+test-results.xml
+junit.xml
+/androidTest/
+/test/
+
+# Espresso
+espresso-reports/
+
+# Coverage reports
+coverage/
+*.exec
+jacoco.exec
+
+# =================================================================
+# LINT RESULTS
+# =================================================================
+lint-results*.html
+lint-results*.xml
+
+# =================================================================
+# MEMORY CAPTURES
+# =================================================================
+captures/
+
+# =================================================================
+# EMULATOR AND DEVICE LOGS
+# =================================================================
+device.log
+emulator.log
+
+# =================================================================
+# PROGUARD/R8
+# =================================================================
+proguard/
+# Add this line if you use Proguard and want to include the mapping file
+# proguard-mapping.txt
+
+# =================================================================
+# NAVIGATION FILES (Android Studio)
+# =================================================================
+.navigation/
+
+# =================================================================
+# MISC GENERATED FILES
+# =================================================================
+# Android Profiling
+*.hprof
+
+# ARCore (Google Augmented Reality SDK)
+sceneformarSceneform.log
+
+# Google Mobile Ads SDK
+GoogleMobileAds.log
+
+# =================================================================
+# DEPENDENCY LOCK FILES
+# =================================================================
+*.lock
+
+# =================================================================
+# BACKUP FILES
+# =================================================================
+*.backup
+*.bak
+*~
+*.swp
+*.swo
+
+# =================================================================
+# TEMP FILES
+# =================================================================
+temp/
+tmp/
+*.tmp
+*.temp
+
+# =================================================================
+# CUSTOM / PROJECT SPECIFIC
+# =================================================================
+# AI Report temp files
+ai_reports_temp/
+
+# Custom screenshots
+screenshots/
+
+# Debug APKs (you might want to include release APKs)
+*-debug.apk
+
+# Firebase
+firebase-debug.log
+firebase-debug.*.log
+
+# Crashlytics
+com_crashlytics_export_strings.xml
+crashlytics.properties
+crashlytics-build.properties
+fabric.properties
+
+# =================================================================
+# KOTLIN
+# =================================================================
+*.kt.bak
+
+# =================================================================
+# GRADLE DAEMON
+# =================================================================
+.gradle/daemon/
+.gradle/native/
+
+# =================================================================
+# BUILD VARIANTS
+# =================================================================
+/app/release/
+/app/debug/
+
+# =================================================================
+# CUSTOM RULES (Add your project-specific rules here)
+# =================================================================
+# Example: Custom library files
+# libs/custom-library.jar
+
+# Example: Generated asset files
+# assets/generated/

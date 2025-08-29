@@ -431,4 +431,6 @@ interface ApiService {
         @Path("club_pk") clubId: Int,
         @Path("id") memberId: Int
     ): Call<okhttp3.ResponseBody>
+
+    // Note: getSimilarClubsByClub method already exists above with SimilarClubItem return type
 }
