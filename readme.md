@@ -152,6 +152,12 @@ python manage.py runserver 0.0.0.0:8000
   ```
 
 ---
+## 사욯가능 계정 ##
+- 이메일만 있으면 로그인 가능
+1. 동아리 리더 계정
+  day2201@naver.com
+2. 일반 학생 
+  user38@example.com
 
 ## 자주 묻는 질문(FAQ)
 
@@ -173,3 +179,4 @@ A. 다른 포트를 사용하세요. 예: `runserver 0.0.0.0:8080` 또는 Docker
 A. `psycopg[binary]`를 설치하고 `DATABASES` 설정을 PostgreSQL로 바꾸세요. Docker를 쓴다면 `docker-compose`로 DB 서비스를 함께 올리는 것을 권장합니다.
 
 ---
+
