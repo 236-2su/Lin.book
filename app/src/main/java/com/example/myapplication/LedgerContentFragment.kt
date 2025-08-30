@@ -125,7 +125,8 @@ class LedgerContentFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         
         try {
-            (activity as? BaseActivity)?.setAppTitle("장부 상세내역")
+            // 동아리 정보를 가져와서 제목 설정
+            fetchClubNameAndSetTitle()
             
             // 디버깅: clubId와 ledgerId 값 확인
             Log.d("LedgerContentFragment", "onViewCreated - clubId: $clubId, ledgerId: $ledgerId")
@@ -362,7 +363,8 @@ class LedgerContentFragment : Fragment() {
          itemTouchHelper.attachToRecyclerView(recyclerView)
      }
  
-     private fun showDeleteConfirmationDialog(position: Int) {
+
+    private fun showDeleteConfirmationDialog(position: Int) {
          androidx.appcompat.app.AlertDialog.Builder(requireContext())
              .setTitle("거래 내역 삭제")
              .setMessage("이 거래 내역을 삭제하시겠습니까?")
@@ -625,6 +627,39 @@ class LedgerContentFragment : Fragment() {
             }
         } catch (e: Exception) {
             Log.e("LedgerContentFragment", "상단 네비게이션 버튼 상태 설정 중 오류 발생", e)
+        }
+    }
+
+    private fun fetchClubNameAndSetTitle() {
+        if (clubId <= 0) {
+            Log.e("LedgerContentFragment", "유효하지 않은 clubId: $clubId")
+            (activity as? BaseActivity)?.setAppTitle("장부 상세내역")
+            return
+        }
+
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val call = ApiClient.getApiService().getClubDetail(clubId)
+                val response = call.execute()
+                
+                if (response.isSuccessful && response.body() != null) {
+                    val club = response.body()!!
+                    CoroutineScope(Dispatchers.Main).launch {
+                        (activity as? BaseActivity)?.setAppTitle(club.name)
+                        Log.d("LedgerContentFragment", "동아리 이름으로 제목 설정 완료: ${club.name}")
+                    }
+                } else {
+                    Log.e("LedgerContentFragment", "동아리 정보 조회 실패: ${response.code()}")
+                    CoroutineScope(Dispatchers.Main).launch {
+                        (activity as? BaseActivity)?.setAppTitle("장부 상세내역")
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("LedgerContentFragment", "동아리 정보 조회 중 오류 발생", e)
+                CoroutineScope(Dispatchers.Main).launch {
+                    (activity as? BaseActivity)?.setAppTitle("장부 상세내역")
+                }
+            }
         }
     }
 }
