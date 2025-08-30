@@ -2310,6 +2310,10 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
         return "${String.format(Locale.US, "%,d", amount)}원"
     }
     
+    private fun formatPlainNumber(number: Int): String {
+        return number.toString()
+    }
+    
     private fun calculateExpenseRatio(income: Int, expense: Int): Int {
         return if (income > 0) ((expense.toDouble() / income) * 100).roundToInt() else 0
     }
@@ -5270,8 +5274,8 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
         return buildString {
             appendLine("📊 SSAFY 앱메이커 3년간 실데이터 완전 분석")
             appendLine("=".repeat(26))
-            appendLine("📅 분석기간: 2023년 ~ 2025년 (3년)")
-            appendLine("📡 실시간 파싱: ${data2023.events.size + data2024.events.size + data2025.events.size}개 이벤트 데이터")
+            appendLine(" 분석기간: 2023년 ~ 2025년 (3년)")
+            appendLine(" 실시간 파싱: ${data2023.events.size + data2024.events.size + data2025.events.size}개 이벤트 데이터")
             appendLine()
             
             // 1. 연도별 재정 현황 비교
@@ -5279,16 +5283,17 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
 
             val yearDataList = listOf(data2023, data2024, data2025).filter { it.year > 0 }
             yearDataList.forEach { yearData ->
-                appendLine("📅 ${yearData.year}년 재정 현황")
-                appendLine("  📈 총 수입: ${formatAmount(yearData.income.toLong())}")
-                appendLine("  📉 총 지출: ${formatAmount(yearData.expense.toLong())}")
-                appendLine("  💎 순수익: ${formatAmount(yearData.net.toLong())} ${if (yearData.net >= 0) "🟢" else "🔴"}")
+                appendLine(" ${yearData.year}년 재정 현황")
+                appendLine("   총 수입: ${formatAmount(yearData.income.toLong())}")
+                appendLine("   총 지출: ${formatAmount(yearData.expense.toLong())}")
+                appendLine("   순수익: ${formatAmount(yearData.net.toLong())} ${if (yearData.net >= 0) "🟢" else "🔴"}")
                 
                 // 거래 유형별 상위 항목 표시
                 val topTypes = yearData.byType.entries
                     .sortedByDescending { it.value.expense }
                     .take(5)
-                
+                appendLine()
+                appendLine("=".repeat(26))
                 if (topTypes.isNotEmpty()) {
                     appendLine("  🏷️ 주요 지출 항목:")
                     topTypes.forEach { (typeName, typeData) ->
@@ -5342,23 +5347,25 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
             appendLine()
             
             // 이벤트 그룹별 3년간 비교 분석
-            appendLine("🎪 이벤트 그룹별 3년간 추이 분석:")
+            appendLine(" 이벤트 그룹별 3년간 추이 분석:")
             appendLine()
             
             eventGroups.entries.sortedByDescending { (_, events) ->
                 // 최신 데이터 기준으로 정렬 (2025 > 2024 > 2023 순)
                 events.values.maxOfOrNull { it.expense } ?: 0
+
             }.forEach { (eventName, yearlyData) ->
-                appendLine("🎪 **${safeDisplayEventName(eventName)}** (${yearlyData.size}년간 진행)")
+                appendLine(" **${safeDisplayEventName(eventName)}** (${yearlyData.size}년간 진행)")
                 
                 // 연도별 데이터 표시
                 listOf(2023, 2024, 2025).forEach { year ->
                     val eventData = yearlyData[year]
                     if (eventData != null) {
-                        appendLine("  📅 ${year}년: 수입 ${formatAmount(eventData.income.toLong())}, 지출 ${formatAmount(eventData.expense.toLong())}, 순액 ${formatAmount(eventData.net.toLong())} ${if (eventData.net >= 0) "🟢" else "🔴"}")
+                        appendLine("  ${year}년 \n 수입 ${formatAmount(eventData.income.toLong())}, 지출 ${formatAmount(eventData.expense.toLong())}, 순액 ${formatAmount(eventData.net.toLong())} ")
                     } else {
-                        appendLine("  📅 ${year}년: 미진행 ❌")
+                        appendLine("  ${year}년: 미진행 ❌")
                     }
+
                 }
                 
                 // 이벤트 그룹 트렌드 분석
@@ -5368,7 +5375,8 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
                 // 투자 효율성 평가
                 val efficiency = analyzeEventGroupEfficiency(yearlyData)
                 appendLine("  💡 **효율성**: $efficiency")
-                
+                appendLine("=".repeat(26))
+                appendLine()
                 appendLine()
             }
             
@@ -5454,48 +5462,9 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
             }
             appendLine()
             
-            // 전략적 권고사항 (그룹 기반)
-            appendLine("💡 전략적 권고사항 (이벤트 그룹 기준):")
-            
-            if (newEventGroups.size > discontinuedEventGroups.size) {
-                appendLine("  1. **이벤트 다양화 성공** - 신규 이벤트 그룹 ${newEventGroups.size}개 도입")
-            } else if (discontinuedEventGroups.size > newEventGroups.size) {
-                appendLine("  1. **선택과 집중 전략** - ${discontinuedEventGroups.size}개 이벤트 그룹 정리")
-            }
-            
-            if (continuousEventGroups.isNotEmpty()) {
-                appendLine("  2. **안정적 핵심 이벤트 운영** - ${continuousEventGroups.size}개 그룹 3년 연속 유지 (브랜드 일관성)")
-            }
-            
-            // 가장 성공적인 이벤트 그룹 추천
-            val mostSuccessfulGroup = eventGroups.entries.maxByOrNull { (_, yearlyData) ->
-                yearlyData.values.minOfOrNull { it.net } ?: Int.MIN_VALUE
-            }
-            if (mostSuccessfulGroup != null) {
-                appendLine("  3. **최고 성과 이벤트**: ${mostSuccessfulGroup.key} - 지속 확대 권장")
-            }
-            
-            // 개선이 필요한 이벤트 그룹 식별
-            val worstPerformingGroup = eventGroups.entries.minByOrNull { (_, yearlyData) ->
-                yearlyData.values.minOfOrNull { it.net } ?: Int.MAX_VALUE
-            }
-            if (worstPerformingGroup != null) {
-                appendLine("  4. **개선 필요 이벤트**: ${worstPerformingGroup.key} - 비용 효율화 검토")
-            }
-            
-            if (data2025.net > 0) {
-                appendLine("  5. **현재 흑자 상태** - 성공 이벤트 확대 및 품질 개선 기회")
-            } else {
-                appendLine("  5. **적자 해소 방안** - 고비용 이벤트 그룹 효율화 우선 추진")
-            }
-            
-            appendLine("  6. **그룹화 분석 기반** - 이벤트명 정규화로 정확한 연도별 비교 달성")
-            
-            appendLine()
+
             appendLine("📊 분석 완료 시각: ${java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.getDefault()).format(java.util.Date())}")
             appendLine("━".repeat(26))
-            appendLine("🔍 본 분석은 실제 API (/report/clubs/{club_pk}/ledgers/{ledger_pk}/reports/yearly/)에서")
-            appendLine("   수집한 ${data2023.events.size + data2024.events.size + data2025.events.size}개 이벤트 데이터를 완전 분석한 결과입니다.")
         }
     }
     
@@ -5718,7 +5687,7 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
                         appendLine("  🎯 효율성 평가: ${evaluateEventEfficiency(currentEvent, similar2024, similar2023)}")
                         appendLine("========================================")
                         appendLine()
-                    }
+                        appendLine()                    }
                 } else {
                     appendLine("⚠️ 2025년 이벤트 데이터가 API에서 발견되지 않았습니다.")
                     appendLine()
