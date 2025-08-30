@@ -62,3 +62,4 @@ class Dues(models.Model):
     due_to = models.DateField()
     description = models.TextField(blank=True)
     paid_at = models.DateField(null=True, blank=True)
+    club = models.ForeignKey(Club, on_delete=models.CASCADE, null=True, blank=True)

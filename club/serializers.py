@@ -6,10 +6,14 @@ from .models import Club, ClubMember, ClubWelcomePage, Dues
 
 class ClubSerializer(serializers.ModelSerializer):
     image = serializers.ImageField(use_url=True, required=False)
+    due = serializers.SerializerMethodField()
 
     class Meta:
         model = Club
         fields = "__all__"
+
+    def get_due(self, obj):
+        return obj.dues_set.first()
 
 
 class ClubWelcomePageSerializer(serializers.ModelSerializer):
