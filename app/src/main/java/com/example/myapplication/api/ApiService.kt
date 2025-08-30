@@ -455,6 +455,14 @@ interface ApiService {
         @Path("transaction_id") transactionId: Int
     ): TransactionDetailResponse
 
+    // Receipt API
+    @GET("club/{club_pk}/ledger/{ledger_pk}/receipts/{receipt_id}/")
+    suspend fun getReceiptDetail(
+        @Path("club_pk") clubId: Int,
+        @Path("ledger_pk") ledgerId: Int,
+        @Path("receipt_id") receiptId: Int
+    ): ReceiptResponse
+
     @GET("club/{club_pk}/ledger/{ledger_pk}/transactions/")
     suspend fun getTransactionsForLedger(
         @Path("club_pk") clubId: Int,

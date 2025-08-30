@@ -86,6 +86,19 @@ class ClubForumBoardListActivity : AppCompatActivity() {
             // 이미 자유게시판 화면이므로 아무것도 하지 않음
         }
 
+        // 공개장부 버튼
+        findViewById<TextView>(R.id.btn_public_account).setOnClickListener {
+            val clubPk = intent?.getIntExtra(EXTRA_CLUB_PK, -1) ?: -1
+            // MainActivity로 이동하여 LedgerContentFragment 표시 (root_page와 동일한 과정)
+            val intent = Intent(this, MainActivity::class.java)
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            intent.putExtra("show_public_ledger", true)
+            intent.putExtra("club_pk", clubPk)
+            // ledger_pk는 MainActivity에서 동아리 ID를 기반으로 조회하도록 수정
+            startActivity(intent)
+            finish()
+        }
+
         // 모임통장 버튼 → 통장 내역 화면
         findViewById<TextView>(R.id.btn_meeting_account)?.setOnClickListener {
             val clubPk = intent?.getIntExtra(EXTRA_CLUB_PK, -1) ?: -1

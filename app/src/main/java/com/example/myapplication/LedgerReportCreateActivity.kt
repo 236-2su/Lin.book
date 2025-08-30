@@ -940,7 +940,6 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
         val reportBuilder = StringBuilder()
         
         reportBuilder.append("🤖 Gemini AI 재무 조언 분석 리포트\n")
-        reportBuilder.append("=====================================\n")
         reportBuilder.append("🧠 AI 엔진: Google Gemini 2.5 Pro\n")
         reportBuilder.append("🆔 동아리ID: $clubId\n")
         reportBuilder.append("📅 분석 년도: ${currentYear}년\n")
@@ -948,39 +947,32 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
         
         // 전체 평가
         reportBuilder.append("📊 AI 종합 평가\n")
-        reportBuilder.append("─────────────────────────────────────\n")
         reportBuilder.append("${adviceData.overall}\n\n")
         
         // 월별 동향 분석
         reportBuilder.append("📅 월별 동향 AI 분석\n")
-        reportBuilder.append("─────────────────────────────────────\n")
         reportBuilder.append("${adviceData.by_month}\n\n")
         
         // 수입원 분석
         reportBuilder.append("💰 수입원 AI 분석\n")
-        reportBuilder.append("─────────────────────────────────────\n")
         reportBuilder.append("${adviceData.by_income}\n\n")
         
         // AI 맞춤형 조언
         reportBuilder.append("💡 Gemini AI 맞춤형 조언\n")
-        reportBuilder.append("─────────────────────────────────────\n")
         adviceData.advices.forEachIndexed { index, advice ->
             reportBuilder.append("${index + 1}. $advice\n\n")
         }
         
         // 추가 AI 인사이트
         reportBuilder.append("🎯 AI 추가 인사이트\n")
-        reportBuilder.append("─────────────────────────────────────\n")
         reportBuilder.append("🔍 분석 신뢰도: ${calculateAdviceReliability(adviceData)}%\n")
         reportBuilder.append("🚀 실행 우선순위: ${getPriorityAdvice(adviceData.advices)}\n")
         reportBuilder.append("📈 예상 개선 효과: ${getExpectedImprovement(adviceData)}\n\n")
         
-        reportBuilder.append("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
         reportBuilder.append("🤖 이 조언은 Google Gemini AI가 실제 재정 데이터를 분석하여 생성했습니다\n")
         reportBuilder.append("💡 정기적인 AI 분석으로 더 정확한 인사이트를 받아보세요\n")
         reportBuilder.append("📞 문의: Hey-Bi AI 지원팀\n")
-        reportBuilder.append("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
-        
+
         return reportBuilder.toString()
     }
     
@@ -1034,14 +1026,12 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
         
         // 헤더
         reportBuilder.append("🤖 AI 연간 재정분석 리포트\n")
-        reportBuilder.append("=====================================\n")
         reportBuilder.append("📅 분석기간: ${reportData.year}년 전체\n")
         reportBuilder.append("🏢 장부ID: ${reportData.ledger_id}\n")
         reportBuilder.append("🆔 동아리ID: ${reportData.club_id}\n\n")
         
         // 종합 요약
         reportBuilder.append("💰 연간 재정 요약\n")
-        reportBuilder.append("─────────────────────────────────────\n")
         reportBuilder.append("📈 총 수입: ${formatPerfectAmount(income)}\n")
         reportBuilder.append("📉 총 지출: ${formatPerfectAmount(expense)}\n")
         reportBuilder.append("💎 순 이익: ${formatPerfectAmount(net)} ${getAdvancedNetEmoji(net)}\n")
@@ -1052,8 +1042,7 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
         // 항목별 분석 (백엔드 딕셔너리 형태 처리)
         if (reportData.by_type.isNotEmpty()) {
             reportBuilder.append("🏷️ 항목별 상세분석\n")
-            reportBuilder.append("─────────────────────────────────────\n")
-            
+
             val sortedTypes = reportData.by_type.entries.sortedByDescending { entry ->
                 val typeData = entry.value
                 (typeData["income"] ?: 0) - (typeData["expense"] ?: 0)
@@ -1075,8 +1064,7 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
         // 월별 추이 분석
         if (reportData.by_month.isNotEmpty()) {
             reportBuilder.append("📅 월별 추이 분석\n")
-            reportBuilder.append("─────────────────────────────────────\n")
-            
+
             val monthlyData = mutableListOf<Triple<Int, Int, Int>>() // month, income, expense
             
             for (monthKey in reportData.by_month.keys.sorted()) {
@@ -1104,7 +1092,6 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
         
         // AI 분석 결론
         reportBuilder.append("🤖 AI 종합 분석\n")
-        reportBuilder.append("─────────────────────────────────────\n")
         reportBuilder.append("${getYearlyAnalysisInsight(income, expense, net)}\n\n")
         
         reportBuilder.append("📊 리포트 생성 완료: ${SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.getDefault()).format(java.util.Date())}\n")
@@ -1117,15 +1104,13 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
         val reportBuilder = StringBuilder()
         
         reportBuilder.append("📈 AI 3년간 연도별 비교 분석 리포트\n")
-        reportBuilder.append("=====================================\n")
         reportBuilder.append("📅 분석기간: ${years.first()}년 ~ ${years.last()}년 (3년간)\n")
         reportBuilder.append("🆔 동아리ID: $clubId\n")
         reportBuilder.append("🤖 분석엔진: Hey-Bi Advanced Comparative Analytics\n\n")
         
         // 연도별 요약
         reportBuilder.append("💰 연도별 재정 요약\n")
-        reportBuilder.append("─────────────────────────────────────\n")
-        
+
         val yearData = mutableMapOf<Int, Triple<Int, Int, Int>>() // year to (income, expense, net)
         
         years.forEach { year ->
@@ -1148,8 +1133,7 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
         // 성장 추이 분석
         if (yearData.size >= 2) {
             reportBuilder.append("📈 성장 추이 분석\n")
-            reportBuilder.append("─────────────────────────────────────\n")
-            
+
             val sortedYears = yearData.keys.sorted()
             for (i in 1 until sortedYears.size) {
                 val prevYear = sortedYears[i-1]
@@ -1170,8 +1154,7 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
         
         // 이벤트 예산 분석
         reportBuilder.append("🎪 이벤트 예산 분석 및 예측\n")
-        reportBuilder.append("─────────────────────────────────────\n")
-        
+
         val totalEventBudgets = mutableMapOf<String, MutableList<Int>>()
         val completedEvents = mutableListOf<String>()
         
@@ -1195,7 +1178,7 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
                 val maxBudget = budgets.maxOrNull() ?: 0
                 val minBudget = budgets.minOrNull() ?: 0
                 
-                reportBuilder.append("   🎯 $eventName\n")
+                reportBuilder.append("   🎯 ${safeDisplayEventName(eventName)}\n")
                 reportBuilder.append("      평균 예산: ${formatPerfectAmount(avgBudget)}\n")
                 reportBuilder.append("      최대/최소: ${formatPerfectAmount(maxBudget)} / ${formatPerfectAmount(minBudget)}\n")
                 reportBuilder.append("      실행 횟수: ${budgets.size}회\n\n")
@@ -1210,7 +1193,6 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
         
         // AI 종합 분석
         reportBuilder.append("🤖 AI 3년간 종합 분석\n")
-        reportBuilder.append("─────────────────────────────────────\n")
         reportBuilder.append("${get3YearsAnalysisInsight(yearData)}\n\n")
         
         reportBuilder.append("📊 리포트 생성 완료: ${SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.getDefault()).format(java.util.Date())}\n")
@@ -1223,7 +1205,6 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
         val reportBuilder = StringBuilder()
         
         reportBuilder.append("🏆 AI 유사 동아리 비교 분석 리포트\n")
-        reportBuilder.append("=====================================\n")
         reportBuilder.append("🔍 분석 대상: ${reportData.similar_club_reports.size}개 유사 동아리\n")
         reportBuilder.append("🤖 분석엔진: Hey-Bi Similarity Matching v4.0\n\n")
         
@@ -1233,14 +1214,12 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
         val ourNet = ourIncome - ourExpense
         
         reportBuilder.append("🏢 우리 동아리 현황\n")
-        reportBuilder.append("─────────────────────────────────────\n")
         reportBuilder.append("📈 수입: ${formatPerfectAmount(ourIncome)}\n")
         reportBuilder.append("📉 지출: ${formatPerfectAmount(ourExpense)}\n")
         reportBuilder.append("💎 순이익: ${formatPerfectAmount(ourNet)} ${getAdvancedNetEmoji(ourNet)}\n\n")
         
         reportBuilder.append("🔍 유사 동아리 비교 분석\n")
-        reportBuilder.append("─────────────────────────────────────\n")
-        
+
         reportData.similar_club_reports.forEachIndexed { index, similarReport ->
             val similarIncome = similarReport.summary["income"] ?: 0
             val similarExpense = similarReport.summary["expense"] ?: 0
@@ -1260,7 +1239,6 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
         
         // 경쟁력 분석
         reportBuilder.append("🎯 경쟁력 분석\n")
-        reportBuilder.append("─────────────────────────────────────\n")
         reportBuilder.append("${getCompetitivenessAnalysis(ourReport, reportData.similar_club_reports)}\n\n")
         
         reportBuilder.append("📊 리포트 생성 완료: ${SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.getDefault()).format(java.util.Date())}\n")
@@ -1272,7 +1250,6 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
         val reportBuilder = StringBuilder()
         
         reportBuilder.append("🔍 유사 동아리 비교 분석 리포트 (상세정보 포함)\n")
-        reportBuilder.append("=====================================\n")
         reportBuilder.append("🔍 분석 대상: ${reportData.similar_club_reports.size}개 유사 동아리\n")
         reportBuilder.append("📅 분석 기간: ${currentYear}년\n")
         reportBuilder.append("🤖 분석엔진: Hey-Bi Enhanced Similarity Matching v5.0\n\n")
@@ -1284,7 +1261,6 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
         val ourClubDetail = clubDetailsMap[ourReport.club_id]
         
         reportBuilder.append("🏢 우리 동아리 현황\n")
-        reportBuilder.append("─────────────────────────────────────\n")
         if (ourClubDetail != null) {
             reportBuilder.append("📛 동아리명: ${ourClubDetail.clubDetail.name}\n")
             reportBuilder.append("🏫 소속: ${ourClubDetail.clubDetail.department}\n")
@@ -1304,8 +1280,7 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
         reportBuilder.append("\n")
         
         reportBuilder.append("🔍 유사 동아리 상세 비교\n")
-        reportBuilder.append("─────────────────────────────────────\n")
-        
+
         reportData.similar_club_reports.forEachIndexed { index, similarReport ->
             val similarIncome = similarReport.summary["income"] ?: 0
             val similarExpense = similarReport.summary["expense"] ?: 0
@@ -1365,7 +1340,6 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
         
         // 종합 경쟁력 분석 (멤버수 포함)
         reportBuilder.append("🎯 종합 경쟁력 분석\n")
-        reportBuilder.append("─────────────────────────────────────\n")
         reportBuilder.append("${getCompetitivenessAnalysisWithMembers(ourReport, reportData.similar_club_reports, clubDetailsMap)}\n\n")
         
         reportBuilder.append("📊 리포트 생성 완료: ${SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.getDefault()).format(java.util.Date())}\n")
@@ -1383,13 +1357,11 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
         
         // 헤더
         reportBuilder.append("🎪 AI 이벤트 비교 분석 리포트\n")
-        reportBuilder.append("=====================================\n")
         reportBuilder.append("📅 분석기간: ${reportData.year}년 전체\n")
         reportBuilder.append("🏢 장부ID: ${reportData.ledger_id}\n\n")
         
         // 전체 요약
         reportBuilder.append("💰 전체 재정 개요\n")
-        reportBuilder.append("─────────────────────────────────────\n")
         reportBuilder.append("📈 총 수입: ${formatPerfectAmount(income)}\n")
         reportBuilder.append("📉 총 지출: ${formatPerfectAmount(expense)}\n")
         reportBuilder.append("💎 순 이익: ${formatPerfectAmount(net)} ${getAdvancedNetEmoji(net)}\n\n")
@@ -1397,8 +1369,7 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
         // 월별 이벤트 활동 분석
         if (reportData.by_month.isNotEmpty()) {
             reportBuilder.append("🎪 월별 이벤트 활동 분석\n")
-            reportBuilder.append("─────────────────────────────────────\n")
-            
+
             val monthlyEventAnalysis = mutableListOf<String>()
             
             for (monthKey in reportData.by_month.keys.sorted()) {
@@ -1437,8 +1408,7 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
         // 이벤트 카테고리별 분석 (항목별 데이터 활용)
         if (reportData.by_type.isNotEmpty()) {
             reportBuilder.append("🏷️ 이벤트 카테고리별 분석\n")
-            reportBuilder.append("─────────────────────────────────────\n")
-            
+
             val sortedTypes = reportData.by_type.entries.sortedByDescending { entry ->
                 val typeData = entry.value
                 (typeData["income"] ?: 0) - (typeData["expense"] ?: 0)
@@ -1459,7 +1429,6 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
         
         // AI 이벤트 전략 제안
         reportBuilder.append("🤖 AI 이벤트 전략 분석\n")
-        reportBuilder.append("─────────────────────────────────────\n")
         reportBuilder.append("${getEventStrategyInsight(reportData)}\n\n")
         
         reportBuilder.append("📊 리포트 생성 완료: ${SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.getDefault()).format(java.util.Date())}\n")
@@ -1598,39 +1567,33 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
         return buildString {
             // 🎯 프리미엄 헤더
             appendLine("🤖 Hey-Bi AI 고급 재정 분석 리포트")
-            appendLine("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
             appendLine("📅 분석 기간: ${reportData.year}년 (12개월 종합)")
             appendLine("🔍 분석 엔진: Hey-Bi Advanced Analytics Engine v3.0")
             appendLine("⚡ 실시간 AI 처리: ${SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date())}")
-            appendLine("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
             appendLine()
             
             // 🎯 AI 핵심 인사이트 (최상단 배치)
             appendLine("🎯 Hey-Bi AI 핵심 인사이트")
-            appendLine("▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔")
             appendLine(generateAdvancedAIInsights(income, expense, net))
             appendLine()
             
             // 💰 재정 현황 대시보드
-            appendLine("💰 재정 현황 대시보드")
-            appendLine("▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔")
-            appendLine("┌─ 총 수입: ${formatPerfectAmount(income)} ${getAdvancedAmountEmoji(income)}")
-            appendLine("├─ 총 지출: ${formatPerfectAmount(expense)} ${getAdvancedAmountEmoji(expense)}")
-            appendLine("├─ 순수익: ${formatPerfectAmount(net)} ${getAdvancedNetEmoji(net)}")
-            appendLine("├─ 재정 건전도: ${getAdvancedFinancialHealth(income, expense, net)}")
-            appendLine("├─ 지출 비율: ${calculateExpenseRatio(income, expense)}% ${getExpenseRatioEmoji(income, expense)}")
-            appendLine("└─ 저축률: ${calculateSavingRate(income, expense)}% ${getSavingRateEmoji(income, expense)}")
+            appendLine("💰 재정 현황 대시보드\n")
+            appendLine(" 총 수입: ${formatPerfectAmount(income)} ${getAdvancedAmountEmoji(income)}")
+            appendLine(" 총 지출: ${formatPerfectAmount(expense)} ${getAdvancedAmountEmoji(expense)}")
+            appendLine(" 순수익: ${formatPerfectAmount(net)} ${getAdvancedNetEmoji(net)}")
+            appendLine(" 재정 건전도: ${getAdvancedFinancialHealth(income, expense, net)}")
+            appendLine(" 지출 비율: ${calculateExpenseRatio(income, expense)}% ${getExpenseRatioEmoji(income, expense)}")
+            appendLine(" 저축률: ${calculateSavingRate(income, expense)}% ${getSavingRateEmoji(income, expense)}")
             appendLine()
             
             // 📊 AI 심화 재정 분석
             appendLine("📊 AI 심화 재정 분석")
-            appendLine("▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔")
             appendLine(generateAdvancedFinancialAnalysis(income, expense, net))
             appendLine()
             
             if (consolidatedByType.isNotEmpty()) {
                 appendLine("🏷️ 거래 유형별 AI 분석")
-                appendLine("▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔")
                 val sortedTypes = consolidatedByType.sortedByDescending { (it["expense"] as? Number)?.toInt() ?: 0 }
                 sortedTypes.forEachIndexed { index, typeData ->
                     val type = typeData["type"] as? String ?: "기타"
@@ -1682,7 +1645,7 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
                     val eventNet = eventIncome - eventExpense
                     val roi = calculateROI(eventIncome, eventExpense)
                     
-                    appendLine("${index + 1}. 🎪 $eventName")
+                    appendLine("${index + 1}. 🎪 ${safeDisplayEventName(eventName)}")
                     appendLine("   ├─ 수입: ${formatPerfectAmount(eventIncome)}")
                     appendLine("   ├─ 지출: ${formatPerfectAmount(eventExpense)}")
                     appendLine("   ├─ 순손익: ${formatPerfectAmount(eventNet)} ${getAdvancedNetEmoji(eventNet)}")
@@ -1887,7 +1850,7 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
                         else -> "${index + 1}."
                     }
                     
-                    appendLine("$rankEmoji $eventName ${getEventCategoryEmoji(eventName)}")
+                    appendLine("$rankEmoji ${safeDisplayEventName(eventName)} ${getEventCategoryEmoji(eventName)}")
                     appendLine("   ├─ 수입: ${formatPerfectAmount(eventIncome)} ${getAdvancedAmountEmoji(eventIncome)}")
                     appendLine("   ├─ 지출: ${formatPerfectAmount(eventExpense)} ${getAdvancedAmountEmoji(eventExpense)}")
                     appendLine("   ├─ 순손익: ${formatPerfectAmount(eventNet)} ${getAdvancedNetEmoji(eventNet)}")
@@ -3852,7 +3815,7 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
             // 재정 요약 비교
             val comparisonContent = buildString {
                 appendLine("📊 ${currentYear-2}-${currentYear} 3년간 재정 비교 분석")
-                appendLine("━".repeat(50))
+                appendLine("━".repeat(30))
                 appendLine()
                 
                 // 1. 연도별 재정 현황 요약
@@ -3883,7 +3846,7 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
                 // 4. 미래 예측
                 appendFuturePrediction(this, yearlyData, currentYear)
                 
-                appendLine("━".repeat(50))
+                appendLine("━".repeat(30))
                 appendLine("📈 이 분석은 3년간의 실제 장부 데이터를 기반으로 생성되었습니다.")
                 appendLine("🤖 AI가 패턴을 분석하여 미래 예측을 제공합니다.")
             }
@@ -3942,7 +3905,7 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
         currentYear: Int
     ) {
         builder.appendLine("🎯 ${currentYear}년 이벤트 기준 3년 비교")
-        builder.appendLine("━".repeat(40))
+        builder.appendLine("━".repeat(30))
         
         // 현재 연도의 이벤트를 기준으로 분석
         val currentYearData = yearlyData[currentYear] ?: emptyMap()
@@ -4073,7 +4036,7 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
         
         // 전체 이벤트 예산 요약
         builder.appendLine("📋 전체 이벤트 예산 요약")
-        builder.appendLine("━".repeat(25))
+        builder.appendLine("━".repeat(30))
         
         val totalEventIncome = currentEvents.sumOf { (it["income"] as? Number)?.toLong() ?: 0L }
         val totalEventExpense = currentEvents.sumOf { (it["expense"] as? Number)?.toLong() ?: 0L }
@@ -4179,7 +4142,7 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
         currentYear: Int
     ) {
         builder.appendLine("🔮 ${currentYear + 1}년 예측 분석")
-        builder.appendLine("━".repeat(40))
+        builder.appendLine("━".repeat(30))
         
         // 현재 연도 이벤트 기준으로 미래 예측
         val currentYearData = yearlyData[currentYear] ?: emptyMap()
@@ -4355,6 +4318,17 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
     
     private fun formatAmount(amount: Long): String {
         return String.format(Locale.US, "%,d원", amount)
+    }
+    
+    /**
+     * 이벤트명을 안전하게 표시 (년도가 화폐로 포맷되는 것을 방지)
+     */
+    private fun safeDisplayEventName(eventName: String): String {
+        // 혹시 이미 잘못 포맷된 경우를 수정 (예: "2,025원" -> "2025")
+        val corrected = eventName
+            .replace(Regex("(\\d{1,2}),(\\d{3})원"), "$1$2") // "2,025원" -> "2025"
+            .replace(Regex("(\\d+)원\\s+"), "$1 ") // "2025원 " -> "2025 " 
+        return corrected
     }
     
     private fun saveReportToLocal(reportJson: String, clubId: Int): Boolean {
@@ -4549,7 +4523,7 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
         
         val fallbackContent = buildString {
             appendLine("📊 SSAFY 앱메이커 3년간 재정 비교 분석")
-            appendLine("━".repeat(50))
+            appendLine("━".repeat(30))
             appendLine("📅 분석기간: 2023년 ~ 2025년 (3년간)")
             appendLine("🔍 데이터 출처: 실제 장부 데이터")
             appendLine()
@@ -4594,7 +4568,7 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
             appendLine("💡 비용 관리 능력이 향상되었으며, 지속적인 효율성 개선을 권장합니다.")
             appendLine()
             appendLine("📈 이 분석은 실제 동아리 장부 데이터를 기반으로 생성되었습니다.")
-            appendLine("━".repeat(50))
+            appendLine("━".repeat(30))
         }
         
         saveReportWithAdvancedMetrics(reportName, fallbackContent, "three_year_comparison", getCurrentClubId())
@@ -4781,17 +4755,14 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
     ): String {
         return buildString {
             appendLine("📊 SSAFY 앱메이커 3년간 실데이터 완전 분석")
-            appendLine("=".repeat(60))
-            appendLine("📅 분석기간: 2023년 ~ 2025년 (3개년)")
-            appendLine("🔍 데이터 출처: /report/clubs/{club_pk}/ledgers/{ledger_pk}/reports/yearly/ API")
-            appendLine("🤖 분석엔진: AI 실시간 비교분석 시스템 v4.0")
+            appendLine("=".repeat(30))
+            appendLine("📅 분석기간: 2023년 ~ 2025년 (3년)")
             appendLine("📡 실시간 파싱: ${data2023.events.size + data2024.events.size + data2025.events.size}개 이벤트 데이터")
             appendLine()
             
             // 1. 연도별 재정 현황 비교
             appendLine("💰 연도별 실제 재정 현황 비교")
-            appendLine("━".repeat(45))
-            
+
             val yearDataList = listOf(data2023, data2024, data2025).filter { it.year > 0 }
             yearDataList.forEach { yearData ->
                 appendLine("📅 ${yearData.year}년 재정 현황")
@@ -4819,7 +4790,7 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
             // 2. 연도별 성장률 분석
             if (yearDataList.size >= 2) {
                 appendLine("📈 연도별 성장률 및 변화 분석")
-                appendLine("━".repeat(45))
+                appendLine("━".repeat(30))
                 
                 for (i in 1 until yearDataList.size) {
                     val prevYear = yearDataList[i-1]
@@ -4847,7 +4818,7 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
             
             // 3. 이벤트 기반 3년 비교 분석 (그룹핑 적용)
             appendLine("🎯 이벤트별 3년간 실데이터 비교 분석 (이벤트명 그룹핑)")
-            appendLine("━".repeat(45))
+            appendLine("━".repeat(30))
             
             // 이벤트 그룹핑 (년도 제거하여 동일 이벤트 묶기)
             val eventGroups = groupEventsByName(data2023.events, data2024.events, data2025.events)
@@ -4864,7 +4835,7 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
                 // 최신 데이터 기준으로 정렬 (2025 > 2024 > 2023 순)
                 events.values.maxOfOrNull { it.expense } ?: 0
             }.forEach { (eventName, yearlyData) ->
-                appendLine("🎪 **$eventName** (${yearlyData.size}년간 진행)")
+                appendLine("🎪 **${safeDisplayEventName(eventName)}** (${yearlyData.size}년간 진행)")
                 
                 // 연도별 데이터 표시
                 listOf(2023, 2024, 2025).forEach { year ->
@@ -4889,7 +4860,7 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
             
             // 4. 이벤트 패턴 분석 (정규화된 그룹 기준)
             appendLine("🔄 이벤트 운영 패턴 분석 (그룹 기준)")
-            appendLine("━".repeat(45))
+            appendLine("━".repeat(30))
             
             // 그룹별 운영 패턴 분석
             val continuousEventGroups = eventGroups.filter { (_, yearlyData) -> yearlyData.size == 3 }
@@ -4904,7 +4875,7 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
                 appendLine("🔄 **3년 연속 운영 이벤트** (${continuousEventGroups.size}개 그룹):")
                 continuousEventGroups.forEach { (eventName, yearlyData) ->
                     val avgExpense = yearlyData.values.map { it.expense }.average().toInt()
-                    appendLine("  • **$eventName**: 평균 지출 ${formatAmount(avgExpense.toLong())}")
+                    appendLine("  • **${safeDisplayEventName(eventName)}**: 평균 지출 ${formatAmount(avgExpense.toLong())}")
                 }
                 appendLine()
             }
@@ -4914,7 +4885,7 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
                 newEventGroups.forEach { (eventName, yearlyData) ->
                     val event2025 = yearlyData[2025]
                     if (event2025 != null) {
-                        appendLine("  • **$eventName**: 지출 ${formatAmount(event2025.expense.toLong())}, 순액 ${formatAmount(event2025.net.toLong())}")
+                        appendLine("  • **${safeDisplayEventName(eventName)}**: 지출 ${formatAmount(event2025.expense.toLong())}, 순액 ${formatAmount(event2025.net.toLong())}")
                     }
                 }
                 appendLine()
@@ -4926,7 +4897,7 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
                     val lastYear = yearlyData.keys.maxOrNull()
                     val lastData = if (lastYear != null) yearlyData[lastYear] else null
                     if (lastData != null && lastYear != null) {
-                        appendLine("  • **$eventName**: 최종 진행 ${lastYear}년 (지출 ${formatAmount(lastData.expense.toLong())})")
+                        appendLine("  • **${safeDisplayEventName(eventName)}**: 최종 진행 ${lastYear}년 (지출 ${formatAmount(lastData.expense.toLong())})")
                     }
                 }
                 appendLine()
@@ -4934,7 +4905,7 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
             
             // 5. AI 종합 분석 및 권고
             appendLine("🤖 AI 종합 분석 및 전략적 권고")
-            appendLine("━".repeat(45))
+            appendLine("━".repeat(30))
             
             val overallTrend = data2025.net - data2023.net
             val eventEfficiency2025 = if (data2025.events.isNotEmpty()) {
@@ -5007,7 +4978,7 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
             
             appendLine()
             appendLine("📊 분석 완료 시각: ${java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.getDefault()).format(java.util.Date())}")
-            appendLine("━".repeat(60))
+            appendLine("━".repeat(30))
             appendLine("🔍 본 분석은 실제 API (/report/clubs/{club_pk}/ledgers/{ledger_pk}/reports/yearly/)에서")
             appendLine("   수집한 ${data2023.events.size + data2024.events.size + data2025.events.size}개 이벤트 데이터를 완전 분석한 결과입니다.")
         }
@@ -5192,26 +5163,22 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
             // API 데이터 기반 이벤트 분석 리포트 생성
             val eventAnalysisContent = buildString {
                 appendLine("📅 SSAFY 앱메이커 3년간 이벤트 전문 분석")
-                appendLine("=".repeat(55))
                 appendLine("🎯 분석 초점: 이벤트 성과와 변화 패턴 심층 분석")
-                appendLine("🔍 데이터 출처: 실제 API 응답 데이터 (/report/clubs/{club_pk}/ledgers/{ledger_pk}/reports/yearly/)")
                 appendLine("📊 분석 대상: ${data2023.events.size + data2024.events.size + data2025.events.size}개 이벤트")
                 appendLine("🚀 실시간 API 호출 기반 분석")
                 appendLine()
                 
                 // 현재년도 이벤트 중심 분석
                 appendLine("🎯 2025년 현재 이벤트 상세 분석 (API 실시간 데이터)")
-                appendLine("━".repeat(40))
-                
+
                 if (data2025.events.isNotEmpty()) {
                     val sortedEvents = data2025.events.sortedByDescending { it.expense }
                     sortedEvents.forEach { currentEvent ->
-                        appendLine("🎪 ${currentEvent.eventName}")
-                        appendLine("  💰 2025년 현황:")
+                        appendLine("🎪 ${safeDisplayEventName(currentEvent.eventName)}")
                         appendLine("    - 수입: ${formatAmount(currentEvent.income.toLong())}")
                         appendLine("    - 지출: ${formatAmount(currentEvent.expense.toLong())}")
                         appendLine("    - 순액: ${formatAmount(currentEvent.net.toLong())} ${if (currentEvent.net >= 0) "🟢" else "🔴"}")
-                        
+                        appendLine("")
                         // 과거 동일 이벤트와의 비교
                         val similar2024 = findSimilarEvent(currentEvent.eventName, data2024.events)
                         val similar2023 = findSimilarEvent(currentEvent.eventName, data2023.events)
@@ -5234,6 +5201,7 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
                         }
                         
                         appendLine("  🎯 효율성 평가: ${evaluateEventEfficiency(currentEvent, similar2024, similar2023)}")
+                        appendLine("========================================")
                         appendLine()
                     }
                 } else {
@@ -5243,8 +5211,7 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
                 
                 // 연도별 이벤트 통계
                 appendLine("📊 연도별 이벤트 운영 통계 (API 실시간 집계)")
-                appendLine("━".repeat(40))
-                
+
                 val eventCount2023 = data2023.events.size
                 val eventCount2024 = data2024.events.size
                 val eventCount2025 = data2025.events.size
@@ -5275,9 +5242,6 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
                 appendLine("  • 활동 등급: $grade")
                 
                 appendLine()
-                appendLine("━".repeat(55))
-                appendLine("📡 실시간 API 데이터 기반 이벤트 전문 분석 완료")
-                appendLine("🌐 API 엔드포인트: /report/clubs/{club_pk}/ledgers/{ledger_pk}/reports/yearly/")
             }
             
             saveReportWithAdvancedMetrics(reportName, eventAnalysisContent, "three_year_event", getCurrentClubId())
