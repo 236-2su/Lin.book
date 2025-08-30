@@ -410,7 +410,7 @@ class ReceiptViewSet(viewsets.ModelViewSet):
         if not processed_data:
             return Response({"error": "Failed to get processed data from OCR result."}, status=500)
 
-        amount = processed_data.get("amount")
+        amount = processed_data.get("amount") * -1
         date_time_str = processed_data.get("date_time")
         items = processed_data.get("details")
         vendor = processed_data.get("vendor", "알 수 없음")  # 가게 이름이 없으면 기본값 설정
@@ -439,7 +439,7 @@ class ReceiptViewSet(viewsets.ModelViewSet):
         LedgerTransactions.objects.create(
             ledger=ledger,
             date_time=receipt.date_time,
-            amount=receipt.amount * -1,
+            amount=receipt.amount,
             payment_method="카드",  # OCR로 알 수 없으므로 '카드'를 기본값으로 가정
             receipt=receipt,
             description=description,
