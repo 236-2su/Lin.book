@@ -9,16 +9,23 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.ImageView
+import android.widget.EditText
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.myapplication.BaseActivity
 import com.example.myapplication.LedgerEditActivity
 import com.example.myapplication.LedgerItem
+import com.example.myapplication.CommentAdapter
+import com.example.myapplication.UserManager
 import com.example.myapplication.api.ApiService
 import com.example.myapplication.api.ApiClient
 import com.example.myapplication.api.TransactionDetailResponse
 import com.example.myapplication.api.ReceiptResponse
+import com.example.myapplication.api.Comment
+import com.example.myapplication.api.CommentRequest
 import com.example.myapplication.TransactionItem
 import kotlinx.coroutines.Dispatchers
 import com.bumptech.glide.Glide
@@ -46,6 +53,11 @@ class TransactionDetailFragment : Fragment() {
     private lateinit var receiptContainer: View
     private lateinit var receiptDivider: View
     private lateinit var ivReceipt: ImageView
+    private lateinit var rvComments: RecyclerView
+    private lateinit var etCommentInput: EditText
+    private lateinit var btnSendComment: ImageView
+    private lateinit var commentAdapter: CommentAdapter
+    private var currentUserMemberPk: Int? = null
     // private lateinit var ivHeart: ImageView
     // private lateinit var tvLikeCount: TextView
 
@@ -106,6 +118,7 @@ class TransactionDetailFragment : Fragment() {
 
             initializeViews()
             setupClickListeners()
+            initializeCurrentUserMemberPk()
             loadAllTransactionsAndDisplayCurrent() // 전체 목록 로드 후 현재 거래 표시
 
         } catch (e: Exception) {
@@ -129,8 +142,13 @@ class TransactionDetailFragment : Fragment() {
         receiptContainer = contentView.findViewById(R.id.receipt_container)
         receiptDivider = contentView.findViewById(R.id.receipt_divider)
         ivReceipt = contentView.findViewById(R.id.iv_receipt)
+        rvComments = contentView.findViewById(R.id.rv_comments)
+        etCommentInput = contentView.findViewById(R.id.et_comment_input)
+        btnSendComment = contentView.findViewById(R.id.btn_send_comment)
 //        ivHeart = contentView.findViewById(R.id.iv_heart)
 //        tvLikeCount = contentView.findViewById(R.id.tv_like_count)
+
+        setupCommentsRecyclerView()
         
 
         
@@ -140,6 +158,14 @@ class TransactionDetailFragment : Fragment() {
         
         // 하트 초기 상태 설정
         // ivHeart.tag = "unliked"
+    }
+
+    private fun setupCommentsRecyclerView() {
+        commentAdapter = CommentAdapter(emptyList(), currentUserMemberPk) { comment ->
+            showDeleteConfirmDialog(comment)
+        }
+        rvComments.adapter = commentAdapter
+        rvComments.layoutManager = LinearLayoutManager(context)
     }
 
     private fun setupClickListeners() {
@@ -161,6 +187,11 @@ class TransactionDetailFragment : Fragment() {
         // 거래 타입 버튼들은 단순 표시용 (클릭 이벤트 없음)
 
 
+
+        // 댓글 전송 버튼 클릭 이벤트
+        btnSendComment.setOnClickListener {
+            sendComment()
+        }
 
         // 하트 클릭 이벤트
         // ivHeart.setOnClickListener {
@@ -273,6 +304,7 @@ class TransactionDetailFragment : Fragment() {
                 val detailResponse = apiService.getTransactionDetail(clubId, ledgerId, transactionId)
                 Log.d("TransactionDetailFragment", "거래 상세 조회 성공: amount=${detailResponse.amount}, type=${detailResponse.type}, vendor=${detailResponse.vendor}")
                 updateUIWithDetail(detailResponse)
+                loadComments(transactionId)
             } catch (e: Exception) {
                 Log.e("TransactionDetailFragment", "거래 상세 조회 실패", e)
                 e.printStackTrace()
@@ -582,6 +614,181 @@ class TransactionDetailFragment : Fragment() {
         } catch (e: Exception) {
             Log.e("TransactionDetailFragment", "SSL 검증 우회 설정 실패", e)
         }
+    }
+
+    private fun loadComments(transactionId: Int) {
+        Log.d("TransactionDetailFragment", "댓글 로드 시작: clubId=$clubId, ledgerId=$ledgerId, transactionId=$transactionId")
+        apiService.getTransactionComments(clubId, ledgerId, transactionId).enqueue(object : retrofit2.Callback<List<Comment>> {
+            override fun onResponse(
+                call: retrofit2.Call<List<Comment>>,
+                response: retrofit2.Response<List<Comment>>
+            ) {
+                if (response.isSuccessful) {
+                    val comments = response.body() ?: emptyList()
+                    commentAdapter.updateComments(comments)
+                    Log.d("TransactionDetailFragment", "댓글 로드 성공: ${comments.size}개")
+                    if (comments.isNotEmpty()) {
+                        Log.d("TransactionDetailFragment", "첫 번째 댓글: ${comments[0].content} by ${comments[0].author_name}")
+                    }
+                } else {
+                    Log.e("TransactionDetailFragment", "댓글 로드 실패: ${response.code()}")
+                    try {
+                        val errorBody = response.errorBody()?.string()
+                        Log.e("TransactionDetailFragment", "댓글 로드 에러 응답: $errorBody")
+                    } catch (ex: Exception) {
+                        Log.e("TransactionDetailFragment", "에러 응답 읽기 실패", ex)
+                    }
+                }
+            }
+
+            override fun onFailure(call: retrofit2.Call<List<Comment>>, t: Throwable) {
+                Log.e("TransactionDetailFragment", "댓글 로드 네트워크 실패", t)
+            }
+        })
+    }
+
+    private fun sendComment() {
+        val content = etCommentInput.text.toString().trim()
+        if (content.isEmpty()) {
+            Toast.makeText(context, "댓글을 입력해주세요", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val currentUserId = UserManager.getUserPk(requireContext())
+        if (currentUserId == null) {
+            Toast.makeText(context, "로그인이 필요합니다", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        if (allTransactions.isEmpty()) {
+            Toast.makeText(context, "거래 정보를 불러오는 중입니다", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val currentTransactionId = allTransactions[currentTransactionIndex].id
+
+        fetchMyClubMemberPk(clubId, currentUserId) { memberPk ->
+            if (memberPk == null) {
+                Toast.makeText(context, "동아리 멤버 정보를 찾을 수 없습니다", Toast.LENGTH_SHORT).show()
+                return@fetchMyClubMemberPk
+            }
+
+            val request = CommentRequest(content, memberPk)
+            Log.d("TransactionDetailFragment", "댓글 작성 요청: clubId=$clubId, ledgerId=$ledgerId, transactionId=$currentTransactionId, memberPk=$memberPk, content='$content'")
+
+            apiService.postTransactionComment(clubId, ledgerId, currentTransactionId, request).enqueue(object : retrofit2.Callback<Comment> {
+                override fun onResponse(
+                    call: retrofit2.Call<Comment>,
+                    response: retrofit2.Response<Comment>
+                ) {
+                    if (response.isSuccessful) {
+                        val newComment = response.body()
+                        etCommentInput.text.clear()
+                        loadComments(currentTransactionId)
+                        Toast.makeText(context, "댓글이 등록되었습니다", Toast.LENGTH_SHORT).show()
+                        Log.d("TransactionDetailFragment", "댓글 작성 성공: ${newComment?.content}")
+                    } else {
+                        Log.e("TransactionDetailFragment", "댓글 작성 실패: ${response.code()}")
+                        try {
+                            val errorBody = response.errorBody()?.string()
+                            Log.e("TransactionDetailFragment", "에러 응답: $errorBody")
+                        } catch (ex: Exception) {
+                            Log.e("TransactionDetailFragment", "에러 응답 읽기 실패", ex)
+                        }
+                        Toast.makeText(context, "댓글 작성에 실패했습니다", Toast.LENGTH_SHORT).show()
+                    }
+                }
+
+                override fun onFailure(call: retrofit2.Call<Comment>, t: Throwable) {
+                    Log.e("TransactionDetailFragment", "댓글 작성 실패", t)
+                    Toast.makeText(context, "댓글 작성에 실패했습니다", Toast.LENGTH_SHORT).show()
+                }
+            })
+        }
+    }
+
+    private fun fetchMyClubMemberPk(clubPk: Int, userId: Int, cb: (Int?) -> Unit) {
+        apiService.getClubMembers(clubPk).enqueue(object : retrofit2.Callback<List<com.example.myapplication.MemberResponse>> {
+            override fun onResponse(
+                call: retrofit2.Call<List<com.example.myapplication.MemberResponse>>,
+                response: retrofit2.Response<List<com.example.myapplication.MemberResponse>>
+            ) {
+                if (response.isSuccessful) {
+                    val members = response.body() ?: emptyList()
+                    val memberPk = members.firstOrNull { it.user == userId }?.id
+                    cb(memberPk)
+                } else {
+                    Log.e("TransactionDetailFragment", "ClubMember 조회 실패: ${response.code()}")
+                    cb(null)
+                }
+            }
+
+            override fun onFailure(call: retrofit2.Call<List<com.example.myapplication.MemberResponse>>, t: Throwable) {
+                Log.e("TransactionDetailFragment", "ClubMember PK 조회 실패", t)
+                cb(null)
+            }
+        })
+    }
+
+    private fun initializeCurrentUserMemberPk() {
+        val currentUserId = UserManager.getUserPk(requireContext())
+        if (currentUserId != null) {
+            fetchMyClubMemberPk(clubId, currentUserId) { memberPk ->
+                currentUserMemberPk = memberPk
+                commentAdapter = CommentAdapter(emptyList(), currentUserMemberPk) { comment ->
+                    showDeleteConfirmDialog(comment)
+                }
+                rvComments.adapter = commentAdapter
+            }
+        }
+    }
+
+    private fun showDeleteConfirmDialog(comment: Comment) {
+        val builder = androidx.appcompat.app.AlertDialog.Builder(requireContext())
+        builder.setTitle("댓글 삭제")
+        builder.setMessage("이 댓글을 삭제하시겠습니까?")
+        builder.setPositiveButton("삭제") { _, _ ->
+            deleteComment(comment)
+        }
+        builder.setNegativeButton("취소", null)
+        builder.show()
+    }
+
+    private fun deleteComment(comment: Comment) {
+        if (allTransactions.isEmpty()) {
+            Toast.makeText(context, "거래 정보를 불러오는 중입니다", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val currentTransactionId = allTransactions[currentTransactionIndex].id
+        Log.d("TransactionDetailFragment", "댓글 삭제 요청: clubId=$clubId, ledgerId=$ledgerId, transactionId=$currentTransactionId, commentId=${comment.id}")
+
+        apiService.deleteTransactionComment(clubId, ledgerId, currentTransactionId, comment.id).enqueue(object : retrofit2.Callback<okhttp3.ResponseBody> {
+            override fun onResponse(
+                call: retrofit2.Call<okhttp3.ResponseBody>,
+                response: retrofit2.Response<okhttp3.ResponseBody>
+            ) {
+                if (response.isSuccessful) {
+                    loadComments(currentTransactionId)
+                    Toast.makeText(context, "댓글이 삭제되었습니다", Toast.LENGTH_SHORT).show()
+                    Log.d("TransactionDetailFragment", "댓글 삭제 성공: commentId=${comment.id}")
+                } else {
+                    Log.e("TransactionDetailFragment", "댓글 삭제 실패: ${response.code()}")
+                    try {
+                        val errorBody = response.errorBody()?.string()
+                        Log.e("TransactionDetailFragment", "댓글 삭제 에러 응답: $errorBody")
+                    } catch (ex: Exception) {
+                        Log.e("TransactionDetailFragment", "에러 응답 읽기 실패", ex)
+                    }
+                    Toast.makeText(context, "댓글 삭제에 실패했습니다", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: retrofit2.Call<okhttp3.ResponseBody>, t: Throwable) {
+                Log.e("TransactionDetailFragment", "댓글 삭제 네트워크 실패", t)
+                Toast.makeText(context, "댓글 삭제에 실패했습니다", Toast.LENGTH_SHORT).show()
+            }
+        })
     }
 
 

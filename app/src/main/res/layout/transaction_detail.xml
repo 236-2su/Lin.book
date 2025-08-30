@@ -257,6 +257,13 @@
                 android:textStyle="bold"
                 android:layout_marginBottom="16dp" />
 
+            <!-- 댓글 목록 -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_comments"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp" />
+
             <!-- 댓글 입력 -->
             <LinearLayout
                 android:layout_width="match_parent"

@@ -614,4 +614,27 @@ interface ApiService {
         @Path("club_pk") clubPk: Int,
         @Path("month") month: Int
     ): Call<List<DuesClaimItem>>
+
+    @GET("club/{club_pk}/ledger/{ledger_pk}/transactions/{transaction_pk}/comments/")
+    fun getTransactionComments(
+        @Path("club_pk") clubId: Int,
+        @Path("ledger_pk") ledgerId: Int,
+        @Path("transaction_pk") transactionId: Int
+    ): Call<List<Comment>>
+
+    @POST("club/{club_pk}/ledger/{ledger_pk}/transactions/{transaction_pk}/comments/")
+    fun postTransactionComment(
+        @Path("club_pk") clubId: Int,
+        @Path("ledger_pk") ledgerId: Int,
+        @Path("transaction_pk") transactionId: Int,
+        @Body body: CommentRequest
+    ): Call<Comment>
+
+    @DELETE("club/{club_pk}/ledger/{ledger_pk}/transactions/{transaction_pk}/comments/{id}/")
+    fun deleteTransactionComment(
+        @Path("club_pk") clubId: Int,
+        @Path("ledger_pk") ledgerId: Int,
+        @Path("transaction_pk") transactionId: Int,
+        @Path("id") commentId: Int
+    ): Call<okhttp3.ResponseBody>
 }
