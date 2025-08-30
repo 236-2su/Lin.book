@@ -7,6 +7,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 import javax.net.ssl.*
+import java.util.concurrent.TimeUnit
 
 class ApiClient {
     companion object {
@@ -24,9 +25,11 @@ class ApiClient {
                     .addInterceptor(loggingInterceptor)
                     .hostnameVerifier { _, _ -> true }
                     .sslSocketFactory(getUnsafeSSLSocketFactory(), getUnsafeTrustManager())
-                    .connectTimeout(30, TimeUnit.SECONDS) // 연결 타임아웃: 30초
-                    .readTimeout(60, TimeUnit.SECONDS)    // 읽기 타임아웃: 60초 (Gemini AI 분석용)
-                    .writeTimeout(30, TimeUnit.SECONDS)   // 쓰기 타임아웃: 30초
+                    .connectTimeout(30, TimeUnit.SECONDS)
+                    .readTimeout(60, TimeUnit.SECONDS)
+                    .writeTimeout(60, TimeUnit.SECONDS)
+                    .callTimeout(90, TimeUnit.SECONDS)
+                    .retryOnConnectionFailure(true)
                     .build()
                 
                 // Retrofit 인스턴스 생성
@@ -73,9 +76,11 @@ class ApiClient {
                 .addInterceptor(loggingInterceptor)
                 .hostnameVerifier { _, _ -> true }
                 .sslSocketFactory(getUnsafeSSLSocketFactory(), getUnsafeTrustManager())
-                .connectTimeout(30, TimeUnit.SECONDS) // 연결 타임아웃: 30초
-                .readTimeout(60, TimeUnit.SECONDS)    // 읽기 타임아웃: 60초
-                .writeTimeout(30, TimeUnit.SECONDS)   // 쓰기 타임아웃: 30초
+                .connectTimeout(30, TimeUnit.SECONDS)
+                .readTimeout(60, TimeUnit.SECONDS)
+                .writeTimeout(60, TimeUnit.SECONDS)
+                .callTimeout(90, TimeUnit.SECONDS)
+                .retryOnConnectionFailure(true)
                 .build()
         }
     }

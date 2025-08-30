@@ -8,6 +8,7 @@ import com.example.myapplication.TransactionItem
 import com.example.myapplication.EventTransactionItem
 import com.example.myapplication.model.Ledger
 import com.example.myapplication.model.Transaction
+import com.google.gson.annotations.SerializedName
 import retrofit2.Call
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
@@ -573,4 +574,44 @@ interface ApiService {
         @Path("ledger_pk") ledgerPk: Int,
         @Part image: okhttp3.MultipartBody.Part
     ): Call<OcrResponse>
+
+    // --- Dues (회비) ---
+    data class UnpaidDueItem(
+        @SerializedName(value = "club_pk", alternate = ["club_id", "club"]) val club_pk: String?,
+        @SerializedName(value = "club_name", alternate = ["name", "club_title"]) val club_name: String?,
+        @SerializedName(value = "description", alternate = ["title", "desc"]) val description: String?,
+        @SerializedName(value = "charged_amount", alternate = ["amount", "request_amount", "requested_amount"]) val charged_amount: String?,
+        @SerializedName(value = "month", alternate = ["billing_month"]) val month: String?
+    )
+
+    @GET("user/{user_id}/unpaid-dues/")
+    fun getUnpaidDues(
+        @Path("user_id") userId: Int
+    ): Call<List<UnpaidDueItem>>
+
+    data class DuesPayRequest(
+        val user_id: Int,
+        val month: Int
+    )
+
+    @POST("club/{club_pk}/dues/pay/")
+    fun payDues(
+        @Path("club_pk") clubPk: Int,
+        @Body body: DuesPayRequest
+    ): Call<okhttp3.ResponseBody>
+
+    // 청구 목록 조회
+    data class DuesClaimItem(
+        val member_name: String,
+        val member_student_number: String?,
+        val description: String,
+        val charged_amount: Int,
+        val paid: Boolean
+    )
+
+    @GET("club/{club_pk}/dues/claims/month/{month}")
+    fun getDuesClaimsByMonth(
+        @Path("club_pk") clubPk: Int,
+        @Path("month") month: Int
+    ): Call<List<DuesClaimItem>>
 }
