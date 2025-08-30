@@ -1,8 +1,11 @@
 package com.example.myapplication
 
+import android.content.Intent
+import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
@@ -66,11 +69,25 @@ class MemberAdapter(
         private val joinDate: TextView = itemView.findViewById(R.id.joinDate)
         private val roleChangeButton: TextView = itemView.findViewById(R.id.roleChangeButton)
         private val actionButtons: View = itemView.findViewById(R.id.actionButtons)
+        private val callButton: ImageView = itemView.findViewById(R.id.callButton)
+        private val messageButton: ImageView = itemView.findViewById(R.id.messageButton)
 
         fun bind(member: Member) {
             memberName.text = member.name
-            memberInfo.text = "${member.department} / ${member.studentNumber}"
-            memberPhone.text = member.phone
+            
+            // 회장이 아닌 사용자는 다른 멤버(회장 제외)의 학번과 전화번호를 볼 수 없음
+            val isLeader = member.role == "leader" || member.role == "회장"
+            val shouldShowContactInfo = isPresidentMode || member.isMe || isLeader
+            
+            if (shouldShowContactInfo) {
+                memberInfo.text = "${member.department} / ${member.studentNumber}"
+                memberPhone.text = member.phone
+                memberPhone.visibility = View.VISIBLE
+            } else {
+                memberInfo.text = member.department
+                memberPhone.visibility = View.GONE
+            }
+            
             joinDate.text = "가입일: ${member.joinDate}"
 
             // Me 배지 표시 여부 및 테두리 설정
@@ -84,19 +101,27 @@ class MemberAdapter(
                 itemView.setBackgroundResource(android.R.color.transparent)
             }
 
-            // 역할에 따른 배지 텍스트 설정
+            // 역할에 따른 배지 텍스트 및 배경 설정
             when (member.role) {
                 "leader", "회장" -> {
                     roleBadge.text = "회장"
+                    roleBadge.setBackgroundResource(R.drawable.badge_leader)
+                    roleBadge.setTextColor(android.graphics.Color.WHITE)
                 }
                 "officer", "간부" -> {
                     roleBadge.text = "간부"
+                    roleBadge.setBackgroundResource(R.drawable.badge_officer)
+                    roleBadge.setTextColor(android.graphics.Color.WHITE)
                 }
                 "member", "일반", "부원" -> {
-                    roleBadge.text = "일반"
+                    roleBadge.text = "부원"
+                    roleBadge.setBackgroundResource(R.drawable.badge_general)
+                    roleBadge.setTextColor(android.graphics.Color.parseColor("#374151"))
                 }
                 else -> {
-                    roleBadge.text = "일반"
+                    roleBadge.text = "부원"
+                    roleBadge.setBackgroundResource(R.drawable.badge_general)
+                    roleBadge.setTextColor(android.graphics.Color.parseColor("#374151"))
                 }
             }
 
@@ -111,11 +136,27 @@ class MemberAdapter(
                 }
             }
             
-            // Me인 경우 액션 버튼 숨기기
-            if (member.isMe) {
+            // Me이거나 연락처 정보가 숨겨진 경우 액션 버튼 숨기기
+            if (member.isMe || !shouldShowContactInfo) {
                 actionButtons.visibility = View.GONE
             } else {
                 actionButtons.visibility = View.VISIBLE
+                
+                // 전화 버튼 클릭 리스너
+                callButton.setOnClickListener {
+                    val intent = Intent(Intent.ACTION_DIAL).apply {
+                        data = Uri.parse("tel:${member.phone}")
+                    }
+                    itemView.context.startActivity(intent)
+                }
+                
+                // 문자 버튼 클릭 리스너
+                messageButton.setOnClickListener {
+                    val intent = Intent(Intent.ACTION_SENDTO).apply {
+                        data = Uri.parse("smsto:${member.phone}")
+                    }
+                    itemView.context.startActivity(intent)
+                }
             }
         }
     }

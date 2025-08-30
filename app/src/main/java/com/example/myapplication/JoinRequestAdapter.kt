@@ -3,7 +3,6 @@ package com.example.myapplication
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
@@ -24,8 +23,8 @@ class JoinRequestAdapter(
     class JoinRequestViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val tvRequestDate: TextView = itemView.findViewById(R.id.tv_request_date)
         private val tvName: TextView = itemView.findViewById(R.id.tv_name)
-        private val btnApprove: Button = itemView.findViewById(R.id.btn_approve)
-        private val btnReject: Button = itemView.findViewById(R.id.btn_reject)
+        private val btnApprove: TextView = itemView.findViewById(R.id.btn_approve)
+        private val btnReject: TextView = itemView.findViewById(R.id.btn_reject)
 
         fun bind(joinRequest: JoinRequest, onApprove: (JoinRequest) -> Unit, onReject: (JoinRequest) -> Unit) {
             tvRequestDate.text = "가입 요청: ${joinRequest.joinedAt}"

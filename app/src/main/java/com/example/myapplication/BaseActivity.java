@@ -293,9 +293,9 @@ public abstract class BaseActivity extends AppCompatActivity {
                 if (this instanceof MainActivity) {
                     // 장부 리스트를 거치지 않고 바로 장부 상세 내역으로 이동
                     // 현재 동아리 ID를 사용하여 장부 ID를 API로 조회
-                    if (currentClubId > 0) {
+                    if (getCurrentClubId() > 0) {
                         // MainActivity에서 장부 ID를 조회하는 함수 호출
-                        ((MainActivity) this).fetchLedgerIdAndShowFragment(currentClubId);
+                        ((MainActivity) this).fetchLedgerIdAndShowFragment(getCurrentClubId());
                     } else {
                         android.util.Log.e("BaseActivity", "동아리 ID를 찾을 수 없습니다");
                     }
