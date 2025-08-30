@@ -127,6 +127,18 @@
             android:name=".AccountHistoryActivity"
             android:exported="false" />
 
+        <activity
+            android:name=".LedgerCreateActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".LedgerDetailActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".LedgerEditActivity"
+            android:exported="false" />
+
     </application>
 
 </manifest>

@@ -102,6 +102,17 @@ class ClubEventLedgerListActivity : AppCompatActivity() {
             startActivity(intent)
             finish()
         }
+        
+        // 모임통장 버튼
+        findViewById<TextView>(R.id.btn_meeting_account).setOnClickListener {
+            // MainActivity로 이동하여 MeetingAccountFragment 표시
+            val intent = Intent(this, MainActivity::class.java)
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            intent.putExtra("show_meeting_account", true)
+            intent.putExtra("club_pk", clubPk)
+            startActivity(intent)
+            finish()
+        }
     }
 
     private fun loadEventList(clubPk: Int) {

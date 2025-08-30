@@ -13,7 +13,7 @@
         android:orientation="vertical"
         android:background="@drawable/info_box"
         android:padding="24dp"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="16dp"
         android:layout_marginBottom="24dp">
 
         <!-- 제목 -->

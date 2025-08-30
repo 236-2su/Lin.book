@@ -27,6 +27,17 @@ import org.json.JSONObject
 import java.io.OutputStreamWriter
 import java.net.HttpURLConnection
 import java.net.URL
+import com.example.myapplication.api.ApiClient
+import com.example.myapplication.api.ApiService.OcrResponse
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.asRequestBody
+import java.io.File
+import java.io.FileOutputStream
+import java.io.InputStream
 
 class LedgerCreateActivity : BaseActivity() {
 
@@ -90,14 +101,13 @@ class LedgerCreateActivity : BaseActivity() {
         etReceipt?.setOnTouchListener(null)
         etReceipt?.setOnLongClickListener(null)
         
-        // 촬영 완료 상태가 아닐 때만 카메라 실행
+        // 촬영/선택 완료 상태가 아닐 때만 선택 다이얼로그 표시
         etReceipt?.setOnClickListener {
             android.util.Log.d("LedgerCreate", "영수증 클릭 이벤트: isReceiptCaptured = $isReceiptCaptured")
-            if (!isReceiptCaptured && checkCameraPermission()) {
-                android.util.Log.d("LedgerCreate", "카메라 실행")
-                openReceiptCamera()
+            if (!isReceiptCaptured) {
+                showImageSelectionDialog()
             } else {
-                android.util.Log.d("LedgerCreate", "카메라 실행 차단됨")
+                android.util.Log.d("LedgerCreate", "이미지 선택 차단됨")
             }
         }
         
@@ -106,13 +116,52 @@ class LedgerCreateActivity : BaseActivity() {
         etReceipt?.isFocusableInTouchMode = false
         etReceipt?.isClickable = true
         etReceipt?.isCursorVisible = false
-        etReceipt?.hint = "클릭하여 영수증 촬영"
+        etReceipt?.hint = "클릭하여 영수증 선택"
+    }
+    
+    // 이미지 선택 다이얼로그 표시
+    private fun showImageSelectionDialog() {
+        val options = arrayOf("카메라로 촬영", "갤러리에서 선택")
+        
+        android.app.AlertDialog.Builder(this)
+            .setTitle("영수증 이미지 선택")
+            .setItems(options) { _, which ->
+                when (which) {
+                    0 -> {
+                        // 카메라 촬영
+                        if (checkCameraPermission()) {
+                            openReceiptCamera()
+                        }
+                    }
+                    1 -> {
+                        // 갤러리에서 선택
+                        openGallery()
+                    }
+                }
+            }
+            .setNegativeButton("취소", null)
+            .show()
+    }
+    
+    // 갤러리 열기
+    private fun openGallery() {
+        val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+        intent.type = "image/*"
+        try {
+            @Suppress("DEPRECATION")
+            startActivityForResult(intent, GALLERY_REQUEST_CODE)
+        } catch (e: Exception) {
+            android.util.Log.e("LedgerCreate", "갤러리 열기 실패: ${e.message}")
+            android.widget.Toast.makeText(this, "갤러리를 열 수 없습니다", Toast.LENGTH_SHORT).show()
+        }
     }
     
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        if (requestCode == RECEIPT_CAMERA_REQUEST_CODE && resultCode == RESULT_OK) {
+        when (requestCode) {
+            RECEIPT_CAMERA_REQUEST_CODE -> {
+                if (resultCode == RESULT_OK) {
                     // 카메라 촬영 결과 처리
             val imageBitmap = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
                 data?.getParcelableExtra("data", Bitmap::class.java)
@@ -131,26 +180,17 @@ class LedgerCreateActivity : BaseActivity() {
                 etReceipt?.isFocusableInTouchMode = false
                 etReceipt?.isCursorVisible = false
                 
-                // 촬영 완료 후 모든 터치 이벤트 비활성화 (중복 촬영 방지)
-                etReceipt?.setOnTouchListener(null)
-                etReceipt?.setOnClickListener(null)
-                etReceipt?.setOnLongClickListener(null)
-                
-                // 길게 누르면 다시 촬영할 수 있도록 설정
-                etReceipt?.setOnLongClickListener {
-                    // 다시 촬영 확인 다이얼로그
+                // 클릭 시 다시 선택할 수 있도록 설정
+                etReceipt?.setOnClickListener {
                     android.app.AlertDialog.Builder(this)
-                        .setTitle("영수증 재촬영")
-                        .setMessage("영수증을 다시 촬영하시겠습니까?")
-                        .setPositiveButton("재촬영") { _, _ ->
+                        .setTitle("영수증 재선택")
+                        .setMessage("영수증을 다시 선택하시겠습니까?")
+                        .setPositiveButton("재선택") { _, _ ->
                             isReceiptCaptured = false
                             setupReceiptInput(contentView)
-                            etReceipt?.setText("클릭하여 영수증 촬영")
-                            etReceipt?.hint = "클릭하여 영수증 촬영"
                         }
                         .setNegativeButton("취소", null)
                         .show()
-                    true
                 }
                 
                 // 촬영 완료 상태를 저장
@@ -159,9 +199,255 @@ class LedgerCreateActivity : BaseActivity() {
                 android.util.Log.d("LedgerCreate", "영수증 촬영 완료")
                 android.widget.Toast.makeText(this, "영수증 이미지가 촬영되었습니다", Toast.LENGTH_SHORT).show()
                 
-                // 여기에 이미지 저장 및 OCR 처리 로직 추가 가능
-                // imageBitmap을 사용하여 이미지 처리
+                // OCR 처리 (카메라의 경우 imageBitmap을 임시 파일로 저장)
+                val tempFile = saveBitmapToTempFile(imageBitmap)
+                if (tempFile != null) {
+                    processOcrWithImageFile(tempFile)
+                } else {
+                    android.widget.Toast.makeText(this, "이미지 저장에 실패했습니다", Toast.LENGTH_SHORT).show()
+                }
             }
+                }
+            }
+            GALLERY_REQUEST_CODE -> {
+                if (resultCode == RESULT_OK && data != null) {
+                    // 갤러리에서 선택한 이미지 처리
+                    val imageUri: Uri? = data.data
+                    if (imageUri != null) {
+                        // 영수증 입력창에 선택 완료 메시지 표시
+                        val etReceipt = contentView.findViewById<EditText>(R.id.et_receipt)
+                        etReceipt?.setText("영수증 선택 완료")
+                        
+                        // 키보드 방지 설정 유지
+                        etReceipt?.isFocusable = false
+                        etReceipt?.isFocusableInTouchMode = false
+                        etReceipt?.isCursorVisible = false
+                        
+                        // 클릭 시 다시 선택할 수 있도록 설정
+                        etReceipt?.setOnClickListener {
+                            android.app.AlertDialog.Builder(this)
+                                .setTitle("영수증 재선택")
+                                .setMessage("영수증을 다시 선택하시겠습니까?")
+                                .setPositiveButton("재선택") { _, _ ->
+                                    isReceiptCaptured = false
+                                    setupReceiptInput(contentView)
+                                }
+                                .setNegativeButton("취소", null)
+                                .show()
+                        }
+                        
+                        // 선택 완료 상태를 저장
+                        isReceiptCaptured = true
+                        
+                        android.util.Log.d("LedgerCreate", "갤러리에서 영수증 선택 완료")
+                        android.widget.Toast.makeText(this, "영수증 이미지가 선택되었습니다", Toast.LENGTH_SHORT).show()
+                        
+                        // OCR 처리 (갤러리의 경우 imageUri 사용)
+                        processOcrWithImageUri(imageUri)
+                    }
+                }
+            }
+        }
+    }
+    
+    // Uri를 이용한 OCR 처리
+    private fun processOcrWithImageUri(imageUri: Uri) {
+        try {
+            val imageFile = createFileFromUri(imageUri)
+            if (imageFile != null) {
+                processOcrWithImageFile(imageFile)
+            } else {
+                android.widget.Toast.makeText(this, "이미지 파일을 읽을 수 없습니다", Toast.LENGTH_SHORT).show()
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("LedgerCreate", "이미지 파일 처리 중 오류 발생", e)
+            android.widget.Toast.makeText(this, "이미지 처리 중 오류가 발생했습니다", Toast.LENGTH_SHORT).show()
+        }
+    }
+    
+    // 파일을 이용한 OCR 처리
+    private fun processOcrWithImageFile(imageFile: File) {
+        // club_id를 가져오기 (현재 동아리 ID)
+        var clubId = getCurrentClubId()
+        
+        // club_id가 유효하지 않으면 테스트용으로 4 사용
+        if (clubId <= 0) {
+            clubId = 4
+            android.util.Log.w("LedgerCreate", "club_id가 유효하지 않아 테스트용 ID 4를 사용합니다")
+        }
+        
+        android.util.Log.d("LedgerCreate", "OCR 처리 시작 - clubId: $clubId, imageFile: ${imageFile.name}")
+        
+        android.widget.Toast.makeText(this, "OCR 처리를 위해 이미지를 서버에 업로드 중...", Toast.LENGTH_SHORT).show()
+        
+        try {
+            // MultipartBody.Part 생성
+            val requestFile = imageFile.asRequestBody("image/*".toMediaType())
+            val imagePart = MultipartBody.Part.createFormData("image", imageFile.name, requestFile)
+            
+            // OCR API 호출
+            ApiClient.getApiService().processOcr(clubId, 10, imagePart).enqueue(object : Callback<OcrResponse> {
+                override fun onResponse(call: Call<OcrResponse>, response: Response<OcrResponse>) {
+                    // 임시 파일 정리
+                    imageFile.delete()
+                    
+                    if (response.isSuccessful) {
+                        val ocrResult = response.body()
+                        if (ocrResult != null) {
+                            android.util.Log.d("LedgerCreate", "OCR 처리 성공: ${ocrResult}")
+                            fillFormWithOcrResult(ocrResult)
+                        } else {
+                            android.util.Log.e("LedgerCreate", "OCR 응답이 null입니다")
+                            android.widget.Toast.makeText(this@LedgerCreateActivity, "OCR 처리 실패", Toast.LENGTH_SHORT).show()
+                        }
+                    } else {
+                        android.util.Log.e("LedgerCreate", "OCR API 응답 오류: ${response.code()}")
+                        android.widget.Toast.makeText(this@LedgerCreateActivity, "OCR 처리 중 오류가 발생했습니다", Toast.LENGTH_SHORT).show()
+                    }
+                }
+                
+                override fun onFailure(call: Call<OcrResponse>, t: Throwable) {
+                    // 임시 파일 정리
+                    imageFile.delete()
+                    android.util.Log.e("LedgerCreate", "OCR API 호출 실패", t)
+                    android.widget.Toast.makeText(this@LedgerCreateActivity, "OCR 처리 실패: ${t.message}", Toast.LENGTH_SHORT).show()
+                }
+            })
+        } catch (e: Exception) {
+            // 오류 시에도 파일 정리
+            imageFile.delete()
+            android.util.Log.e("LedgerCreate", "OCR API 호출 준비 중 오류 발생", e)
+            android.widget.Toast.makeText(this, "OCR 처리 중 오류가 발생했습니다", Toast.LENGTH_SHORT).show()
+        }
+    }
+    
+    // Bitmap을 임시 파일로 저장하는 함수
+    private fun saveBitmapToTempFile(bitmap: Bitmap): File? {
+        try {
+            val tempFile = File(cacheDir, "temp_camera_receipt_${System.currentTimeMillis()}.jpg")
+            val outputStream = FileOutputStream(tempFile)
+            
+            // Bitmap을 JPEG로 압축하여 저장
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 85, outputStream)
+            outputStream.close()
+            
+            return tempFile
+        } catch (e: Exception) {
+            android.util.Log.e("LedgerCreate", "Bitmap 파일 저장 실패", e)
+        }
+        return null
+    }
+    
+    // OCR 날짜 형식을 앱에서 사용하는 형식으로 변환
+    private fun formatOcrDateTime(ocrDateTime: String): String {
+        try {
+            // OCR에서 올 수 있는 다양한 날짜 형식들을 처리
+            val possibleFormats = listOf(
+                "yyyy-MM-dd HH:mm:ss",           // 2024-08-30 14:30:00
+                "yyyy-MM-dd'T'HH:mm:ss",         // 2024-08-30T14:30:00
+                "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",  // ISO 8601
+                "yyyy-MM-dd HH:mm",              // 2024-08-30 14:30
+                "yyyy/MM/dd HH:mm:ss",           // 2024/08/30 14:30:00
+                "yyyy/MM/dd HH:mm",              // 2024/08/30 14:30
+                "yyyy.MM.dd HH:mm:ss",           // 2024.08.30 14:30:00
+                "yyyy.MM.dd HH:mm",              // 2024.08.30 14:30
+                "yyyy-MM-dd",                    // 2024-08-30 (시간 없음)
+                "yyyy/MM/dd",                    // 2024/08/30 (시간 없음)
+                "yyyy.MM.dd"                     // 2024.08.30 (시간 없음)
+            )
+            
+            // 출력 형식: "2024년 08월 30일 14:30" 또는 "2024년 08월 30일"
+            val outputFormatWithTime = SimpleDateFormat("yyyy년 MM월 dd일 HH:mm", Locale.getDefault())
+            val outputFormatDateOnly = SimpleDateFormat("yyyy년 MM월 dd일", Locale.getDefault())
+            
+            for (formatPattern in possibleFormats) {
+                try {
+                    val inputFormat = SimpleDateFormat(formatPattern, Locale.getDefault())
+                    val date = inputFormat.parse(ocrDateTime)
+                    
+                    return if (formatPattern.contains("HH:mm")) {
+                        outputFormatWithTime.format(date)
+                    } else {
+                        outputFormatDateOnly.format(date)
+                    }
+                } catch (e: Exception) {
+                    // 이 형식으로 파싱 실패, 다음 형식 시도
+                    continue
+                }
+            }
+            
+            // 모든 형식으로 파싱 실패한 경우 원본 반환
+            android.util.Log.w("LedgerCreate", "날짜 형식 변환 실패, 원본 반환: $ocrDateTime")
+            return ocrDateTime
+            
+        } catch (e: Exception) {
+            android.util.Log.e("LedgerCreate", "날짜 변환 중 오류 발생", e)
+            return ocrDateTime
+        }
+    }
+    
+    // Content URI를 임시 파일로 변환하는 함수
+    private fun createFileFromUri(uri: Uri): File? {
+        try {
+            val inputStream: InputStream? = contentResolver.openInputStream(uri)
+            inputStream?.let { input ->
+                val tempFile = File(cacheDir, "temp_receipt_${System.currentTimeMillis()}.jpg")
+                val outputStream = FileOutputStream(tempFile)
+                
+                val buffer = ByteArray(4096)
+                var length: Int
+                while (input.read(buffer).also { length = it } > 0) {
+                    outputStream.write(buffer, 0, length)
+                }
+                
+                outputStream.close()
+                input.close()
+                
+                return tempFile
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("LedgerCreate", "파일 생성 실패", e)
+        }
+        return null
+    }
+    
+    // OCR 결과로 입력창 채우기
+    private fun fillFormWithOcrResult(ocrResult: OcrResponse) {
+        try {
+            // 1. date_time을 거래일시로 설정 (형식 변환)
+            ocrResult.date_time?.let { dateTime ->
+                val formattedDateTime = formatOcrDateTime(dateTime)
+                etTransactionDateTime?.setText(formattedDateTime)
+                android.util.Log.d("LedgerCreate", "거래일시 설정: $dateTime -> $formattedDateTime")
+            }
+            
+            // 2. items의 첫 번째 항목 처리
+            ocrResult.items?.let { items ->
+                if (items.isNotEmpty()) {
+                    val firstEntry = items.entries.first()
+                    val vendorName = firstEntry.key    // 첫 번째 항목의 키를 거래처명으로
+                    val amount = firstEntry.value      // 첫 번째 항목의 값을 금액으로
+                    
+                    // 거래처명 설정 (etTransactionCategory가 거래처명 입력창인 경우)
+                    etTransactionCategory?.setText(vendorName)
+                    android.util.Log.d("LedgerCreate", "거래처명 설정: $vendorName")
+                    
+                    // 금액 설정
+                    etAmount?.setText(amount)
+                    android.util.Log.d("LedgerCreate", "금액 설정: $amount")
+                    
+                    android.widget.Toast.makeText(this, "OCR 처리 완료: 정보가 자동으로 입력되었습니다", Toast.LENGTH_LONG).show()
+                } else {
+                    android.util.Log.w("LedgerCreate", "OCR 결과의 items가 비어있습니다")
+                    android.widget.Toast.makeText(this, "영수증에서 정보를 추출할 수 없습니다", Toast.LENGTH_SHORT).show()
+                }
+            } ?: run {
+                android.util.Log.w("LedgerCreate", "OCR 결과에 items가 없습니다")
+            }
+            
+        } catch (e: Exception) {
+            android.util.Log.e("LedgerCreate", "OCR 결과 처리 중 오류 발생", e)
+            android.widget.Toast.makeText(this, "OCR 결과 처리 중 오류가 발생했습니다", Toast.LENGTH_SHORT).show()
         }
     }
     
@@ -585,6 +871,7 @@ class LedgerCreateActivity : BaseActivity() {
     companion object {
         private const val RECEIPT_CAMERA_REQUEST_CODE = 1002
         private const val CAMERA_PERMISSION_REQUEST_CODE = 1003
+        private const val GALLERY_REQUEST_CODE = 1004
     }
     
     private fun sendLedgerDataToAPI(
