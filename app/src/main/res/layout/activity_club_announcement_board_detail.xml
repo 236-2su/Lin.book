@@ -275,13 +275,15 @@
                     android:src="@drawable/lin_book_banner"
                     android:layout_marginBottom="20dp"/>
 
-                <!-- 댓글 블록: 좌우 36dp 마진 -->
+                <!-- 댓글 블록: 좌우 36dp 마진, 남는 영역을 차지하여 중앙 정렬 -->
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
                     android:orientation="vertical"
                     android:layout_marginStart="36dp"
-                    android:layout_marginEnd="36dp">
+                    android:layout_marginEnd="36dp"
+                    android:gravity="center">
 
                     <!-- 동적 댓글 컨테이너 -->
                     <LinearLayout

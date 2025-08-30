@@ -23,6 +23,8 @@ class ClubAnnouncementBoardListActivity : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var boardAdapter: BoardAdapter
     private val boardList = mutableListOf<BoardItem>()
+    private var isMember: Boolean = false
+    private var isOfficerOrLeader: Boolean = false
 
     companion object {
         private const val EXTRA_CLUB_PK = "club_pk"
@@ -59,12 +61,16 @@ class ClubAnnouncementBoardListActivity : AppCompatActivity() {
                 android.widget.Toast.makeText(this, "동아리 URL이 저장되었습니다.", android.widget.Toast.LENGTH_SHORT).show()
             }
         }
+        // 비회원 포함 항상 공유 버튼은 보이도록 강제
+        findViewById<androidx.appcompat.widget.AppCompatImageButton>(R.id.btn_share)?.visibility = android.view.View.VISIBLE
 
         // 헤더 메뉴(햄버거): 구성원 관리 / 회비 관리
         findViewById<androidx.appcompat.widget.AppCompatImageButton>(R.id.btn_menu)?.setOnClickListener { v ->
             val popup = android.widget.PopupMenu(this, v)
-            popup.menu.add(0, 1, 0, "구성원 관리")
-            popup.menu.add(0, 2, 1, "회비 관리")
+            val membersLabel = if (isOfficerOrLeader) "구성원 관리" else "구성원 조회"
+            val feeLabel = if (isOfficerOrLeader) "회비 관리" else "회비 조회"
+            popup.menu.add(0, 1, 0, membersLabel)
+            popup.menu.add(0, 2, 1, feeLabel)
             popup.setOnMenuItemClickListener { item ->
                 when (item.itemId) {
                     1 -> {
@@ -97,12 +103,19 @@ class ClubAnnouncementBoardListActivity : AppCompatActivity() {
             updateIntent.putExtra("club_pk", currentClubPk)
             startActivity(updateIntent)
         }
+        // 설정 버튼은 기본 숨김(운영진만 노출)
+        findViewById<androidx.appcompat.widget.AppCompatImageButton>(R.id.btn_settings)?.visibility = android.view.View.GONE
 
         // RecyclerView 설정
         recyclerView = findViewById(R.id.rv_board_list)
         recyclerView.layoutManager = LinearLayoutManager(this)
 
         boardAdapter = BoardAdapter(boardList) { boardItem ->
+            // 비회원은 상세 진입 차단 및 토스트 안내
+            if (!isMember) {
+                Toast.makeText(this, "동아리원만 조회 가능합니다", Toast.LENGTH_SHORT).show()
+                return@BoardAdapter
+            }
             // 아이템 클릭 시 상세 페이지로 이동
             val intent = Intent(this, ClubAnnouncementBoardDetailActivity::class.java)
             intent.putExtra("board_item", boardItem)
@@ -117,6 +130,8 @@ class ClubAnnouncementBoardListActivity : AppCompatActivity() {
         val clubPk = intent?.getIntExtra(EXTRA_CLUB_PK, -1) ?: -1
         // 클럽 기본 정보 로드
         fetchClubDetail(clubPk)
+        // 멤버/운영진 여부 확인 후 헤더/버튼/하단 고정 가입 버튼 가시성 적용
+        applyMembershipUi(clubPk)
         fetchBoardList(clubPk)
     }
 
@@ -302,6 +317,68 @@ class ClubAnnouncementBoardListActivity : AppCompatActivity() {
         // Welcome 아래 설명은 short_description으로 표시
         findViewById<TextView>(R.id.tv_club_description)?.text = club.shortDescription
         // 커버 이미지가 API에 없다면 기본 이미지를 유지
+    }
+
+    private fun applyMembershipUi(clubPk: Int) {
+        if (clubPk <= 0) return
+        val userPk = UserManager.getUserPk(this)
+        if (userPk == null) {
+            // 비회원 UI 적용
+            isMember = false
+            findViewById<androidx.appcompat.widget.AppCompatImageButton>(R.id.btn_menu)?.visibility = android.view.View.GONE
+            findViewById<androidx.appcompat.widget.AppCompatImageButton>(R.id.btn_settings)?.visibility = android.view.View.GONE
+            findViewById<com.google.android.material.floatingactionbutton.FloatingActionButton>(R.id.fab_add_post)?.visibility = android.view.View.GONE
+            findViewById<Button>(R.id.btn_bottom_join)?.visibility = android.view.View.VISIBLE
+            // 탭: 공지/자유 외 숨김
+            findViewById<TextView>(R.id.btn_public_account)?.visibility = android.view.View.GONE
+            findViewById<TextView>(R.id.btn_event_account)?.visibility = android.view.View.GONE
+            findViewById<TextView>(R.id.btn_meeting_account)?.visibility = android.view.View.GONE
+            findViewById<TextView>(R.id.btn_ai_report)?.visibility = android.view.View.GONE
+            return
+        }
+        val api = ApiClient.getApiService()
+        api.getClubMembers(clubPk).enqueue(object : retrofit2.Callback<List<com.example.myapplication.MemberResponse>> {
+            override fun onResponse(
+                call: retrofit2.Call<List<com.example.myapplication.MemberResponse>>,
+                response: retrofit2.Response<List<com.example.myapplication.MemberResponse>>
+            ) {
+                val members = response.body().orEmpty()
+                val mine = members.firstOrNull { it.user == userPk && it.status == "active" }
+                val isOfficer = mine?.role == "leader" || mine?.role == "officer"
+                isMember = mine != null
+                isOfficerOrLeader = isOfficer
+                // 햄버거: 회원만 표시
+                findViewById<androidx.appcompat.widget.AppCompatImageButton>(R.id.btn_menu)?.visibility = if (isMember) android.view.View.VISIBLE else android.view.View.GONE
+                // 설정: 운영진만 표시
+                findViewById<androidx.appcompat.widget.AppCompatImageButton>(R.id.btn_settings)?.visibility = if (isOfficer) android.view.View.VISIBLE else android.view.View.GONE
+                // FAB: 운영진만 표시
+                findViewById<com.google.android.material.floatingactionbutton.FloatingActionButton>(R.id.fab_add_post)?.visibility = if (isOfficer) android.view.View.VISIBLE else android.view.View.GONE
+                // 하단 고정 가입 버튼: 비회원만 표시
+                findViewById<Button>(R.id.btn_bottom_join)?.visibility = if (!isMember) android.view.View.VISIBLE else android.view.View.GONE
+                // 탭: 회원 아니면 공지/자유 외 숨김
+                val extraVisibility = if (isMember) android.view.View.VISIBLE else android.view.View.GONE
+                findViewById<TextView>(R.id.btn_public_account)?.visibility = extraVisibility
+                findViewById<TextView>(R.id.btn_event_account)?.visibility = extraVisibility
+                findViewById<TextView>(R.id.btn_meeting_account)?.visibility = extraVisibility
+                findViewById<TextView>(R.id.btn_ai_report)?.visibility = extraVisibility
+            }
+            override fun onFailure(
+                call: retrofit2.Call<List<com.example.myapplication.MemberResponse>>,
+                t: Throwable
+            ) {
+                // 실패 시 비회원 UI 적용
+                isMember = false
+                isOfficerOrLeader = false
+                findViewById<androidx.appcompat.widget.AppCompatImageButton>(R.id.btn_menu)?.visibility = android.view.View.GONE
+                findViewById<androidx.appcompat.widget.AppCompatImageButton>(R.id.btn_settings)?.visibility = android.view.View.GONE
+                findViewById<com.google.android.material.floatingactionbutton.FloatingActionButton>(R.id.fab_add_post)?.visibility = android.view.View.GONE
+                findViewById<Button>(R.id.btn_bottom_join)?.visibility = android.view.View.VISIBLE
+                findViewById<TextView>(R.id.btn_public_account)?.visibility = android.view.View.GONE
+                findViewById<TextView>(R.id.btn_event_account)?.visibility = android.view.View.GONE
+                findViewById<TextView>(R.id.btn_meeting_account)?.visibility = android.view.View.GONE
+                findViewById<TextView>(R.id.btn_ai_report)?.visibility = android.view.View.GONE
+            }
+        })
     }
 
 }

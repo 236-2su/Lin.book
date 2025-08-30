@@ -15,6 +15,35 @@ class ClubFeeBatchBillingActivity : AppCompatActivity() {
             onBackPressedDispatcher.onBackPressed()
         }
 
+        // 헤더 햄버거 메뉴: 구성원 관리 / 회비 관리 (공지 목록과 동일 경로)
+        findViewById<androidx.appcompat.widget.AppCompatImageButton>(R.id.btn_menu)?.setOnClickListener { v ->
+            val popup = android.widget.PopupMenu(this, v)
+            popup.menu.add(0, 1, 0, "구성원 관리")
+            popup.menu.add(0, 2, 1, "회비 관리")
+            popup.setOnMenuItemClickListener { item ->
+                when (item.itemId) {
+                    1 -> {
+                        val clubPk = intent?.getIntExtra(ClubFeeManagementActivity.EXTRA_CLUB_PK, -1) ?: -1
+                        val userPk = UserManager.getUserPk(this) ?: -1
+                        val i = android.content.Intent(this, ClubMemberManagementActivity::class.java)
+                        i.putExtra(ClubMemberManagementActivity.EXTRA_CLUB_PK, clubPk)
+                        i.putExtra(ClubMemberManagementActivity.EXTRA_USER_PK, userPk)
+                        startActivity(i)
+                        true
+                    }
+                    2 -> {
+                        val clubPk = intent?.getIntExtra(ClubFeeManagementActivity.EXTRA_CLUB_PK, -1) ?: -1
+                        val i = android.content.Intent(this, ClubFeeManagementActivity::class.java)
+                        i.putExtra(ClubFeeManagementActivity.EXTRA_CLUB_PK, clubPk)
+                        startActivity(i)
+                        true
+                    }
+                    else -> false
+                }
+            }
+            popup.show()
+        }
+
         // 금액 입력 시 1,000 단위 콤마 표시
         val etAmount = findViewById<android.widget.EditText>(R.id.et_billing_amount)
         etAmount?.addTextChangedListener(object : android.text.TextWatcher {

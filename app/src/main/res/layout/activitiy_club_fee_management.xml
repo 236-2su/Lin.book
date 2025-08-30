@@ -81,7 +81,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_marginStart="16dp"
-            android:text="회비 일괄 청구 목록"
+            android:text="요청 회비 납부 현황"
             android:textColor="#000000"
             android:textSize="16sp" />
 
@@ -124,6 +124,7 @@
 
     <!-- 구분선 -->
     <View
+        android:id="@+id/divider_admin_only"
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:layout_marginStart="24dp"
@@ -131,16 +132,47 @@
         android:layout_marginTop="16dp"
         android:background="#E0E0E0" />
 
-    <!-- 나의 회비 현황 타이틀 -->
+    <!-- 나의 미납 회비 현황 타이틀 -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
         android:layout_marginTop="20dp"
-        android:text="나의 회비 현황"
+        android:text="나의 미납 회비 현황"
         android:textStyle="bold"
         android:textColor="#000000"
         android:textSize="18sp" />
+
+    <!-- 미납 없음/에러 안내 (남은 공간 중앙 정렬) -->
+    <LinearLayout
+        android:id="@+id/empty_unpaid_container"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp"
+        android:gravity="center"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/tv_unpaid_empty"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="미납된 회비가 없습니다."
+            android:textColor="#9E9E9E"
+            android:textSize="13sp" />
+
+    </LinearLayout>
+
+    <!-- 나의 미납 회비 카드 목록 컨테이너 -->
+    <LinearLayout
+        android:id="@+id/container_my_fee_cards"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginTop="12dp"
+        android:orientation="vertical" />
 
 </LinearLayout>
 

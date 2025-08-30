@@ -19,6 +19,7 @@ class ClubForumBoardListActivity : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var boardAdapter: BoardAdapter
     private val boardList = mutableListOf<BoardItem>()
+    private var isMember: Boolean = false
     
     companion object {
         private const val EXTRA_CLUB_PK = "club_pk"
@@ -49,6 +50,11 @@ class ClubForumBoardListActivity : AppCompatActivity() {
         recyclerView.layoutManager = LinearLayoutManager(this)
         
         boardAdapter = BoardAdapter(boardList) { boardItem ->
+            // 비회원은 상세 진입 차단
+            if (!isMember) {
+                android.widget.Toast.makeText(this, "동아리원만 조회 가능합니다", android.widget.Toast.LENGTH_SHORT).show()
+                return@BoardAdapter
+            }
             // 아이템 클릭 시 상세 페이지로 이동
             val intent = Intent(this, ClubForumBoardDetailActivity::class.java)
             intent.putExtra("board_item", boardItem)
@@ -62,6 +68,7 @@ class ClubForumBoardListActivity : AppCompatActivity() {
         // API 호출
         val clubPk = intent?.getIntExtra(EXTRA_CLUB_PK, -1) ?: -1
         fetchClubDetail(clubPk)
+        fetchMembershipAndApply(clubPk)
         fetchBoardList(clubPk)
     }
 
@@ -106,6 +113,42 @@ class ClubForumBoardListActivity : AppCompatActivity() {
             startActivity(intent)
             finish()
         }
+    }
+
+    private fun fetchMembershipAndApply(clubPk: Int) {
+        if (clubPk <= 0) { applyRoleUi(); return }
+        val userPk = UserManager.getUserPk(this)
+        if (userPk == null) { isMember = false; applyRoleUi(); return }
+        val api = com.example.myapplication.api.ApiClient.getApiService()
+        api.getClubMembers(clubPk).enqueue(object : retrofit2.Callback<List<com.example.myapplication.MemberResponse>> {
+            override fun onResponse(
+                call: retrofit2.Call<List<com.example.myapplication.MemberResponse>>,
+                response: retrofit2.Response<List<com.example.myapplication.MemberResponse>>
+            ) {
+                val items = response.body().orEmpty()
+                val mine = items.firstOrNull { it.user == userPk && it.status == "active" }
+                isMember = mine != null
+                applyRoleUi()
+            }
+            override fun onFailure(
+                call: retrofit2.Call<List<com.example.myapplication.MemberResponse>>,
+                t: Throwable
+            ) { applyRoleUi() }
+        })
+    }
+
+    private fun applyRoleUi() {
+        // 자유게시판 작성 FAB: 멤버만 표시 (공지처럼 운영진 제한 요구는 없었으므로 멤버 기준)
+        findViewById<com.google.android.material.floatingactionbutton.FloatingActionButton>(R.id.fab_add_post)?.visibility = if (isMember) android.view.View.VISIBLE else android.view.View.GONE
+        // 비회원 전용 가입신청 버튼 표시
+        findViewById<Button>(R.id.btn_join_request)?.visibility = if (!isMember) android.view.View.VISIBLE else android.view.View.GONE
+        // 비회원 하단 고정 '바로 가입하기' 버튼 표시
+        findViewById<Button>(R.id.btn_bottom_join)?.visibility = if (!isMember) android.view.View.VISIBLE else android.view.View.GONE
+        // 비회원은 공지/자유 탭만 보이도록 나머지 숨김
+        val showOthers = isMember
+        findViewById<TextView>(R.id.btn_public_account)?.visibility = if (showOthers) android.view.View.VISIBLE else android.view.View.GONE
+        findViewById<TextView>(R.id.btn_meeting_account)?.visibility = if (showOthers) android.view.View.VISIBLE else android.view.View.GONE
+        findViewById<TextView>(R.id.btn_ai_report)?.visibility = if (showOthers) android.view.View.VISIBLE else android.view.View.GONE
     }
     
     private fun fetchBoardList(clubPk: Int) {

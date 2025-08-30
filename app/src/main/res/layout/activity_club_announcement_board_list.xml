@@ -156,6 +156,20 @@
             android:textSize="16sp"
             android:textColor="@android:color/black"
             android:lineSpacingMultiplier="1.2" />
+
+        <!-- 비회원 전용 가입신청 버튼 (페이지 연결 없음) -->
+        <Button
+            android:id="@+id/btn_join_request"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_marginTop="12dp"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:text="가입신청"
+            android:textStyle="bold"
+            android:textColor="#1976D2"
+            android:background="@drawable/btn_outline_blue_round"
+            android:visibility="gone" />
     </LinearLayout>
 
     <!-- 게시판 버튼 영역 -->
@@ -240,6 +254,22 @@
         app:backgroundTint="#1976D2"
         app:fabSize="normal"
         app:tint="#FFFFFF" />
+
+    <!-- 비회원용 하단 고정 '바로 가입하기' 버튼 -->
+    <Button
+        android:id="@+id/btn_bottom_join"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        android:text="가입요청"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textColor="#FFFFFF"
+        android:background="@drawable/btn_primary_background"
+        android:visibility="gone" />
 
     
 </FrameLayout>

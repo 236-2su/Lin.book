@@ -130,4 +130,20 @@
         app:tint="#FFFFFF"
         app:fabSize="normal" />
     
+    <!-- 비회원용 하단 고정 '바로 가입하기' 버튼 -->
+    <Button
+        android:id="@+id/btn_bottom_join"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        android:text="가입요청"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textColor="#FFFFFF"
+        android:background="@drawable/btn_primary_background"
+        android:visibility="gone" />
+    
 </FrameLayout>
