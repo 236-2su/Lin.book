@@ -1,11 +1,3 @@
-"""
-주의!!!
-이 프로젝트는 프로토타입으로서 일반적인 인증 기능이 전혀 구현되어 있지 않음!
-만약 프론트에서 오는 요청을 식별하기 위해서는
-request.user 같은 헤더가 아니라
-명시적으로 request body에 user_id를 받아서 그걸 기반으로 user를 식별해야 함!!
-"""
-
 import calendar
 
 from django.db import transaction

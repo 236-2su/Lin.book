@@ -82,6 +82,15 @@ class BoardViewSet(viewsets.ModelViewSet):
     queryset = Board.objects.select_related("author__user")
     serializer_class = BoardSerializer
 
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        instance.views = instance.views + 1
+        instance.save(update_fields=["views"])
+
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
     @extend_schema(
         summary="게시글 좋아요",
         description="게시글에 좋아요가 있으면 삭제하고, 없으면 생성합니다.",
