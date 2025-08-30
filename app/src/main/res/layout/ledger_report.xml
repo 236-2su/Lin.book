@@ -45,7 +45,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Hey-bi 리포트"
+                        android:text="Hey-bi "
                         android:textSize="24sp"
                         android:textColor="#1565C0"
                         android:textStyle="bold"
