@@ -36,10 +36,11 @@ class AIReportDetailActivity : BaseActivity() {
             contentContainer.addView(contentView)
             android.util.Log.d("AIReportDetail", "contentView 추가 성공")
             
-            // Intent에서 리포트 데이터 받아오기
-            val reportData = intent.getStringExtra("report_content")
+            // Intent에서 리포트 데이터 받아오기 (두 가지 키 모두 확인)
+            val reportData = intent.getStringExtra("report_data") ?: intent.getStringExtra("report_content")
             android.util.Log.d("AIReportDetail", "Intent에서 받은 데이터 길이: ${reportData?.length ?: 0}")
             android.util.Log.d("AIReportDetail", "Intent에서 받은 데이터 내용: $reportData")
+            android.util.Log.d("AIReportDetail", "사용된 키: ${if (intent.getStringExtra("report_data") != null) "report_data" else "report_content"}")
             
             if (reportData.isNullOrEmpty()) {
                 android.util.Log.e("AIReportDetail", "❌ Intent에서 받은 데이터가 비어있습니다!")

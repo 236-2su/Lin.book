@@ -35,6 +35,17 @@ class AIReportsAdapter(
         notifyDataSetChanged()
         android.util.Log.d("AIReportsAdapter", "✅ notifyDataSetChanged() 호출 완료")
     }
+    
+    fun removeReport(position: Int) {
+        if (position >= 0 && position < reports.size) {
+            val mutableReports = reports.toMutableList()
+            mutableReports.removeAt(position)
+            reports = mutableReports
+            notifyItemRemoved(position)
+            notifyItemRangeChanged(position, reports.size)
+            android.util.Log.d("AIReportsAdapter", "리포트 제거 완료 - 위치: $position, 남은 개수: ${reports.size}")
+        }
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ReportViewHolder {
         android.util.Log.d("AIReportsAdapter", "🏗️ onCreateViewHolder 호출됨")
@@ -93,6 +104,26 @@ class AIReportsAdapter(
                     }
                     "comparison" -> {
                         tvReportType.text = "비교분석"
+                        tvReportType.setTextColor(0xFF607D8B.toInt()) // 회색
+                    }
+                    "similar_clubs" -> {
+                        tvReportType.text = "유사동아리"
+                        tvReportType.setTextColor(0xFF9C27B0.toInt()) // 보라색
+                    }
+                    "gemini_analysis" -> {
+                        tvReportType.text = "AI재무조언"
+                        tvReportType.setTextColor(0xFF4CAF50.toInt()) // 초록색
+                    }
+                    "three_year_events" -> {
+                        tvReportType.text = "3년이벤트"
+                        tvReportType.setTextColor(0xFF2196F3.toInt()) // 파랑색
+                    }
+                    "yearly" -> {
+                        tvReportType.text = "연간종합"
+                        tvReportType.setTextColor(0xFFFF9800.toInt()) // 주황색
+                    }
+                    "event_comparison" -> {
+                        tvReportType.text = "이벤트비교"
                         tvReportType.setTextColor(0xFF607D8B.toInt()) // 회색
                     }
                     else -> {
