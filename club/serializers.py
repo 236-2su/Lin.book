@@ -61,9 +61,15 @@ class ClubLoginResponseSerializer(serializers.Serializer):
 
 
 class DueSerializer(serializers.ModelSerializer):
+    paid = serializers.SerializerMethodField()
+
     class Meta:
         model = Dues
-        read_only_fields = ["description", "paid_at", "due_to", "amount", "member"]
+        fields = ["description", "paid"]
+        read_only_fields = ["paid_at", "due_to", "amount", "member"]
+
+    def get_paid(self, obj):
+        return obj.paid_at is not None
 
 
 class DuesBatchClaimSerializer(serializers.Serializer):

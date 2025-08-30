@@ -20,9 +20,7 @@ class AccountResponseSerializer(serializers.ModelSerializer):
 
 
 class AccountCreateRequestSerializer(serializers.Serializer):
-    class Meta:
-        model = Accounts
-        fields = ["user"]
+    user_id = serializers.IntegerField(help_text="유저의 id")
 
 
 class AccountUpdateRequestSerializer(serializers.Serializer):

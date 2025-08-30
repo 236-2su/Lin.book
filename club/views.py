@@ -420,6 +420,12 @@ from rest_framework.exceptions import ValidationError
         },
         tags=["Dues"],
     ),
+    get_claims=extend_schema(
+        summary="청구한 회비 조회",
+        description="특정 클럽의 특정 월에 청구한 회비 및 납부 여부를 조회합니다.",
+        request=DueSerializer,
+        tags=["Dues"],
+    ),
 )
 class DueViewSet(viewsets.ViewSet):
     def get_club(self):
@@ -511,3 +517,34 @@ class DueViewSet(viewsets.ViewSet):
         member.save(update_fields=["amount_fee", "paid_fee"])
 
         return Response({"detail": "이체에 성공했습니다."}, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=["get"], url_path="claims/month/(?P<month>[^/.]+)")
+    def get_claims(self, request, club_pk=None, month=None):
+        club = self.get_club()
+        if not month:
+            return Response({"detail": "month is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            month = int(month)
+            if not 1 <= month <= 12:
+                raise ValueError()
+        except (ValueError, TypeError):
+            return Response({"detail": "Invalid month format"}, status=status.HTTP_400_BAD_REQUEST)
+
+        current_year = timezone.now().year
+        dues = Dues.objects.filter(member__club=club, due_to__year=current_year, due_to__month=month)
+        serializer = DueSerializer(dues, many=True)
+        return Response(serializer.data)
+
+
+class UserUnpaidDuesView(APIView):
+    @extend_schema(
+        summary="특정 유저의 미납 회비 전체 조회",
+        description="특정 유저가 모든 클럽에서 아직 납부하지 않은 회비 목록을 조회합니다.",
+        responses=DueSerializer(many=True),
+        tags=["Dues", "User"],
+    )
+    def get(self, request, user_id):
+        unpaid_dues = Dues.objects.filter(member__user_id=user_id, paid_at__isnull=True)
+        serializer = DueSerializer(unpaid_dues, many=True)
+        return Response(serializer.data)
