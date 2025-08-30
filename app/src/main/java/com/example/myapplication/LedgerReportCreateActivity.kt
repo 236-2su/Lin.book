@@ -940,9 +940,9 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
         return buildString {
             appendLine("📊 실제 데이터 기반 유사 동아리 비교 분석")
             appendLine("=".repeat(26))
-            appendLine("🔍 분석 방식: 3개 실시간 API 엔드포인트 통합 분석")
-            appendLine("📅 분석 기준일: ${java.text.SimpleDateFormat("yyyy.MM.dd HH:mm").format(java.util.Date())}")
-            appendLine("🎯 비교 대상: ${clubDetailsMap.size}개 동아리 (내 동아리 + 유사 동아리 ${similarClubs.size}개)")
+            appendLine(" 분석 방식: 3개 실시간 API 엔드포인트 통합 분석")
+            appendLine(" 분석 기준일: ${java.text.SimpleDateFormat("yyyy.MM.dd HH:mm").format(java.util.Date())}")
+            appendLine(" 비교 대상: ${clubDetailsMap.size}개 동아리 (내 동아리 + 유사 동아리 ${similarClubs.size}개)")
             appendLine()
             
             val myClubDetail = clubDetailsMap[myClubId]
@@ -954,12 +954,12 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
             // 1. 내 동아리 기본 정보
             appendLine("🏠 내 동아리 정보")
             appendLine("━".repeat(26))
-            appendLine("📌 동아리명: ${safeDisplayEventName(myClubDetail.clubDetail.name)}")
-            appendLine("🏫 소속: ${myClubDetail.clubDetail.department}")
-            appendLine("📂 대분류: ${myClubDetail.clubDetail.majorCategory}")
-            appendLine("🔖 소분류: ${myClubDetail.clubDetail.minorCategory}")
-            appendLine("👥 활성 멤버 수: ${myClubDetail.memberCount}명")
-            appendLine("📍 활동 장소: ${myClubDetail.clubDetail.location}")
+            appendLine("- 동아리명: ${safeDisplayEventName(myClubDetail.clubDetail.name)}")
+            appendLine("- 소속: ${myClubDetail.clubDetail.department}")
+            appendLine("- 대분류: ${myClubDetail.clubDetail.majorCategory}")
+            appendLine("- 소분류: ${myClubDetail.clubDetail.minorCategory}")
+            appendLine("- 활성 멤버 수: ${myClubDetail.memberCount}명")
+            appendLine("- 활동 장소: ${myClubDetail.clubDetail.location}")
             if (myClubDetail.clubDetail.shortDescription.isNotEmpty()) {
                 appendLine("💭 한줄 소개: ${myClubDetail.clubDetail.shortDescription}")
             }
@@ -980,11 +980,11 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
             
             validSimilarClubs.forEachIndexed { index, (similarClub, detail) ->
                 appendLine("🔍 유사 동아리 ${index + 1}")
-                appendLine("  📌 동아리명: ${safeDisplayEventName(detail.clubDetail.name)}")
-                appendLine("  🏫 소속: ${detail.clubDetail.department}")
-                appendLine("  📂 분류: ${detail.clubDetail.majorCategory} > ${detail.clubDetail.minorCategory}")
-                appendLine("  👥 활성 멤버 수: ${detail.memberCount}명")
-                appendLine("  📍 활동 장소: ${detail.clubDetail.location}")
+                appendLine(" -  동아리명: ${safeDisplayEventName(detail.clubDetail.name)}")
+                appendLine(" -  소속: ${detail.clubDetail.department}")
+                appendLine(" -  분류: ${detail.clubDetail.majorCategory} > ${detail.clubDetail.minorCategory}")
+                appendLine(" -  활성 멤버 수: ${detail.memberCount}명")
+                appendLine(" -  활동 장소: ${detail.clubDetail.location}")
                 if (similarClub.score_hint != null) {
                     appendLine("  📊 유사도 점수: ${String.format("%.1f", similarClub.score_hint * 100)}%")
                 }
@@ -1019,7 +1019,7 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
             val categories = (listOf(myClubDetail.clubDetail.majorCategory) + 
                             validSimilarClubs.map { it.second.clubDetail.majorCategory }).distinct()
             
-            categories.forEach { category ->
+            categories.forEach { category ->ㅇ
                 val clubsInCategory = validSimilarClubs.count { it.second.clubDetail.majorCategory == category } + 
                                    if (myClubDetail.clubDetail.majorCategory == category) 1 else 0
                 appendLine("  📂 $category: ${clubsInCategory}개 동아리")
@@ -4842,10 +4842,12 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
      * 이벤트명을 안전하게 표시 (년도가 화폐로 포맷되는 것을 방지)
      */
     private fun safeDisplayEventName(eventName: String): String {
-        // 혹시 이미 잘못 포맷된 경우를 수정 (예: "2,025원" -> "2025")
+        // 연도가 화폐로 잘못 포맷된 경우를 모두 수정
         val corrected = eventName
             .replace(Regex("(\\d{1,2}),(\\d{3})원"), "$1$2") // "2,025원" -> "2025"
-            .replace(Regex("(\\d+)원\\s+"), "$1 ") // "2025원 " -> "2025 " 
+            .replace(Regex("(\\d+)원(?=\\s|$)"), "$1") // "2025원" -> "2025" (끝이나 공백 앞에서)
+            .replace(Regex("(202[0-9])원"), "$1") // "2023원", "2024원", "2025원" -> "2023", "2024", "2025"
+            .replace(Regex("(\\d{4})원"), "$1") // 모든 4자리 연도+원 -> 연도만
         return corrected
     }
     
@@ -5359,22 +5361,23 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
                 
                 // 연도별 데이터 표시
                 listOf(2023, 2024, 2025).forEach { year ->
+
                     val eventData = yearlyData[year]
                     if (eventData != null) {
-                        appendLine("  ${year}년 \n 수입 ${formatAmount(eventData.income.toLong())}, 지출 ${formatAmount(eventData.expense.toLong())}, 순액 ${formatAmount(eventData.net.toLong())} ")
+                        appendLine(" ▶ ${year}년 \n  :수입 ${formatAmount(eventData.income.toLong())}, 지출 ${formatAmount(eventData.expense.toLong())}, \n 순액 ${formatAmount(eventData.net.toLong())} ")
                     } else {
-                        appendLine("  ${year}년: 미진행 ❌")
+                        appendLine("   ${year}년: 미진행 ❌")
                     }
+                    appendLine()
 
                 }
                 
                 // 이벤트 그룹 트렌드 분석
                 val trend = analyzeEventGroupTrend(yearlyData)
-                appendLine("  📈 **트렌드 분석**: $trend")
+                appendLine("  📈 **트렌드 분석** \n $trend")
                 
                 // 투자 효율성 평가
                 val efficiency = analyzeEventGroupEfficiency(yearlyData)
-                appendLine("  💡 **효율성**: $efficiency")
                 appendLine("=".repeat(26))
                 appendLine()
                 appendLine()
@@ -5419,7 +5422,7 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
                     val lastYear = yearlyData.keys.maxOrNull()
                     val lastData = if (lastYear != null) yearlyData[lastYear] else null
                     if (lastData != null && lastYear != null) {
-                        appendLine("  • **${safeDisplayEventName(eventName)}**: 최종 진행 ${lastYear}년 (지출 ${formatAmount(lastData.expense.toLong())})")
+                        appendLine("  • **${safeDisplayEventName(eventName)}**\n    최종 진행 ${lastYear}년 (지출 ${formatAmount(lastData.expense.toLong())})")
                     }
                 }
                 appendLine()
@@ -5791,12 +5794,14 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
                 expenseChange <= 0 && netChange > 0 -> "✅ 비용 절감 및 효율성 개선"
                 expenseChange <= 0 && netChange <= 0 -> "📉 규모 축소"
                 else -> "➡️ 유지"
+
             }
+
             
-            trends.add("${prevYear}→${currYear}년: $trendDescription (지출 ${if (expenseChange >= 0) "+" else ""}${String.format("%.1f", expenseChangePercent)}%)")
+            trends.add("${prevYear}→${currYear}년: $trendDescription (지출 ${if (expenseChange >= 0) "+" else ""}${String.format("%.1f", expenseChangePercent)}%)\n")
         }
         
-        return trends.joinToString(" | ")
+        return trends.joinToString(" ")
     }
     
     /**

@@ -222,12 +222,17 @@ class AIReportDetailActivity : BaseActivity() {
                 .replace("•", "▪") // 불릿 포인트 한국어 스타일
                 .replace("- ", "▪ ") // 하이픈 불릿을 한국어 스타일로
             
-            // 숫자 포맷팅 (천단위 콤마)
+            // 숫자 포맷팅 (천단위 콤마) - 연도는 제외
             val numberPattern = "\\b(\\d{4,})원?\\b".toRegex()
             val finalContent = numberPattern.replace(formattedContent) { matchResult ->
                 val number = matchResult.groupValues[1].toLongOrNull()
                 if (number != null) {
-                    String.format("%,d", number) + "원"
+                    // 2023, 2024, 2025는 연도이므로 포맷팅하지 않음
+                    if (number == 2023L || number == 2024L || number == 2025L) {
+                        number.toString()
+                    } else {
+                        String.format("%,d", number) + "원"
+                    }
                 } else {
                     matchResult.value
                 }
