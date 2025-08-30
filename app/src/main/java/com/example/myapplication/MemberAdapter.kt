@@ -74,8 +74,20 @@ class MemberAdapter(
 
         fun bind(member: Member) {
             memberName.text = member.name
-            memberInfo.text = "${member.department} / ${member.studentNumber}"
-            memberPhone.text = member.phone
+            
+            // 회장이 아닌 사용자는 다른 멤버(회장 제외)의 학번과 전화번호를 볼 수 없음
+            val isLeader = member.role == "leader" || member.role == "회장"
+            val shouldShowContactInfo = isPresidentMode || member.isMe || isLeader
+            
+            if (shouldShowContactInfo) {
+                memberInfo.text = "${member.department} / ${member.studentNumber}"
+                memberPhone.text = member.phone
+                memberPhone.visibility = View.VISIBLE
+            } else {
+                memberInfo.text = member.department
+                memberPhone.visibility = View.GONE
+            }
+            
             joinDate.text = "가입일: ${member.joinDate}"
 
             // Me 배지 표시 여부 및 테두리 설정
@@ -124,8 +136,8 @@ class MemberAdapter(
                 }
             }
             
-            // Me인 경우 액션 버튼 숨기기
-            if (member.isMe) {
+            // Me이거나 연락처 정보가 숨겨진 경우 액션 버튼 숨기기
+            if (member.isMe || !shouldShowContactInfo) {
                 actionButtons.visibility = View.GONE
             } else {
                 actionButtons.visibility = View.VISIBLE

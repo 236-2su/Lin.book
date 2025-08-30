@@ -273,6 +273,12 @@ class ClubMemberManagementActivity : AppCompatActivity() {
                         }
                     }
                     
+                    // 권한에 따라 제목 텍스트 변경
+                    updateTitleBasedOnRole()
+                    
+                    // 권한에 따라 가입 요청 탭 표시/숨김
+                    updateJoinRequestTabVisibility()
+                    
                     memberAdapter.notifyDataSetChanged()
                 } else {
                     Log.e("API_ERROR", "사용자 목록 조회 실패: ${response.code()}")
@@ -613,5 +619,17 @@ class ClubMemberManagementActivity : AppCompatActivity() {
                     Toast.LENGTH_SHORT).show()
             }
         })
+    }
+
+    // 권한에 따라 제목 텍스트 업데이트
+    private fun updateTitleBasedOnRole() {
+        val titleTextView = findViewById<TextView>(R.id.tv_member_title)
+        titleTextView.text = if (isCurrentUserPresident) "구성원 관리" else "구성원 목록"
+    }
+    
+    // 권한에 따라 가입 요청 탭 표시/숨김
+    private fun updateJoinRequestTabVisibility() {
+        val btnJoinRequest = findViewById<TextView>(R.id.btnJoinRequest)
+        btnJoinRequest.visibility = if (isCurrentUserPresident) View.VISIBLE else View.GONE
     }
 }
