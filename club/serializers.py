@@ -69,10 +69,11 @@ class DueSerializer(serializers.ModelSerializer):
     member_name = serializers.SerializerMethodField()
     member_student_number = serializers.SerializerMethodField()
     charged_amount = serializers.SerializerMethodField()
+    club_name = serializers.SerializerMethodField()
 
     class Meta:
         model = Dues
-        fields = ["description", "paid", "member_name", "member_student_number", "charged_amount"]
+        fields = ["description", "paid", "member_name", "member_student_number", "charged_amount", "club_name"]
         read_only_fields = ["paid_at", "due_to", "amount", "member"]
 
     def get_paid(self, obj):
@@ -86,6 +87,9 @@ class DueSerializer(serializers.ModelSerializer):
 
     def get_charged_amount(self, obj):
         return obj.amount
+
+    def get_club_name(self, obj):
+        return obj.club.name if obj.club is not None else "null"
 
 
 class DuesBatchClaimSerializer(serializers.Serializer):
