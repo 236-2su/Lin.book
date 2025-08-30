@@ -49,6 +49,9 @@ class MeetingAccountFragment : Fragment() {
         super.onCreate(savedInstanceState)
         arguments?.let {
             clubPk = it.getInt(ARG_CLUB_PK, -1)
+            Log.d("MeetingAccountFragment", "onCreate - arguments에서 받은 clubPk: $clubPk")
+        } ?: run {
+            Log.e("MeetingAccountFragment", "onCreate - arguments가 null입니다!")
         }
     }
     
@@ -65,6 +68,11 @@ class MeetingAccountFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        
+        // 디버깅: clubPk 값 확인
+        Log.d("MeetingAccountFragment", "onViewCreated - clubPk: $clubPk")
+        Log.d("MeetingAccountFragment", "onViewCreated - arguments 확인: ${arguments}")
+        Log.d("MeetingAccountFragment", "onViewCreated - ARG_CLUB_PK: ${arguments?.getInt(ARG_CLUB_PK, -1)}")
         
         // 등록하기 버튼 숨기기
         hideRegisterButton()

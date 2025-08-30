@@ -2,12 +2,18 @@ package com.example.myapplication
 
 import android.os.Bundle
 import android.graphics.Color
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.Switch
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.example.myapplication.ClubForumBoardListFragment
+import com.example.myapplication.api.ApiClient
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MainActivity : BaseActivity() {
 
@@ -28,7 +34,8 @@ class MainActivity : BaseActivity() {
             val clubPk = intent?.getIntExtra("club_pk", -1) ?: -1
             val ledgerPk = intent?.getIntExtra("ledger_pk", 10) ?: 10 // ledger_pk도 Intent에서 받아옴
             if (clubPk > 0) {
-                replaceFragment(LedgerContentFragment.newInstance(clubPk, ledgerPk))
+                // 해당 동아리의 장부 ID를 API로 조회
+                fetchLedgerIdAndShowFragment(clubPk)
                 return
             }
         }
@@ -139,6 +146,62 @@ class MainActivity : BaseActivity() {
         // 프래그먼트 교체
         transaction.replace(R.id.content_container, fragment)
         transaction.commit()
+    }
+    
+    // 동아리 ID를 기반으로 장부 ID를 조회하고 LedgerContentFragment를 표시하는 함수
+    fun fetchLedgerIdAndShowFragment(clubPk: Int) {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val apiService = ApiClient.getApiService()
+                val response = apiService.getLedgerList(clubPk).execute()
+                
+                withContext(Dispatchers.Main) {
+                    if (response.isSuccessful && response.body() != null) {
+                        val ledgers = response.body()!!
+                        if (ledgers.isNotEmpty()) {
+                            // 첫 번째 장부를 사용 (또는 특정 조건에 맞는 장부 선택)
+                            val ledgerId = ledgers.first().id
+                            Log.d("MainActivity", "장부 ID 조회 성공: clubPk=$clubPk, ledgerId=$ledgerId")
+                            replaceFragment(LedgerContentFragment.newInstance(clubPk, ledgerId))
+                        } else {
+                            Log.e("MainActivity", "해당 동아리의 장부가 없습니다: clubPk=$clubPk")
+                            // 장부가 없는 경우 기본값 사용
+                            replaceFragment(LedgerContentFragment.newInstance(clubPk, 1))
+                        }
+                    } else {
+                        Log.e("MainActivity", "장부 목록 조회 실패: ${response.code()}")
+                        // API 실패 시 기본값 사용
+                        replaceFragment(LedgerContentFragment.newInstance(clubPk, 1))
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("MainActivity", "장부 ID 조회 중 오류 발생", e)
+                withContext(Dispatchers.Main) {
+                    // 오류 발생 시 기본값 사용
+                    replaceFragment(LedgerContentFragment.newInstance(clubPk, 1))
+                }
+            }
+        }
+    }
+    
+    // BaseActivity의 getCurrentClubId를 오버라이드하여 동아리 ID를 올바르게 반환
+    override fun getCurrentClubId(): Int {
+        // Intent에서 동아리 ID를 가져오려고 시도 (여러 가능한 키 확인)
+        var clubId = intent.getIntExtra("club_pk", -1)
+        if (clubId <= 0) {
+            clubId = intent.getIntExtra("club_id", -1)
+        }
+        if (clubId <= 0) {
+            clubId = intent.getIntExtra("EXTRA_CLUB_PK", -1)
+        }
+        
+        Log.d("MainActivity", "getCurrentClubId 호출됨")
+        Log.d("MainActivity", "  - club_pk: ${intent.getIntExtra("club_pk", -1)}")
+        Log.d("MainActivity", "  - club_id: ${intent.getIntExtra("club_id", -1)}")
+        Log.d("MainActivity", "  - EXTRA_CLUB_PK: ${intent.getIntExtra("EXTRA_CLUB_PK", -1)}")
+        Log.d("MainActivity", "  - 최종 반환값: $clubId")
+        
+        return if (clubId > 0) clubId else 0
     }
     
     // 뒤로가기 처리

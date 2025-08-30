@@ -45,7 +45,7 @@ class TransactionAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     
     // 거래 내역 ViewHolder
     class TransactionViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val tvDateTime: TextView = itemView.findViewById(R.id.tv_transaction_datetime)
+        private val tvDateTime: TextView = itemView.findViewById(R.id.tv_transaction_type)
         private val tvSummary: TextView = itemView.findViewById(R.id.tv_transaction_summary)
         private val tvAmount: TextView = itemView.findViewById(R.id.tv_transaction_amount)
         private val tvBalance: TextView = itemView.findViewById(R.id.tv_transaction_balance)
