@@ -7,6 +7,8 @@ from rest_framework.exceptions import ValidationError
 from club.models import ClubMember
 from user.models import User
 
+from .models import Accounts
+
 
 def _get_unique_transaction_no():
     """Generates a unique transaction number."""
@@ -131,28 +133,6 @@ def get_transaction_history(
     return payload.get("REC", {})
 
 
-"""
-거래 내역 조회 API 응답
-{
-    "totalCount": "1",
-    "list": [
-    {
-        "transactionUniqueNo": "104429",
-        "transactionDate": "20250830",
-        "transactionTime": "014735",
-        "transactionType": "1",
-        "transactionTypeName": "입금(이체)",
-        "transactionAccountNo": "0011461639385305",
-        "transactionBalance": "100",
-        "transactionAfterBalance": "100",
-        "transactionSummary": "류하준 1월 회비",
-        "transactionMemo": ""
-    }
-    ]
-}
-"""
-
-
 def transfer(member: ClubMember, to_account_no: str, amount: int, withdrawal_message: str, deposit_message: str):
     user = member.user
     user_account = user.accounts_set.first()
@@ -190,6 +170,18 @@ def deposit(user: User, amount: int, summary: str = "입금"):
         "accountNo": user_account.code,
         "transactionBalance": amount,
         "transactionSummary": summary,
+    }
+
+    return _make_request(url, data)
+
+
+def cancel(account: Accounts, refund_account: Accounts):
+    api_name = "deleteDemandDepositAccount"
+    url = "https://finopenapi.ssafy.io/ssafy/api/v1/edu/demandDeposit/deleteDemandDepositAccount"
+    data = {
+        "Header": _build_header(api_name, account.user.user_key),
+        "accountNo": account.code,
+        "refundAccountNo": refund_account.code,
     }
 
     return _make_request(url, data)
