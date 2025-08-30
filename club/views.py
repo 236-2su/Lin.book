@@ -516,7 +516,7 @@ class DueViewSet(viewsets.ViewSet):
         member.paid_fee += due.amount
         member.save(update_fields=["amount_fee", "paid_fee"])
 
-        return Response({"detail": "이체에 성공했습니다."}, status=status.HTTP_200_OK)
+        return Response({"detail": f"{due.amount}원 이체에 성공했습니다."}, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=["get"], url_path="claims/month/(?P<month>[^/.]+)")
     def get_claims(self, request, club_pk=None, month=None):
