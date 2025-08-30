@@ -379,14 +379,14 @@ class BackendReportConverter {
     private fun formatThreeYearData(yearlyData: Map<Int, Map<String, Any>>): String {
         return buildString {
             appendLine("📊 SSAFY 앱메이커 3년간 재정 비교 분석")
-            appendLine("━".repeat(50))
+            appendLine("━".repeat(26))
             appendLine("📅 분석기간: 2023년 ~ 2025년 (3년간)")
             appendLine("🔍 데이터 출처: 실제 장부 데이터 기반")
             appendLine()
             
             // 1. 연도별 재정 현황
             appendLine("💰 연도별 재정 현황 비교")
-            appendLine("━".repeat(30))
+            appendLine("━".repeat(26))
             
             val summaryData = mutableMapOf<Int, Triple<Long, Long, Long>>()
             
@@ -408,7 +408,7 @@ class BackendReportConverter {
             // 2. 성장률 분석
             if (summaryData.size >= 2) {
                 appendLine("📈 연도별 성장률 분석")
-                appendLine("━".repeat(30))
+                appendLine("━".repeat(26))
                 
                 val years = summaryData.keys.sorted()
                 for (i in 1 until years.size) {
@@ -435,7 +435,7 @@ class BackendReportConverter {
             
             // 3. 거래 유형별 3년간 비교
             appendLine("🏷️ 거래 유형별 3년간 비교")
-            appendLine("━".repeat(30))
+            appendLine("━".repeat(26))
             
             val typeComparison = mutableMapOf<String, MutableMap<Int, Pair<Int, Int>>>()
             
@@ -462,7 +462,7 @@ class BackendReportConverter {
             
             // 4. AI 분석 결론
             appendLine("🤖 AI 종합 분석 결론")
-            appendLine("━".repeat(30))
+            appendLine("━".repeat(26))
             
             val totalYears = summaryData.keys.sorted()
             if (totalYears.size >= 2) {
@@ -485,7 +485,7 @@ class BackendReportConverter {
             
             appendLine()
             appendLine("📈 이 분석은 실제 동아리 장부 데이터를 기반으로 생성되었습니다.")
-            appendLine("━".repeat(50))
+            appendLine("━".repeat(26))
         }
     }
     

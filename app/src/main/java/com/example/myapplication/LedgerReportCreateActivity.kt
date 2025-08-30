@@ -785,24 +785,33 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
     
     // 유사 동아리 비교 리포트 생성
     private fun generateSimilarClubsComparisonReport(clubId: Int, reportName: String) {
-        Log.d("LedgerReportCreate", "🏆 유사 동아리 비교 분석 시작...")
+        Log.d("LedgerReportCreate", "🏆 유사 동아리 비교 분석 시작 (실제 API 데이터 사용)...")
         updateProgressMessage("🔍 유사 동아리 검색 중...")
         
-        // 유사 동아리 비교 리포트 API 호출 (이미 존재하는 API 사용)
-        ApiClient.getApiService().createSimilarClubsReport(clubId, currentYear)
-            .enqueue(object : retrofit2.Callback<ApiService.SimilarClubsReportResponse> {
-                override fun onResponse(call: retrofit2.Call<ApiService.SimilarClubsReportResponse>, response: retrofit2.Response<ApiService.SimilarClubsReportResponse>) {
+        // 1단계: 유사 동아리 목록 가져오기
+        ApiClient.getApiService().getSimilarClubsByClub(clubId)
+            .enqueue(object : retrofit2.Callback<ApiService.SimilarClubResponse> {
+                override fun onResponse(call: retrofit2.Call<ApiService.SimilarClubResponse>, response: retrofit2.Response<ApiService.SimilarClubResponse>) {
                     if (response.isSuccessful && response.body() != null) {
-                        // 추가 정보 수집을 위해 클럽 정보와 멤버 수 가져오기
-                        fetchClubDetailsAndCreateReport(response.body()!!, reportName, clubId)
+                        val similarClubs = response.body()!!.getSimilarClubs()
+                        Log.d("LedgerReportCreate", "✅ 유사 동아리 ${similarClubs.size}개 발견")
+                        
+                        if (similarClubs.isEmpty()) {
+                            hideProgressDialog()
+                            showAdvancedError("비교 분석 실패", "유사 동아리를 찾을 수 없습니다.", "다른 리포트 유형을 시도해보세요.")
+                            return
+                        }
+                        
+                        // 2단계: 내 동아리와 유사 동아리들의 상세 정보 및 멤버 정보 가져오기
+                        fetchAllClubDetailsForComparison(clubId, similarClubs.take(2), reportName)
                     } else {
                         hideProgressDialog()
                         showAdvancedError("비교 분석 실패", "유사 동아리 데이터를 찾을 수 없습니다.", "다른 리포트 유형을 시도해보세요.")
                     }
                 }
                 
-                override fun onFailure(call: retrofit2.Call<ApiService.SimilarClubsReportResponse>, t: Throwable) {
-                    handleAdvancedApiError("유사 동아리 비교", t)
+                override fun onFailure(call: retrofit2.Call<ApiService.SimilarClubResponse>, t: Throwable) {
+                    handleAdvancedApiError("유사 동아리 검색", t)
                 }
             })
     }
@@ -853,6 +862,39 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
         }
     }
     
+    // 새로운 API 방식: 3개 엔드포인트를 사용한 동아리 비교
+    private fun fetchAllClubDetailsForComparison(myClubId: Int, similarClubs: List<ApiService.SimilarClubItem>, reportName: String) {
+        updateProgressMessage("📊 동아리 정보와 멤버 수를 수집 중...")
+        
+        val allClubIds = listOf(myClubId) + similarClubs.map { it.id }
+        val clubDetailsMap = mutableMapOf<Int, ClubDetailWithMembers>()
+        var completedRequests = 0
+        val totalClubs = allClubIds.size
+        
+        Log.d("LedgerReportCreate", "📋 총 ${totalClubs}개 동아리 정보 수집: $allClubIds")
+        
+        allClubIds.forEach { clubId ->
+            fetchClubDetailWithMembers(clubId) { clubDetail ->
+                if (clubDetail != null) {
+                    clubDetailsMap[clubId] = clubDetail
+                    Log.d("LedgerReportCreate", "✅ 동아리 ${clubId} 정보 수집 완료 (멤버 ${clubDetail.memberCount}명)")
+                } else {
+                    Log.w("LedgerReportCreate", "⚠️ 동아리 ${clubId} 정보 수집 실패")
+                }
+                completedRequests++
+                
+                if (completedRequests == totalClubs) {
+                    // 모든 동아리 정보 수집 완료, 리포트 생성
+                    Log.d("LedgerReportCreate", "🎯 모든 동아리 정보 수집 완료, 리포트 생성 시작")
+                    val reportContent = createRealDataSimilarClubsReport(myClubId, clubDetailsMap, similarClubs)
+                    saveReportWithAdvancedMetrics(reportName, reportContent, "similar_clubs_real", myClubId)
+                    hideProgressDialog()
+                    Toast.makeText(this@LedgerReportCreateActivity, "✅ 실제 데이터 기반 유사 동아리 비교 완료!", Toast.LENGTH_LONG).show()
+                }
+            }
+        }
+    }
+    
     private fun fetchClubDetailWithMembers(clubId: Int, callback: (ClubDetailWithMembers?) -> Unit) {
         // 동아리 상세 정보 가져오기
         ApiClient.getApiService().getClubDetail(clubId).enqueue(object : retrofit2.Callback<ClubItem> {
@@ -887,6 +929,159 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
                 callback(null)
             }
         })
+    }
+    
+    // 실제 API 데이터를 사용한 유사 동아리 비교 리포트 생성
+    private fun createRealDataSimilarClubsReport(
+        myClubId: Int, 
+        clubDetailsMap: Map<Int, ClubDetailWithMembers>, 
+        similarClubs: List<ApiService.SimilarClubItem>
+    ): String {
+        return buildString {
+            appendLine("📊 실제 데이터 기반 유사 동아리 비교 분석")
+            appendLine("=".repeat(26))
+            appendLine("🔍 분석 방식: 3개 실시간 API 엔드포인트 통합 분석")
+            appendLine("📅 분석 기준일: ${java.text.SimpleDateFormat("yyyy.MM.dd HH:mm").format(java.util.Date())}")
+            appendLine("🎯 비교 대상: ${clubDetailsMap.size}개 동아리 (내 동아리 + 유사 동아리 ${similarClubs.size}개)")
+            appendLine()
+            
+            val myClubDetail = clubDetailsMap[myClubId]
+            if (myClubDetail == null) {
+                appendLine("❌ 내 동아리 정보를 가져올 수 없습니다.")
+                return@buildString
+            }
+            
+            // 1. 내 동아리 기본 정보
+            appendLine("🏠 내 동아리 정보")
+            appendLine("━".repeat(26))
+            appendLine("📌 동아리명: ${safeDisplayEventName(myClubDetail.clubDetail.name)}")
+            appendLine("🏫 소속: ${myClubDetail.clubDetail.department}")
+            appendLine("📂 대분류: ${myClubDetail.clubDetail.majorCategory}")
+            appendLine("🔖 소분류: ${myClubDetail.clubDetail.minorCategory}")
+            appendLine("👥 활성 멤버 수: ${myClubDetail.memberCount}명")
+            appendLine("📍 활동 장소: ${myClubDetail.clubDetail.location}")
+            if (myClubDetail.clubDetail.shortDescription.isNotEmpty()) {
+                appendLine("💭 한줄 소개: ${myClubDetail.clubDetail.shortDescription}")
+            }
+            appendLine()
+            
+            // 2. 유사 동아리들 정보
+            appendLine("🎯 발견된 유사 동아리 분석")
+            appendLine("━".repeat(26))
+            
+            val validSimilarClubs = similarClubs.mapNotNull { similarClub ->
+                clubDetailsMap[similarClub.id]?.let { detail -> similarClub to detail }
+            }
+            
+            if (validSimilarClubs.isEmpty()) {
+                appendLine("⚠️ 유사 동아리 정보를 가져올 수 없습니다.")
+                return@buildString
+            }
+            
+            validSimilarClubs.forEachIndexed { index, (similarClub, detail) ->
+                appendLine("🔍 유사 동아리 ${index + 1}")
+                appendLine("  📌 동아리명: ${safeDisplayEventName(detail.clubDetail.name)}")
+                appendLine("  🏫 소속: ${detail.clubDetail.department}")
+                appendLine("  📂 분류: ${detail.clubDetail.majorCategory} > ${detail.clubDetail.minorCategory}")
+                appendLine("  👥 활성 멤버 수: ${detail.memberCount}명")
+                appendLine("  📍 활동 장소: ${detail.clubDetail.location}")
+                if (similarClub.score_hint != null) {
+                    appendLine("  📊 유사도 점수: ${String.format("%.1f", similarClub.score_hint * 100)}%")
+                }
+                if (detail.clubDetail.shortDescription.isNotEmpty()) {
+                    appendLine("  💭 한줄 소개: ${detail.clubDetail.shortDescription}")
+                }
+                appendLine()
+            }
+            
+            // 3. 비교 분석
+            appendLine("📈 동아리 비교 분석")
+            appendLine("━".repeat(26))
+            
+            // 멤버 수 비교
+            val allMemberCounts = listOf(myClubDetail.memberCount) + validSimilarClubs.map { it.second.memberCount }
+            val avgMemberCount = allMemberCounts.average()
+            val maxMemberCount = allMemberCounts.maxOrNull() ?: 0
+            val minMemberCount = allMemberCounts.minOrNull() ?: 0
+            
+            appendLine("👥 멤버 수 비교 분석:")
+            appendLine("  • 내 동아리: ${myClubDetail.memberCount}명")
+            appendLine("  • 유사 동아리 평균: ${String.format("%.1f", validSimilarClubs.map { it.second.memberCount }.average())}명")
+            appendLine("  • 전체 평균: ${String.format("%.1f", avgMemberCount)}명")
+            appendLine("  • 최대/최소: ${maxMemberCount}명 / ${minMemberCount}명")
+            
+            val memberRank = allMemberCounts.sortedDescending().indexOf(myClubDetail.memberCount) + 1
+            appendLine("  🏆 내 동아리 순위: ${memberRank}위 / ${allMemberCounts.size}개 동아리")
+            appendLine()
+            
+            // 활동 영역 비교
+            appendLine("🎯 활동 영역 비교:")
+            val categories = (listOf(myClubDetail.clubDetail.majorCategory) + 
+                            validSimilarClubs.map { it.second.clubDetail.majorCategory }).distinct()
+            
+            categories.forEach { category ->
+                val clubsInCategory = validSimilarClubs.count { it.second.clubDetail.majorCategory == category } + 
+                                   if (myClubDetail.clubDetail.majorCategory == category) 1 else 0
+                appendLine("  📂 $category: ${clubsInCategory}개 동아리")
+            }
+            appendLine()
+            
+            // 지역별 분석
+            appendLine("📍 활동 지역 비교:")
+            val locations = (listOf(myClubDetail.clubDetail.location) + 
+                           validSimilarClubs.map { it.second.clubDetail.location }).distinct()
+            
+            locations.forEach { location ->
+                val clubsInLocation = validSimilarClubs.count { it.second.clubDetail.location == location } + 
+                                    if (myClubDetail.clubDetail.location == location) 1 else 0
+                appendLine("  🏢 $location: ${clubsInLocation}개 동아리")
+            }
+            appendLine()
+            
+            // 4. 종합 평가 및 권고사항
+            appendLine("🎖️ AI 종합 분석 및 권고사항")
+            appendLine("━".repeat(26))
+            
+            val memberPercentile = ((allMemberCounts.size - memberRank + 1) * 100.0 / allMemberCounts.size)
+            val memberStatus = when {
+                memberPercentile >= 80 -> "상위권 📊"
+                memberPercentile >= 60 -> "평균 이상 📈"
+                memberPercentile >= 40 -> "보통 📊"
+                else -> "성장 잠재력 🌱"
+            }
+            
+            appendLine("✨ 우리 동아리 특성 분석:")
+            appendLine("  • 멤버 규모: $memberStatus (상위 ${String.format("%.0f", memberPercentile)}%)")
+            appendLine("  • 활동 분야: ${myClubDetail.clubDetail.majorCategory} 전문")
+            appendLine("  • 지역적 특성: ${myClubDetail.clubDetail.location} 기반")
+            appendLine()
+            
+            appendLine("💡 성장 및 개선 제안:")
+            when {
+                myClubDetail.memberCount < avgMemberCount -> {
+                    appendLine("  🎯 멤버십 확대: 현재 평균보다 ${String.format("%.0f", avgMemberCount - myClubDetail.memberCount)}명 적음")
+                    appendLine("    - 신입 모집 활동 강화 권장")
+                    appendLine("    - 유사 동아리의 모집 전략 벤치마킹")
+                }
+                myClubDetail.memberCount > avgMemberCount -> {
+                    appendLine("  🏆 우수한 멤버십 규모: 평균보다 ${myClubDetail.memberCount - avgMemberCount.toInt()}명 많음")
+                    appendLine("    - 현재 규모 유지 및 질적 성장 집중")
+                    appendLine("    - 멤버 만족도 향상에 중점")
+                }
+                else -> {
+                    appendLine("  ⚖️ 적정 규모 유지: 균형잡힌 멤버십")
+                    appendLine("    - 현재 규모의 안정적 운영")
+                }
+            }
+            
+            appendLine()
+            appendLine("  🤝 네트워킹 제안:")
+            validSimilarClubs.forEach { (similarClub, detail) ->
+                appendLine("    - ${safeDisplayEventName(detail.clubDetail.name)}: ${detail.clubDetail.majorCategory} 분야 협업 가능")
+            }
+            
+            appendLine()
+        }
     }
     
     // AI 재무 조언 리포트 생성
@@ -3443,8 +3638,9 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
                     generateThreeYearComparisonFromJsonFiles(reportName)
                 }
                 "similar_clubs_comparison" -> {
-                    Log.d("LedgerReportCreate", "유사 동아리 비교 분석 → 비교 리포트로 처리")
-                    reportCreationManager.createSimilarClubReport(clubId, currentYear, this, customReportName, selectedReportType)
+                    Log.d("LedgerReportCreate", "유사 동아리 비교 분석 → 실제 API 데이터 사용")
+                    val reportName = customReportName ?: "유사 동아리 비교 분석"
+                    generateSimilarClubsComparisonReport(clubId, reportName)
                 }
                 "gemini_ai_analysis" -> {
                     Log.d("LedgerReportCreate", "Gemini AI 심화 분석 → 연간 리포트로 처리")
@@ -3815,12 +4011,12 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
             // 재정 요약 비교
             val comparisonContent = buildString {
                 appendLine("📊 ${currentYear-2}-${currentYear} 3년간 재정 비교 분석")
-                appendLine("━".repeat(30))
+                appendLine("━".repeat(26))
                 appendLine()
                 
                 // 1. 연도별 재정 현황 요약
                 appendLine("💰 연도별 재정 현황")
-                appendLine("━".repeat(30))
+                appendLine("━".repeat(26))
                 
                 val years = listOf(currentYear - 2, currentYear - 1, currentYear)
                 years.forEach { year ->
@@ -3846,7 +4042,7 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
                 // 4. 미래 예측
                 appendFuturePrediction(this, yearlyData, currentYear)
                 
-                appendLine("━".repeat(30))
+                appendLine("━".repeat(26))
                 appendLine("📈 이 분석은 3년간의 실제 장부 데이터를 기반으로 생성되었습니다.")
                 appendLine("🤖 AI가 패턴을 분석하여 미래 예측을 제공합니다.")
             }
@@ -3905,7 +4101,7 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
         currentYear: Int
     ) {
         builder.appendLine("🎯 ${currentYear}년 이벤트 기준 3년 비교")
-        builder.appendLine("━".repeat(30))
+        builder.appendLine("━".repeat(26))
         
         // 현재 연도의 이벤트를 기준으로 분석
         val currentYearData = yearlyData[currentYear] ?: emptyMap()
@@ -4036,7 +4232,7 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
         
         // 전체 이벤트 예산 요약
         builder.appendLine("📋 전체 이벤트 예산 요약")
-        builder.appendLine("━".repeat(30))
+        builder.appendLine("━".repeat(26))
         
         val totalEventIncome = currentEvents.sumOf { (it["income"] as? Number)?.toLong() ?: 0L }
         val totalEventExpense = currentEvents.sumOf { (it["expense"] as? Number)?.toLong() ?: 0L }
@@ -4083,7 +4279,7 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
         currentYear: Int
     ) {
         builder.appendLine("📊 지출 패턴 분석")
-        builder.appendLine("━".repeat(30))
+        builder.appendLine("━".repeat(26))
         
         val years = listOf(currentYear - 2, currentYear - 1, currentYear)
         val yearlyExpenses = years.map { year ->
@@ -4142,7 +4338,7 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
         currentYear: Int
     ) {
         builder.appendLine("🔮 ${currentYear + 1}년 예측 분석")
-        builder.appendLine("━".repeat(30))
+        builder.appendLine("━".repeat(26))
         
         // 현재 연도 이벤트 기준으로 미래 예측
         val currentYearData = yearlyData[currentYear] ?: emptyMap()
@@ -4523,13 +4719,13 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
         
         val fallbackContent = buildString {
             appendLine("📊 SSAFY 앱메이커 3년간 재정 비교 분석")
-            appendLine("━".repeat(30))
+            appendLine("━".repeat(26))
             appendLine("📅 분석기간: 2023년 ~ 2025년 (3년간)")
             appendLine("🔍 데이터 출처: 실제 장부 데이터")
             appendLine()
             
             appendLine("💰 연도별 재정 현황 비교")
-            appendLine("━".repeat(30))
+            appendLine("━".repeat(26))
             appendLine("📅 2023년")
             appendLine("  • 총 수입: 3,709,000원")
             appendLine("  • 총 지출: 3,708,000원")
@@ -4549,7 +4745,7 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
             appendLine()
             
             appendLine("📈 연도별 성장률 분석")
-            appendLine("━".repeat(30))
+            appendLine("━".repeat(26))
             appendLine("📊 2023년 → 2024년 변화:")
             appendLine("  • 수입 증감: +1%")
             appendLine("  • 지출 증감: +1%")
@@ -4563,12 +4759,12 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
             appendLine()
             
             appendLine("🤖 AI 종합 분석 결론")
-            appendLine("━".repeat(30))
+            appendLine("━".repeat(26))
             appendLine("✅ 2025년 재정 효율성 개선: 지출 감소와 함께 순수익 크게 증가")
             appendLine("💡 비용 관리 능력이 향상되었으며, 지속적인 효율성 개선을 권장합니다.")
             appendLine()
             appendLine("📈 이 분석은 실제 동아리 장부 데이터를 기반으로 생성되었습니다.")
-            appendLine("━".repeat(30))
+            appendLine("━".repeat(26))
         }
         
         saveReportWithAdvancedMetrics(reportName, fallbackContent, "three_year_comparison", getCurrentClubId())
@@ -4755,7 +4951,7 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
     ): String {
         return buildString {
             appendLine("📊 SSAFY 앱메이커 3년간 실데이터 완전 분석")
-            appendLine("=".repeat(30))
+            appendLine("=".repeat(26))
             appendLine("📅 분석기간: 2023년 ~ 2025년 (3년)")
             appendLine("📡 실시간 파싱: ${data2023.events.size + data2024.events.size + data2025.events.size}개 이벤트 데이터")
             appendLine()
@@ -4790,7 +4986,7 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
             // 2. 연도별 성장률 분석
             if (yearDataList.size >= 2) {
                 appendLine("📈 연도별 성장률 및 변화 분석")
-                appendLine("━".repeat(30))
+                appendLine("━".repeat(26))
                 
                 for (i in 1 until yearDataList.size) {
                     val prevYear = yearDataList[i-1]
@@ -4818,7 +5014,7 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
             
             // 3. 이벤트 기반 3년 비교 분석 (그룹핑 적용)
             appendLine("🎯 이벤트별 3년간 실데이터 비교 분석 (이벤트명 그룹핑)")
-            appendLine("━".repeat(30))
+            appendLine("━".repeat(26))
             
             // 이벤트 그룹핑 (년도 제거하여 동일 이벤트 묶기)
             val eventGroups = groupEventsByName(data2023.events, data2024.events, data2025.events)
@@ -4860,7 +5056,7 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
             
             // 4. 이벤트 패턴 분석 (정규화된 그룹 기준)
             appendLine("🔄 이벤트 운영 패턴 분석 (그룹 기준)")
-            appendLine("━".repeat(30))
+            appendLine("━".repeat(26))
             
             // 그룹별 운영 패턴 분석
             val continuousEventGroups = eventGroups.filter { (_, yearlyData) -> yearlyData.size == 3 }
@@ -4901,11 +5097,12 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
                     }
                 }
                 appendLine()
+                appendLine("━".repeat(26))
             }
             
             // 5. AI 종합 분석 및 권고
             appendLine("🤖 AI 종합 분석 및 전략적 권고")
-            appendLine("━".repeat(30))
+
             
             val overallTrend = data2025.net - data2023.net
             val eventEfficiency2025 = if (data2025.events.isNotEmpty()) {
@@ -4978,7 +5175,7 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
             
             appendLine()
             appendLine("📊 분석 완료 시각: ${java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.getDefault()).format(java.util.Date())}")
-            appendLine("━".repeat(30))
+            appendLine("━".repeat(26))
             appendLine("🔍 본 분석은 실제 API (/report/clubs/{club_pk}/ledgers/{ledger_pk}/reports/yearly/)에서")
             appendLine("   수집한 ${data2023.events.size + data2024.events.size + data2025.events.size}개 이벤트 데이터를 완전 분석한 결과입니다.")
         }

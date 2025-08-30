@@ -212,9 +212,9 @@ class AIReportDetailActivity : BaseActivity() {
             
             // 한국어 표시 및 가독성 향상
             val formattedContent = content
-                .replace("=".repeat(50), "━".repeat(30))
-                .replace("=".repeat(40), "━".repeat(25))  
-                .replace("=".repeat(30), "━".repeat(20))
+                .replace("=".repeat(50), "━".repeat(26))
+                .replace("=".repeat(40), "━".repeat(26))
+                .replace("=".repeat(30), "━".repeat(26))
                 .replace("\\*\\*(.+?)\\*\\*".toRegex(), "【$1】")  // **텍스트** -> 【텍스트】
                 .replace("###\\s*(.+)".toRegex(), "\n▶ $1\n")     // ### 헤딩 -> ▶ 헤딩
                 .replace("##\\s*(.+)".toRegex(), "\n■ $1\n")      // ## 헤딩 -> ■ 헤딩  
