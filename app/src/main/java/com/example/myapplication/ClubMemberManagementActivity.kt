@@ -263,15 +263,17 @@ class ClubMemberManagementActivity : AppCompatActivity() {
                         }
                     }
                     
-                    // 정렬 순서: 본인(isMe) -> 회장(leader) -> 간부(officer) -> 일반(member)
-                    members.sortBy { 
+                    // 정렬 순서: 본인(isMe) -> 회장(leader) -> 간부(officer) -> 일반(member), 같은 권한 내에서는 가입일순
+                    members.sortWith(compareBy<Member> { 
                         when {
                             it.isMe -> 0                    // 본인이 최우선 (최상단)
                             it.role == "leader" -> 1        // 회장이 두 번째
                             it.role == "officer" -> 2       // 간부가 세 번째
                             else -> 3                        // 일반 멤버가 네 번째
                         }
-                    }
+                    }.thenBy { 
+                        it.joinDate                         // 2순위: 가입일 (오름차순)
+                    })
                     
                     // 권한에 따라 제목 텍스트 변경
                     updateTitleBasedOnRole()
@@ -403,7 +405,9 @@ class ClubMemberManagementActivity : AppCompatActivity() {
                                 userId = memberResponse.user,
                                 name = user.name,
                                 joinedAt = formatDate(memberResponse.joined_at),
-                                status = memberResponse.status
+                                status = memberResponse.status,
+                                department = user.major,
+                                studentNumber = user.student_number
                             )
                             joinRequests.add(joinRequest)
                         }

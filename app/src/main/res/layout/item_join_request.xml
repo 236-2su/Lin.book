@@ -1,18 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginVertical="6dp"
-    app:cardCornerRadius="12dp"
-    app:cardElevation="2dp"
-    app:cardBackgroundColor="@android:color/white">
+    android:orientation="vertical"
+    android:background='#F9FAFB'>
 
 <LinearLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:padding="12dp"
+    android:paddingHorizontal="16dp"
+    android:paddingVertical="16dp"
     android:gravity="center_vertical">
 
     <!-- 왼쪽 영역: 가입 요청 정보 -->
@@ -33,16 +32,36 @@
             android:fontFamily="sans-serif"
             android:layout_marginBottom="12dp" />
 
-        <!-- 아랫줄: 이름 -->
-        <TextView
-            android:id="@+id/tv_name"
-            android:layout_width="wrap_content"
+        <!-- 아랫줄: 이름과 전공/학번 -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="홍길동"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:textColor="#111827"
-            android:fontFamily="sans-serif-medium" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <!-- 이름 -->
+            <TextView
+                android:id="@+id/tv_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="홍길동"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="#111827"
+                android:fontFamily="sans-serif-medium"
+                android:layout_marginEnd="16dp" />
+
+            <!-- 전공/학번 -->
+            <TextView
+                android:id="@+id/tv_member_info"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="인공지능융합학과 / 2023256"
+                android:textSize="12sp"
+                android:textColor="#6B7280"
+                android:fontFamily="sans-serif" />
+
+        </LinearLayout>
     </LinearLayout>
 
     <!-- 오른쪽 영역: 액션 버튼들을 세로로 배치 -->
@@ -83,4 +102,12 @@
     </LinearLayout>
 
 </LinearLayout>
-</androidx.cardview.widget.CardView>
+
+    <!-- 구분선 -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginHorizontal="16dp"
+        android:background="#E0E0E0" />
+
+</LinearLayout>

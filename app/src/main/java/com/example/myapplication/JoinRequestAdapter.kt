@@ -11,7 +11,9 @@ data class JoinRequest(
     val userId: Int,
     val name: String,
     val joinedAt: String,
-    val status: String = "waiting"
+    val status: String = "waiting",
+    val department: String = "",
+    val studentNumber: String = ""
 )
 
 class JoinRequestAdapter(
@@ -23,12 +25,14 @@ class JoinRequestAdapter(
     class JoinRequestViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val tvRequestDate: TextView = itemView.findViewById(R.id.tv_request_date)
         private val tvName: TextView = itemView.findViewById(R.id.tv_name)
+        private val tvMemberInfo: TextView = itemView.findViewById(R.id.tv_member_info)
         private val btnApprove: TextView = itemView.findViewById(R.id.btn_approve)
         private val btnReject: TextView = itemView.findViewById(R.id.btn_reject)
 
         fun bind(joinRequest: JoinRequest, onApprove: (JoinRequest) -> Unit, onReject: (JoinRequest) -> Unit) {
-            tvRequestDate.text = "가입 요청: ${joinRequest.joinedAt}"
+            tvRequestDate.text = "가입 요청일: ${joinRequest.joinedAt}"
             tvName.text = joinRequest.name
+            tvMemberInfo.text = "${joinRequest.department} / ${joinRequest.studentNumber}"
 
             btnApprove.setOnClickListener {
                 onApprove(joinRequest)
