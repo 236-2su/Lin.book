@@ -8,34 +8,36 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
         android:gravity="center_horizontal"
-        android:padding="16dp">
+        android:orientation="vertical"
+        android:paddingStart="24dp"
+        android:paddingEnd="24dp"
+        android:paddingBottom="8dp">
 
         <!-- 뒤로가기 버튼 -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginTop="16dp"
+            android:layout_gravity="center_vertical"
+            android:layout_marginTop="60dp"
             android:layout_marginBottom="24dp"
-            android:layout_gravity="center_vertical">
+            android:orientation="horizontal">
 
             <Button
                 android:id="@+id/btn_back"
                 android:layout_width="24dp"
                 android:layout_height="48dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:backgroundTint="#FFFFFF"
+                android:clickable="true"
+                android:focusable="true"
+                android:fontFamily="sans-serif-light"
                 android:minWidth="0dp"
                 android:minHeight="0dp"
                 android:padding="0dp"
-                android:backgroundTint="#FFFFFF"
-                android:background="?attr/selectableItemBackgroundBorderless"
                 android:text="&lt;"
                 android:textColor="@android:color/darker_gray"
-                android:textSize="16sp"
-                android:fontFamily="sans-serif-light"
-                android:clickable="true"
-                android:focusable="true" />
+                android:textSize="16sp" />
 
             <ImageView
                 android:layout_width="48dp"
@@ -43,14 +45,14 @@
                 android:src="@drawable/logo" />
 
             <TextView
+                android:id="@+id/tv_club_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/tv_club_title"
+                android:layout_marginStart="8dp"
                 android:text=""
-                android:textSize="24sp"
-                android:textStyle="bold"
                 android:textColor="@android:color/black"
-                android:layout_marginStart="8dp"/>
+                android:textSize="24sp"
+                android:textStyle="bold" />
         </LinearLayout>
 
         <!-- 게시판 버튼 영역 -->
@@ -111,12 +113,12 @@
 
 
         <!-- 행사 생성 폼 -->
-        <include 
+        <include
             layout="@layout/event_create"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1"
-            android:layout_marginTop="16dp"/>
+            android:layout_marginTop="16dp"
+            android:layout_weight="1"/>
     </LinearLayout>
 
 </FrameLayout>

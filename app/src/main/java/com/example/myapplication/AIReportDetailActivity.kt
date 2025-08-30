@@ -36,10 +36,11 @@ class AIReportDetailActivity : BaseActivity() {
             contentContainer.addView(contentView)
             android.util.Log.d("AIReportDetail", "contentView 추가 성공")
             
-            // Intent에서 리포트 데이터 받아오기
-            val reportData = intent.getStringExtra("report_content")
+            // Intent에서 리포트 데이터 받아오기 (두 가지 키 모두 확인)
+            val reportData = intent.getStringExtra("report_data") ?: intent.getStringExtra("report_content")
             android.util.Log.d("AIReportDetail", "Intent에서 받은 데이터 길이: ${reportData?.length ?: 0}")
             android.util.Log.d("AIReportDetail", "Intent에서 받은 데이터 내용: $reportData")
+            android.util.Log.d("AIReportDetail", "사용된 키: ${if (intent.getStringExtra("report_data") != null) "report_data" else "report_content"}")
             
             if (reportData.isNullOrEmpty()) {
                 android.util.Log.e("AIReportDetail", "❌ Intent에서 받은 데이터가 비어있습니다!")
@@ -211,9 +212,9 @@ class AIReportDetailActivity : BaseActivity() {
             
             // 한국어 표시 및 가독성 향상
             val formattedContent = content
-                .replace("=".repeat(50), "━".repeat(30))
-                .replace("=".repeat(40), "━".repeat(25))  
-                .replace("=".repeat(30), "━".repeat(20))
+                .replace("=".repeat(50), "━".repeat(26))
+                .replace("=".repeat(40), "━".repeat(26))
+                .replace("=".repeat(30), "━".repeat(26))
                 .replace("\\*\\*(.+?)\\*\\*".toRegex(), "【$1】")  // **텍스트** -> 【텍스트】
                 .replace("###\\s*(.+)".toRegex(), "\n▶ $1\n")     // ### 헤딩 -> ▶ 헤딩
                 .replace("##\\s*(.+)".toRegex(), "\n■ $1\n")      // ## 헤딩 -> ■ 헤딩  
@@ -221,12 +222,17 @@ class AIReportDetailActivity : BaseActivity() {
                 .replace("•", "▪") // 불릿 포인트 한국어 스타일
                 .replace("- ", "▪ ") // 하이픈 불릿을 한국어 스타일로
             
-            // 숫자 포맷팅 (천단위 콤마)
+            // 숫자 포맷팅 (천단위 콤마) - 연도는 제외
             val numberPattern = "\\b(\\d{4,})원?\\b".toRegex()
             val finalContent = numberPattern.replace(formattedContent) { matchResult ->
                 val number = matchResult.groupValues[1].toLongOrNull()
                 if (number != null) {
-                    String.format("%,d", number) + "원"
+                    // 2023, 2024, 2025는 연도이므로 포맷팅하지 않음
+                    if (number == 2023L || number == 2024L || number == 2025L) {
+                        number.toString()
+                    } else {
+                        String.format("%,d", number) + "원"
+                    }
                 } else {
                     matchResult.value
                 }

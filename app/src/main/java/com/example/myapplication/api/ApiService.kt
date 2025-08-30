@@ -23,6 +23,8 @@ import retrofit2.http.Field
 import retrofit2.http.PATCH
 import retrofit2.http.Query
 import retrofit2.http.FieldMap
+import retrofit2.http.Multipart
+import retrofit2.http.Part
 
 interface ApiService {
     // 로그인
@@ -456,6 +458,14 @@ interface ApiService {
         @Path("transaction_id") transactionId: Int
     ): TransactionDetailResponse
 
+    // Receipt API
+    @GET("club/{club_pk}/ledger/{ledger_pk}/receipts/{receipt_id}/")
+    suspend fun getReceiptDetail(
+        @Path("club_pk") clubId: Int,
+        @Path("ledger_pk") ledgerId: Int,
+        @Path("receipt_id") receiptId: Int
+    ): ReceiptResponse
+
     @GET("club/{club_pk}/ledger/{ledger_pk}/transactions/")
     suspend fun getTransactionsForLedger(
         @Path("club_pk") clubId: Int,
@@ -526,6 +536,44 @@ interface ApiService {
     ): Call<MemberRoleUpdateResponse>
 
     // Note: getSimilarClubsByClub method already exists above with SimilarClubItem return type
+    
+    // 동아리 계좌 생성 응답
+    data class AccountResponse(
+        val code: String? // 계좌번호
+    )
+    
+    // 동아리 계좌 생성 요청
+    data class CreateAccountRequest(
+        val user_id: Int
+    )
+    
+    // 동아리 계좌 생성
+    @POST("club/{club_pk}/accounts/")
+    fun createClubAccount(
+        @Path("club_pk") clubPk: Int,
+        @Body request: CreateAccountRequest
+    ): Call<AccountResponse>
+    
+    // OCR 처리 요청
+    data class OcrRequest(
+        val club_id: Int,
+        val ledger_pk: Int,
+        val img_url: String
+    )
+    
+    // OCR 응답
+    data class OcrResponse(
+        val date_time: String?,
+        val items: Map<String, String>?
+    )
+    
+    @Multipart
+    @POST("club/{club_pk}/ledger/{ledger_pk}/receipts/")
+    fun processOcr(
+        @Path("club_pk") clubPk: Int,
+        @Path("ledger_pk") ledgerPk: Int,
+        @Part image: okhttp3.MultipartBody.Part
+    ): Call<OcrResponse>
 
     // --- Dues (회비) ---
     data class UnpaidDueItem(

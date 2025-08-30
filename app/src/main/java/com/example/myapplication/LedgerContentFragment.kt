@@ -22,6 +22,7 @@ import java.util.*
 import com.example.myapplication.PublicLedgerTransactionAdapter
 import com.example.myapplication.UserManager
 import com.example.myapplication.TransactionDetailFragment
+import com.example.myapplication.BaseActivity
 
 class LedgerContentFragment : Fragment() {
 
@@ -48,8 +49,8 @@ class LedgerContentFragment : Fragment() {
 
     private var allTransactions: List<TransactionItem> = listOf() // 전체 거래 내역 저장
 
-    private var clubId: Int = 4  // 하드코딩
-    private var ledgerId: Int = 10  // 하드코딩
+    private var clubId: Int = -1  // arguments에서 받아올 예정
+    private var ledgerId: Int = 0  // 고정값
 
     companion object {
         private const val ARG_CLUB_ID = "club_id"
@@ -70,6 +71,9 @@ class LedgerContentFragment : Fragment() {
         arguments?.let {
             clubId = it.getInt(ARG_CLUB_ID)
             ledgerId = it.getInt(ARG_LEDGER_ID)
+            Log.d("LedgerContentFragment", "onCreate - arguments에서 받은 값: clubId=$clubId, ledgerId=$ledgerId")
+        } ?: run {
+            Log.e("LedgerContentFragment", "onCreate - arguments가 null입니다!")
         }
     }
     
@@ -125,6 +129,12 @@ class LedgerContentFragment : Fragment() {
             
             // 디버깅: clubId와 ledgerId 값 확인
             Log.d("LedgerContentFragment", "onViewCreated - clubId: $clubId, ledgerId: $ledgerId")
+            Log.d("LedgerContentFragment", "onViewCreated - arguments 확인: ${arguments}")
+            Log.d("LedgerContentFragment", "onViewCreated - ARG_CLUB_ID: ${arguments?.getInt(ARG_CLUB_ID, -1)}")
+            Log.d("LedgerContentFragment", "onViewCreated - ARG_LEDGER_ID: ${arguments?.getInt(ARG_LEDGER_ID, -1)}")
+
+            // 상단 네비게이션 버튼들의 상태 설정 (공개장부 버튼이 선택된 상태로 표시)
+            setupNavigationButtonStates()
 
             setupFloatingActionButton()
 
@@ -161,18 +171,27 @@ class LedgerContentFragment : Fragment() {
 
             // 년/월 변경 리스너 설정
             btnPrevMonth.setOnClickListener {
-                calendar.add(Calendar.MONTH, -1)
-                updateDate()
-                updateFinancialSummary()
+                if (canMoveToPreviousMonth()) {
+                    calendar.add(Calendar.MONTH, -1)
+                    updateDate()
+                    updateFinancialSummary()
+                    updateMonthNavigationButtons()
+                }
             }
             btnNextMonth.setOnClickListener {
-                calendar.add(Calendar.MONTH, 1)
-                updateDate()
-                updateFinancialSummary()
+                if (canMoveToNextMonth()) {
+                    calendar.add(Calendar.MONTH, 1)
+                    updateDate()
+                    updateFinancialSummary()
+                    updateMonthNavigationButtons()
+                }
             }
 
             // API 호출
             fetchTransactions()
+            
+            // 초기 월 이동 버튼 상태 설정 (거래 내역이 로드된 후 업데이트됨)
+            updateMonthNavigationButtons()
 
         } catch (e: Exception) {
             Log.e("LedgerContentFragment", "onViewCreated에서 오류 발생!", e)
@@ -433,7 +452,7 @@ class LedgerContentFragment : Fragment() {
                 gravity = android.view.Gravity.BOTTOM or android.view.Gravity.END
                 setMargins(0, 0, 80, 80)
             }
-            setImageResource(R.drawable.pencil)
+            setImageResource(android.R.drawable.ic_input_add)
             backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#2457C5"))
             imageTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.WHITE)
             setOnClickListener {
@@ -451,6 +470,9 @@ class LedgerContentFragment : Fragment() {
 
     private fun fetchTransactions() {
         Log.d("LedgerContentFragment", "fetchTransactions called with clubId: $clubId, ledgerId: $ledgerId")
+        Log.d("LedgerContentFragment", "fetchTransactions - arguments 확인: ${arguments}")
+        Log.d("LedgerContentFragment", "fetchTransactions - ARG_CLUB_ID: ${arguments?.getInt(ARG_CLUB_ID, -1)}")
+        Log.d("LedgerContentFragment", "fetchTransactions - ARG_LEDGER_ID: ${arguments?.getInt(ARG_LEDGER_ID, -1)}")
         if (clubId == -1 || ledgerId == -1) {
             Log.e("LedgerContentFragment", "Club ID or Ledger ID is missing.")
             return
@@ -475,11 +497,13 @@ class LedgerContentFragment : Fragment() {
                         Log.d("LedgerContentFragment", "API 호출 성공: ${allTransactions.size}개의 거래 내역")
                         updateFinancialSummary()
                         applyFiltersAndSort() // 필터링 및 정렬 적용하여 화면에 표시
+                        updateMonthNavigationButtons() // 월 이동 버튼 상태 업데이트
                     } else {
                         Log.e("LedgerContentFragment", "서버 응답 오류: ${response.code()}")
                         allTransactions = emptyList()
                         updateFinancialSummary()
                         applyFiltersAndSort()
+                        updateMonthNavigationButtons() // 월 이동 버튼 상태 업데이트
                     }
                 }
             } catch (e: Exception) {
@@ -524,5 +548,83 @@ class LedgerContentFragment : Fragment() {
             }
         }
         Log.d("LedgerContentFragment", "클릭 리스너 설정 완료")
+    }
+    
+    // 이전 달로 이동할 수 있는지 확인하는 함수
+    private fun canMoveToPreviousMonth(): Boolean {
+        // 현재 달이 너무 과거가 아니면 항상 이동 가능
+        // 예: 2020년 1월 이후로는 항상 이동 가능하도록 설정
+        val minDate = Calendar.getInstance().apply {
+            set(2020, Calendar.JANUARY, 1)
+        }
+        
+        val canMove = calendar.after(minDate)
+        val currentMonth = SimpleDateFormat("yyyy-MM", Locale.getDefault()).format(calendar.time)
+        
+        Log.d("LedgerContentFragment", "이전 달 이동 가능 여부: $canMove (현재 월: $currentMonth)")
+        return canMove
+    }
+    
+    // 다음 달로 이동할 수 있는지 확인하는 함수
+    private fun canMoveToNextMonth(): Boolean {
+        // 현재 달이 현재 시점보다 이전이면 이동 가능
+        val currentTime = Calendar.getInstance()
+        val canMove = calendar.before(currentTime) || calendar.get(Calendar.YEAR) == currentTime.get(Calendar.YEAR) && calendar.get(Calendar.MONTH) == currentTime.get(Calendar.MONTH)
+        
+        val currentMonth = SimpleDateFormat("yyyy-MM", Locale.getDefault()).format(calendar.time)
+        val thisMonth = SimpleDateFormat("yyyy-MM", Locale.getDefault()).format(currentTime.time)
+        
+        Log.d("LedgerContentFragment", "다음 달 이동 가능 여부: $canMove (현재 월: $currentMonth, 오늘: $thisMonth)")
+        return canMove
+    }
+    
+    // 월 이동 버튼들의 상태를 업데이트하는 함수
+    private fun updateMonthNavigationButtons() {
+        val canMovePrev = canMoveToPreviousMonth()
+        val canMoveNext = canMoveToNextMonth()
+        
+        // 이전 달 버튼 상태 설정
+        btnPrevMonth.isEnabled = canMovePrev
+        btnPrevMonth.alpha = if (canMovePrev) 1.0f else 0.5f
+        
+        // 다음 달 버튼 상태 설정
+        btnNextMonth.isEnabled = canMoveNext
+        btnNextMonth.alpha = if (canMoveNext) 1.0f else 0.5f
+        
+        Log.d("LedgerContentFragment", "월 이동 버튼 상태 업데이트: 이전달=$canMovePrev, 다음달=$canMoveNext")
+    }
+    
+    // 상단 네비게이션 버튼들의 상태를 설정하는 함수
+    private fun setupNavigationButtonStates() {
+        try {
+            val baseActivity = activity as? BaseActivity
+            if (baseActivity != null) {
+                // BaseActivity에서 상단 네비게이션 버튼들을 찾아서 공개장부 버튼을 선택된 상태로 설정
+                val btnPublicAccount = baseActivity.findViewById<TextView>(R.id.btn_public_account)
+                val btnNotice = baseActivity.findViewById<TextView>(R.id.btn_notice)
+                val btnFreeBoard = baseActivity.findViewById<TextView>(R.id.btn_free_board)
+                val btnEventAccount = baseActivity.findViewById<TextView>(R.id.btn_event_account)
+                val btnMeetingAccount = baseActivity.findViewById<TextView>(R.id.btn_meeting_account)
+                val btnAiReport = baseActivity.findViewById<TextView>(R.id.btn_ai_report)
+                
+                // 공개장부 버튼을 선택된 상태로 설정하고 나머지는 선택되지 않은 상태로 설정
+                if (btnPublicAccount != null) {
+                    btnPublicAccount.setBackgroundResource(R.drawable.btn_board_selected)
+                    btnPublicAccount.setTextColor(android.graphics.Color.parseColor("#FFFFFF"))
+                }
+                
+                // 나머지 버튼들을 선택되지 않은 상태로 설정
+                listOfNotNull(btnNotice, btnFreeBoard, btnEventAccount, btnMeetingAccount, btnAiReport).forEach { btn ->
+                    btn.setBackgroundResource(R.drawable.btn_unselected)
+                    btn.setTextColor(android.graphics.Color.parseColor("#333333"))
+                }
+                
+                Log.d("LedgerContentFragment", "상단 네비게이션 버튼 상태 설정 완료")
+            } else {
+                Log.e("LedgerContentFragment", "BaseActivity를 찾을 수 없습니다")
+            }
+        } catch (e: Exception) {
+            Log.e("LedgerContentFragment", "상단 네비게이션 버튼 상태 설정 중 오류 발생", e)
+        }
     }
 }

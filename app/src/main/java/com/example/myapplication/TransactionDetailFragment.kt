@@ -18,8 +18,10 @@ import com.example.myapplication.LedgerItem
 import com.example.myapplication.api.ApiService
 import com.example.myapplication.api.ApiClient
 import com.example.myapplication.api.TransactionDetailResponse
+import com.example.myapplication.api.ReceiptResponse
 import com.example.myapplication.TransactionItem
 import kotlinx.coroutines.Dispatchers
+import com.bumptech.glide.Glide
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.text.NumberFormat
@@ -35,8 +37,7 @@ class TransactionDetailFragment : Fragment() {
     private lateinit var btnExpense: TextView
     private lateinit var btnIncome: TextView
     private lateinit var btnType: TextView
-    private lateinit var btnModify: TextView
-    private lateinit var btnDelete: TextView
+
     private lateinit var tvTransactionDatetime: TextView
     private lateinit var tvTransactionAmount: TextView
     private lateinit var tvVendorName: TextView
@@ -119,8 +120,7 @@ class TransactionDetailFragment : Fragment() {
         btnExpense = contentView.findViewById(R.id.btn_expense)
         btnIncome = contentView.findViewById(R.id.btn_income)
         btnType = contentView.findViewById(R.id.btn_type)
-        btnModify = contentView.findViewById(R.id.btn_modify)
-        btnDelete = contentView.findViewById(R.id.btn_delete)
+
         tvTransactionDatetime = contentView.findViewById(R.id.tv_transaction_datetime)
         tvTransactionAmount = contentView.findViewById(R.id.tv_transaction_amount)
         tvVendorName = contentView.findViewById(R.id.tv_vendor_name)
@@ -132,9 +132,7 @@ class TransactionDetailFragment : Fragment() {
 //        ivHeart = contentView.findViewById(R.id.iv_heart)
 //        tvLikeCount = contentView.findViewById(R.id.tv_like_count)
         
-        // 초기에는 수정하기/삭제하기 버튼 숨기기 (데이터 로드 후 표시)
-        btnModify.visibility = View.GONE
-        btnDelete.visibility = View.GONE
+
         
         // 초기에는 지출/수입 버튼도 숨기기 (데이터 로드 후 표시)
         btnExpense.visibility = View.GONE
@@ -162,15 +160,7 @@ class TransactionDetailFragment : Fragment() {
 
         // 거래 타입 버튼들은 단순 표시용 (클릭 이벤트 없음)
 
-        // 액션 버튼들
-        btnModify.setOnClickListener {
-            // 거래 수정 화면으로 이동
-            navigateToEditPage()
-        }
 
-        btnDelete.setOnClickListener {
-            // TODO: 거래 삭제 확인 다이얼로그 표시
-        }
 
         // 하트 클릭 이벤트
         // ivHeart.setOnClickListener {
@@ -178,91 +168,7 @@ class TransactionDetailFragment : Fragment() {
         // }
     }
 
-    // 거래 수정 페이지로 이동
-    private fun navigateToEditPage() {
-        try {
-            Log.d("TransactionDetailFragment", "navigateToEditPage 시작")
-            
-            // activity null 체크
-            val currentActivity = activity
-            if (currentActivity == null) {
-                Log.e("TransactionDetailFragment", "activity가 null입니다!")
-                return
-            }
-            
-            // allTransactions가 비어있는지 체크
-            if (allTransactions.isEmpty()) {
-                Log.e("TransactionDetailFragment", "allTransactions가 비어있습니다!")
-                return
-            }
-            
-            // currentTransactionIndex 유효성 체크
-            if (currentTransactionIndex < 0 || currentTransactionIndex >= allTransactions.size) {
-                Log.e("TransactionDetailFragment", "currentTransactionIndex가 유효하지 않습니다: $currentTransactionIndex, 크기: ${allTransactions.size}")
-                return
-            }
-            
-            // 현재 거래 정보를 LedgerItem 형태로 변환
-            val currentTransaction = allTransactions[currentTransactionIndex]
-            Log.d("TransactionDetailFragment", "현재 거래: $currentTransaction")
-            
-            // UI에서 데이터를 안전하게 가져오기 (현재 표시된 데이터 그대로)
-            val vendorName = tvVendorName.text?.toString()?.replace("거래처명: ", "") ?: ""
-            val paymentMethod = tvPaymentMethod.text?.toString()?.replace("결제수단: ", "") ?: ""
-            val originalAmount = currentTransaction.amount
-            val originalType = btnType.text?.toString() ?: "기타"
-            val originalDate = tvTransactionDatetime.text?.toString() ?: ""
-            val originalMemo = tvMemo.text?.toString()?.replace("메모 : ", "") ?: ""
-            
-            // 디버깅을 위한 로그 추가
-            Log.d("TransactionDetailFragment", "=== 수정 페이지로 전달할 데이터 ===")
-            Log.d("TransactionDetailFragment", "거래처명: '$vendorName'")
-            Log.d("TransactionDetailFragment", "결제수단: '$paymentMethod'")
-            Log.d("TransactionDetailFragment", "원본 금액: $originalAmount")
-            Log.d("TransactionDetailFragment", "원본 타입: '$originalType'")
-            Log.d("TransactionDetailFragment", "원본 날짜: '$originalDate'")
-            Log.d("TransactionDetailFragment", "원본 메모: '$originalMemo'")
-            Log.d("TransactionDetailFragment", "UI에서 가져온 금액 텍스트: '${tvTransactionAmount.text}'")
-            Log.d("TransactionDetailFragment", "UI에서 가져온 타입 텍스트: '${btnType.text}'")
-            Log.d("TransactionDetailFragment", "UI에서 가져온 날짜 텍스트: '${tvTransactionDatetime.text}'")
-            Log.d("TransactionDetailFragment", "UI에서 가져온 메모 텍스트: '${tvMemo.text}'")
-            
-            // LedgerItem 생성 (API 응답 데이터를 기반으로)
-            val ledgerItem = LedgerItem(
-                type = originalType,
-                tags = listOf(), // 빈 태그 리스트
-                date = originalDate,
-                amount = tvTransactionAmount.text?.toString() ?: "0",
-                author = "사용자", // 기본값
-                memo = originalMemo,
-                hasReceipt = receiptContainer.visibility == View.VISIBLE
-            )
-            
-            Log.d("TransactionDetailFragment", "생성된 LedgerItem: $ledgerItem")
-            
-            // LedgerEditActivity로 이동 (모든 정보 포함)
-            val intent = Intent(currentActivity, LedgerEditActivity::class.java)
-            intent.putExtra("LEDGER_ITEM", ledgerItem)
-            intent.putExtra("VENDOR_NAME", vendorName)
-            intent.putExtra("PAYMENT_METHOD", paymentMethod)
-            intent.putExtra("ORIGINAL_AMOUNT", originalAmount)
-            intent.putExtra("ORIGINAL_TYPE", originalType)
-            intent.putExtra("ORIGINAL_DATE", originalDate)
-            intent.putExtra("ORIGINAL_MEMO", originalMemo)
-            
-            Log.d("TransactionDetailFragment", "Intent 생성 완료, LedgerEditActivity 시작")
-            Log.d("TransactionDetailFragment", "Intent extras: ${intent.extras}")
-            
-            startActivity(intent)
-            Log.d("TransactionDetailFragment", "startActivity 호출 완료")
-            
-        } catch (e: Exception) {
-            Log.e("TransactionDetailFragment", "수정 페이지 이동 실패", e)
-            e.printStackTrace()
-            // 에러 처리 (예: 토스트 메시지)
-            Toast.makeText(activity, "수정 페이지 이동 실패: ${e.message}", Toast.LENGTH_SHORT).show()
-        }
-    }
+
 
     // 하트 좋아요 토글
     private fun toggleHeartLike() {
@@ -338,8 +244,8 @@ class TransactionDetailFragment : Fragment() {
             btnPrevItem.isEnabled = false
             btnNextItem.isEnabled = false
             // 수정하기/삭제하기 버튼 숨기기
-            btnModify.visibility = View.GONE
-            btnDelete.visibility = View.GONE
+//            btnModify.visibility = View.GONE
+//            btnDelete.visibility = View.GONE
             return
         }
 
@@ -381,18 +287,21 @@ class TransactionDetailFragment : Fragment() {
 
     private fun updateUIWithDetail(detail: TransactionDetailResponse) {
         // 날짜 포맷 변경 (예: 2023-02-18T14:22:18+09:00 -> 02월 18일)
-        val apiDateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX", Locale.getDefault())
         val displayDateFormat = SimpleDateFormat("MM월 dd일", Locale.getDefault())
         val fullDisplayDateFormat = SimpleDateFormat("yyyy년 MM월 dd일 E요일 HH:mm", Locale.KOREA)
 
-        try {
-            val date = apiDateFormat.parse(detail.date_time)
-            tvCurrentDate.text = date?.let { displayDateFormat.format(it) } ?: ""
-            tvTransactionDatetime.text = date?.let { fullDisplayDateFormat.format(it) } ?: ""
-        } catch (e: Exception) {
-            e.printStackTrace()
+        // API에서 오는 날짜 형식을 로그로 확인
+        Log.d("TransactionDetailFragment", "API 날짜 형식: '${detail.date_time}'")
+        
+        val date = parseDateWithMultipleFormats(detail.date_time)
+        if (date != null) {
+            tvCurrentDate.text = displayDateFormat.format(date)
+            tvTransactionDatetime.text = fullDisplayDateFormat.format(date)
+            Log.d("TransactionDetailFragment", "날짜 파싱 성공: ${date}")
+        } else {
             tvCurrentDate.text = "날짜 오류"
             tvTransactionDatetime.text = "날짜 오류"
+            Log.e("TransactionDetailFragment", "모든 날짜 형식으로 파싱 실패: '${detail.date_time}'")
         }
 
         // 금액 표시 (세자리씩 쉼표 표시)
@@ -412,22 +321,21 @@ class TransactionDetailFragment : Fragment() {
         }
 
         // 카테고리 타입
+        if (!detail.type.isNullOrEmpty()) {
+            btnType.visibility = View.VISIBLE
         btnType.text = detail.type
+        } else {
+            btnType.visibility = View.GONE
+        }
 
         // 영수증 이미지 처리
-        if (!detail.receipt.isNullOrEmpty()) {
+        val receiptId = detail.receipt?.toIntOrNull()
+        if (receiptId != null && receiptId > 0) {
             receiptContainer.visibility = View.VISIBLE
             receiptDivider.visibility = View.VISIBLE
             
-            // Glide를 사용하여 이미지 로드 (Glide 의존성 필요)
-            try {
-                // Glide.with(this).load(detail.receipt).into(ivReceipt)
-                // 임시로 배경색 변경으로 표시
-                ivReceipt.setBackgroundColor(Color.parseColor("#F0F0F0"))
-                ivReceipt.setImageResource(android.R.drawable.ic_menu_gallery)
-            } catch (e: Exception) {
-                Log.e("TransactionDetailFragment", "영수증 이미지 로드 실패", e)
-            }
+            // 영수증 ID가 있으면 API를 호출하여 이미지 URL 가져오기
+            loadReceiptImage(receiptId)
         } else {
             receiptContainer.visibility = View.GONE
             receiptDivider.visibility = View.GONE
@@ -438,8 +346,243 @@ class TransactionDetailFragment : Fragment() {
         tvPaymentMethod.text = "결제수단: ${detail.payment_method ?: ""}"
         tvMemo.text = "메모 : ${detail.description ?: ""}"
         
-        // 수정하기/삭제하기 버튼 가시성 설정
-        btnModify.visibility = View.VISIBLE
-        btnDelete.visibility = View.VISIBLE
+
     }
+
+    // 여러 날짜 형식을 시도하여 파싱
+    private fun parseDateWithMultipleFormats(dateString: String): java.util.Date? {
+        val dateFormats = listOf(
+            "yyyy-MM-dd'T'HH:mm:ssXXX",      // 2023-02-18T14:22:18+09:00
+            "yyyy-MM-dd'T'HH:mm:ss'Z'",      // 2023-02-18T14:22:18Z
+            "yyyy-MM-dd'T'HH:mm:ss",         // 2023-02-18T14:22:18
+            "yyyy-MM-dd HH:mm:ss",           // 2023-02-18 14:22:18
+            "yyyy-MM-dd",                    // 2023-02-18
+            "dd/MM/yyyy",                    // 18/02/2023
+            "MM/dd/yyyy",                    // 02/18/2023
+            "yyyy/MM/dd"                     // 2023/02/18
+        )
+        
+        for (format in dateFormats) {
+            try {
+                val dateFormat = SimpleDateFormat(format, Locale.getDefault())
+                dateFormat.isLenient = false
+                val date = dateFormat.parse(dateString)
+                if (date != null) {
+                    Log.d("TransactionDetailFragment", "날짜 파싱 성공: '$dateString' -> $format -> $date")
+                    return date
+                }
+            } catch (e: Exception) {
+                Log.d("TransactionDetailFragment", "날짜 형식 '$format'로 파싱 실패: '$dateString' - ${e.message}")
+            }
+        }
+        
+        Log.e("TransactionDetailFragment", "모든 날짜 형식으로 파싱 실패: '$dateString'")
+        return null
+    }
+
+    // EXIF 회전 정보를 고려하여 이미지 회전
+    private fun rotateImageIfNeeded(bitmap: android.graphics.Bitmap, imageUrl: String): android.graphics.Bitmap {
+        try {
+            // URL에서 이미지 다운로드하여 EXIF 정보 읽기
+            val url = java.net.URL(imageUrl)
+            val connection = url.openConnection() as java.net.HttpURLConnection
+            connection.requestMethod = "GET"
+            connection.connectTimeout = 10000
+            connection.readTimeout = 10000
+            
+            if (url.protocol == "https") {
+                setupTrustAllCertificates()
+            }
+            
+            val responseCode = connection.responseCode
+            if (responseCode == java.net.HttpURLConnection.HTTP_OK) {
+                val inputStream = connection.inputStream
+                
+                // EXIF 정보 읽기
+                val exif = android.media.ExifInterface(inputStream)
+                val orientation = exif.getAttributeInt(
+                    android.media.ExifInterface.TAG_ORIENTATION,
+                    android.media.ExifInterface.ORIENTATION_NORMAL
+                )
+                
+                inputStream.close()
+                connection.disconnect()
+                
+                // 회전 각도 계산
+                val rotationAngle = when (orientation) {
+                    android.media.ExifInterface.ORIENTATION_ROTATE_90 -> 90f
+                    android.media.ExifInterface.ORIENTATION_ROTATE_180 -> 180f
+                    android.media.ExifInterface.ORIENTATION_ROTATE_270 -> 270f
+                    else -> 0f
+                }
+                
+                if (rotationAngle != 0f) {
+                    Log.d("TransactionDetailFragment", "이미지 회전 적용: ${rotationAngle}도")
+                    
+                    // 이미지 회전
+                    val matrix = android.graphics.Matrix()
+                    matrix.postRotate(rotationAngle)
+                    
+                    val rotatedBitmap = android.graphics.Bitmap.createBitmap(
+                        bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true
+                    )
+                    
+                    // 원본 비트맵이 회전된 비트맵과 다르면 원본 해제
+                    if (rotatedBitmap != bitmap) {
+                        bitmap.recycle()
+                    }
+                    
+                    return rotatedBitmap
+                }
+            }
+            
+            connection.disconnect()
+        } catch (e: Exception) {
+            Log.e("TransactionDetailFragment", "EXIF 회전 정보 읽기 실패", e)
+        }
+        
+        // 회전이 필요하지 않거나 실패한 경우 원본 반환
+        return bitmap
+    }
+
+    // 영수증 이미지 로드
+    private fun loadReceiptImage(receiptId: Int) {
+        lifecycleScope.launch {
+            try {
+                Log.d("TransactionDetailFragment", "영수증 이미지 로드 시작: receiptId=$receiptId")
+                val receiptResponse = apiService.getReceiptDetail(clubId, ledgerId, receiptId)
+                
+                if (!receiptResponse.image.isNullOrEmpty()) {
+                    val imageUrl = receiptResponse.image
+                    Log.d("TransactionDetailFragment", "영수증 이미지 URL: '$imageUrl'")
+                    
+                    // 백그라운드에서 HTTP 연결로 이미지 로드
+                    withContext(Dispatchers.IO) {
+                        try {
+                            loadImageWithHttpUrlConnection(imageUrl)
+                        } catch (e: Exception) {
+                            Log.e("TransactionDetailFragment", "HTTP 이미지 로드 실패", e)
+                            withContext(Dispatchers.Main) {
+                                ivReceipt.setImageResource(android.R.drawable.ic_menu_gallery)
+                            }
+                        }
+                    }
+                } else {
+                    Log.w("TransactionDetailFragment", "영수증 이미지 URL이 비어있음")
+                    withContext(Dispatchers.Main) {
+                        ivReceipt.setImageResource(android.R.drawable.ic_menu_gallery)
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("TransactionDetailFragment", "영수증 API 호출 실패", e)
+                withContext(Dispatchers.Main) {
+                    ivReceipt.setImageResource(android.R.drawable.ic_menu_gallery)
+                }
+            }
+        }
+    }
+
+    // HTTP 연결을 직접 사용한 이미지 로드 (EXIF 회전 정보 처리 포함)
+    private suspend fun loadImageWithHttpUrlConnection(imageUrl: String) {
+        Log.d("TransactionDetailFragment", "HTTP 이미지 로드 시작: $imageUrl")
+        
+        withContext(Dispatchers.IO) {
+            try {
+                val url = java.net.URL(imageUrl)
+                
+                // HTTPS URL인 경우 SSL 검증 우회
+                if (url.protocol == "https") {
+                    Log.d("TransactionDetailFragment", "HTTPS URL 감지, SSL 검증 우회 설정")
+                    setupTrustAllCertificates()
+                }
+                
+                val connection = url.openConnection() as java.net.HttpURLConnection
+                connection.requestMethod = "GET"
+                connection.connectTimeout = 15000 // 15초 타임아웃
+                connection.readTimeout = 15000 // 15초 타임아웃
+                connection.instanceFollowRedirects = true
+                
+                // User-Agent 설정으로 일부 서버 차단 방지
+                connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Android)")
+                
+                val responseCode = connection.responseCode
+                Log.d("TransactionDetailFragment", "HTTP 응답 코드: $responseCode")
+
+                if (responseCode == java.net.HttpURLConnection.HTTP_OK) {
+                    val inputStream = connection.inputStream
+                    val bitmap = android.graphics.BitmapFactory.decodeStream(inputStream)
+                    
+                    if (bitmap != null) {
+                        // EXIF 회전 정보를 고려하여 이미지 회전
+                        val rotatedBitmap = rotateImageIfNeeded(bitmap, imageUrl)
+                        
+                        // UI 스레드에서 이미지 설정
+                        withContext(Dispatchers.Main) {
+                            ivReceipt.setImageBitmap(rotatedBitmap)
+                            Log.d("TransactionDetailFragment", "HTTP 이미지 로드 성공")
+                        }
+                    } else {
+                        Log.e("TransactionDetailFragment", "비트맵 디코딩 실패")
+                        withContext(Dispatchers.Main) {
+                            ivReceipt.setImageResource(android.R.drawable.ic_menu_gallery)
+                        }
+                    }
+                } else if (responseCode == java.net.HttpURLConnection.HTTP_MOVED_PERM || 
+                           responseCode == java.net.HttpURLConnection.HTTP_MOVED_TEMP) {
+                    // 리다이렉트 처리
+                    val newLocation = connection.getHeaderField("Location")
+                    Log.d("TransactionDetailFragment", "리다이렉트 감지: $newLocation")
+                    
+                    if (!newLocation.isNullOrEmpty()) {
+                        // 새로운 URL로 재시도
+                        loadImageWithHttpUrlConnection(newLocation)
+                    } else {
+                        Log.e("TransactionDetailFragment", "리다이렉트 URL이 비어있음")
+                        withContext(Dispatchers.Main) {
+                            ivReceipt.setImageResource(android.R.drawable.ic_menu_gallery)
+                        }
+                    }
+                } else {
+                    Log.e("TransactionDetailFragment", "HTTP 이미지 로드 실패, 응답 코드: $responseCode")
+                    withContext(Dispatchers.Main) {
+                        ivReceipt.setImageResource(android.R.drawable.ic_menu_gallery)
+                    }
+                }
+                connection.disconnect()
+            } catch (e: Exception) {
+                Log.e("TransactionDetailFragment", "HTTP 이미지 로드 실패", e)
+                withContext(Dispatchers.Main) {
+                    ivReceipt.setImageResource(android.R.drawable.ic_menu_gallery)
+                }
+            }
+        }
+    }
+
+    // 모든 SSL 인증서를 신뢰하도록 설정
+    private fun setupTrustAllCertificates() {
+        try {
+            // 모든 인증서를 신뢰하는 TrustManager 생성
+            val trustAllCerts = arrayOf<javax.net.ssl.TrustManager>(object : javax.net.ssl.X509TrustManager {
+                override fun checkClientTrusted(chain: Array<out java.security.cert.X509Certificate>?, authType: String?) {}
+                override fun checkServerTrusted(chain: Array<out java.security.cert.X509Certificate>?, authType: String?) {}
+                override fun getAcceptedIssuers(): Array<java.security.cert.X509Certificate> = arrayOf()
+            })
+
+            // SSL 컨텍스트 설정
+            val sslContext = javax.net.ssl.SSLContext.getInstance("TLS")
+            sslContext.init(null, trustAllCerts, java.security.SecureRandom())
+            
+            // HttpsURLConnection의 기본 SSL 소켓 팩토리 설정
+            javax.net.ssl.HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.socketFactory)
+            
+            // 호스트명 검증 비활성화
+            javax.net.ssl.HttpsURLConnection.setDefaultHostnameVerifier { _, _ -> true }
+            
+            Log.d("TransactionDetailFragment", "SSL 검증 우회 설정 완료")
+        } catch (e: Exception) {
+            Log.e("TransactionDetailFragment", "SSL 검증 우회 설정 실패", e)
+        }
+    }
+
+
 }

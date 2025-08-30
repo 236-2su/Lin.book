@@ -91,7 +91,7 @@ class AIAnalysisService(private val context: Context) {
         
         // 📊 데이터 수집 현황
         sb.append("📈 데이터 수집 현황\n")
-        sb.append("=".repeat(25) + "\n")
+        sb.append("=".repeat(26) + "\n")
         sb.append("• 동아리 정보: ${if (clubData.clubInfo != null) "✅" else "❌"}\n")
         sb.append("• 장부 데이터: ${if (clubData.ledgerData != null) "✅ ${clubData.ledgerData.size}개" else "❌"}\n")
         sb.append("• 거래 내역: ${if (clubData.transactions != null) "✅ ${clubData.transactions.size}건" else "❌"}\n")
@@ -117,7 +117,7 @@ class AIAnalysisService(private val context: Context) {
                 else -> {
                     Log.w("AIAnalysisService", "⚠️ 알 수 없는 리포트 타입: $reportType")
                     sb.append("📋 새로운 AI 분석 리포트\n")
-                    sb.append("=".repeat(30) + "\n\n")
+                    sb.append("=".repeat(26) + "\n\n")
                     sb.append("선택한 리포트 타입에 맞는 전문 분석을 제공합니다.\n")
                 }
             }
@@ -132,7 +132,7 @@ class AIAnalysisService(private val context: Context) {
         customRequest?.let { request ->
             if (request.isNotBlank()) {
                 sb.append("\n\n🎯 맞춤 분석 결과\n")
-                sb.append("=".repeat(25) + "\n")
+                sb.append("=".repeat(26) + "\n")
                 sb.append("📝 요청사항: $request\n\n")
                 sb.append(generateCustomAnalysis(clubData, request))
             }
@@ -140,11 +140,11 @@ class AIAnalysisService(private val context: Context) {
         
         // 📋 종합 결론 및 제안사항
         sb.append("\n\n💡 AI 제안사항\n")
-        sb.append("=".repeat(25) + "\n")
+        sb.append("=".repeat(26) + "\n")
         sb.append(generateRecommendations(clubData))
         
         // 🏁 리포트 마무리
-        sb.append("\n\n" + "=".repeat(40) + "\n")
+        sb.append("\n\n" + "=".repeat(26) + "\n")
         sb.append("📊 분석 완료\n")
         sb.append("이 리포트는 Hey-Bi AI가 현재 데이터를 기반으로 분석한 결과입니다.\n")
         sb.append("더 정확한 분석을 위해 정기적인 데이터 업데이트를 권장합니다.\n")
@@ -375,7 +375,7 @@ class AIAnalysisService(private val context: Context) {
     // 1. 3년간 이벤트 분석 리포트 (백엔드 API 사용)
     private suspend fun generateThreeYearEventAnalysis(sb: StringBuilder, clubData: AIReportDataCollector.ClubReportData) {
         sb.append("📅 3년간 이벤트 예산 비교 분석 (2023-2025)\n")
-        sb.append("=".repeat(50) + "\n\n")
+        sb.append("=".repeat(26) + "\n\n")
         
         try {
             val currentYear = Calendar.getInstance().get(Calendar.YEAR)
@@ -542,36 +542,36 @@ class AIAnalysisService(private val context: Context) {
         sb.append("🔍 분석 유형: ${getReportTypeKorean(reportType)}\n")
         sb.append("📊 데이터 품질: ${aiInput.dataQuality}\n")
         sb.append("⚡ 고급 AI 엔진: Enhanced Hey-Bi v3.0\n")
-        sb.append("=".repeat(50) + "\n\n")
+        sb.append("=".repeat(26) + "\n\n")
         
         // Executive Summary with key insights
         sb.append("🎯 핵심 인사이트 (Executive Summary)\n")
-        sb.append("=".repeat(35) + "\n")
+        sb.append("=".repeat(26) + "\n")
         generateExecutiveSummary(sb, aiInput)
         sb.append("\n")
         
         // Financial Performance Analysis
         sb.append("💰 재정 성과 분석\n")
-        sb.append("=".repeat(20) + "\n")
+        sb.append("=".repeat(26) + "\n")
         generateFinancialAnalysis(sb, aiInput.financialSummary)
         sb.append("\n")
         
         // Spending Pattern Analysis  
         sb.append("📈 지출 패턴 분석\n")
-        sb.append("=".repeat(20) + "\n")
+        sb.append("=".repeat(26) + "\n")
         generateSpendingAnalysis(sb, aiInput.spendingPatterns)
         sb.append("\n")
         
         // Trend Analysis
         sb.append("📊 트렌드 분석\n")
-        sb.append("=".repeat(15) + "\n")
+        sb.append("=".repeat(26) + "\n")
         generateTrendAnalysis(sb, aiInput.trends)
         sb.append("\n")
         
         // Risk Assessment
         if (aiInput.spendingPatterns.riskFactors.isNotEmpty()) {
             sb.append("⚠️ 리스크 평가\n")
-            sb.append("=".repeat(15) + "\n")
+            sb.append("=".repeat(26) + "\n")
             aiInput.spendingPatterns.riskFactors.forEach { risk ->
                 sb.append("• $risk\n")
             }
@@ -588,13 +588,13 @@ class AIAnalysisService(private val context: Context) {
         
         // Strategic recommendations
         sb.append("🎯 전략적 권고사항\n")
-        sb.append("=".repeat(20) + "\n")
+        sb.append("=".repeat(26) + "\n")
         generateStrategicRecommendations(sb, aiInput)
         sb.append("\n")
         
         // Data appendix
         sb.append("📋 분석 데이터 요약\n")
-        sb.append("=".repeat(20) + "\n")
+        sb.append("=".repeat(26) + "\n")
         sb.append("• 분석 기간: ${aiInput.contextualInfo["analysis_year"]}년\n")
         sb.append("• 활성 월수: ${aiInput.financialSummary.activeMonths}개월\n")
         sb.append("• 원본 데이터 크기: ${aiInput.rawDataSize}바이트\n")
@@ -684,7 +684,7 @@ class AIAnalysisService(private val context: Context) {
     
     private fun generateEnhancedThreeYearAnalysis(sb: StringBuilder, aiInput: AIReportDataCollector.AIAnalysisInput) {
         sb.append("📅 3년간 이벤트 분석 (Enhanced)\n")
-        sb.append("=".repeat(30) + "\n")
+        sb.append("=".repeat(26) + "\n")
         sb.append("현재 년도 기준으로 심층 분석한 결과를 제공합니다.\n\n")
         
         val financial = aiInput.financialSummary
@@ -706,7 +706,7 @@ class AIAnalysisService(private val context: Context) {
     
     private fun generateEnhancedComparisonAnalysis(sb: StringBuilder, aiInput: AIReportDataCollector.AIAnalysisInput) {
         sb.append("🔍 유사 동아리 비교 분석 (Enhanced)\n")
-        sb.append("=".repeat(35) + "\n")
+        sb.append("=".repeat(26) + "\n")
         
         val financial = aiInput.financialSummary
         sb.append("📊 우리 동아리 재정 지표:\n")
@@ -727,7 +727,7 @@ class AIAnalysisService(private val context: Context) {
     
     private fun generateEnhancedGeminiAnalysis(sb: StringBuilder, aiInput: AIReportDataCollector.AIAnalysisInput) {
         sb.append("🤖 Gemini AI 심화 분석 (Enhanced)\n")
-        sb.append("=".repeat(35) + "\n")
+        sb.append("=".repeat(26) + "\n")
         
         sb.append("🧠 AI 통찰력 분석:\n")
         sb.append("데이터 품질 평가를 통한 정밀 분석 결과입니다.\n\n")
@@ -754,7 +754,7 @@ class AIAnalysisService(private val context: Context) {
     
     private fun generateGenericEnhancedAnalysis(sb: StringBuilder, aiInput: AIReportDataCollector.AIAnalysisInput) {
         sb.append("📊 종합 재정 분석\n")
-        sb.append("=".repeat(20) + "\n")
+        sb.append("=".repeat(26) + "\n")
         sb.append("정밀 데이터 분석을 통한 포괄적 평가 결과입니다.\n\n")
         
         val score = calculateOverallScore(aiInput)
@@ -1022,7 +1022,7 @@ class AIAnalysisService(private val context: Context) {
     // 2. 유사 동아리 비교 분석 (백엔드 API 사용)
     private suspend fun generateSimilarClubsComparisonAnalysis(sb: StringBuilder, clubData: AIReportDataCollector.ClubReportData) {
         sb.append("🏆 유사 동아리 비교 분석\n")
-        sb.append("=".repeat(50) + "\n\n")
+        sb.append("=".repeat(26) + "\n\n")
         
         try {
             // 현재 동아리 정보 표시
@@ -1377,7 +1377,7 @@ class AIAnalysisService(private val context: Context) {
     // 3. Gemini AI 심화 분석 (백엔드 API 사용)
     private suspend fun generateGeminiAIAnalysis(sb: StringBuilder, clubData: AIReportDataCollector.ClubReportData) {
         sb.append("🤖 Gemini AI 심화 분석 리포트\n")
-        sb.append("=".repeat(50) + "\n\n")
+        sb.append("=".repeat(26) + "\n\n")
         
         sb.append("⚡ AI 분석 엔진: Gemini 2.5 Pro Advanced\n")
         sb.append("🔍 분석 모드: 동아리 전략 최적화 + 예산 리스크 관리\n")
@@ -1390,7 +1390,7 @@ class AIAnalysisService(private val context: Context) {
             
             if (geminiAdvice != null) {
                 sb.append("🌟 Gemini AI 전문 분석 결과\n")
-                sb.append("=" .repeat(30) + "\n\n")
+                sb.append("=" .repeat(26) + "\n\n")
                 
                 sb.append("📊 전체 현황 분석\n")
                 sb.append("${geminiAdvice.overall}\n\n")
@@ -1456,7 +1456,7 @@ class AIAnalysisService(private val context: Context) {
     // Gemini API 실패 시 폴백 분석
     private fun generateGeminiFallbackAnalysis(sb: StringBuilder, clubData: AIReportDataCollector.ClubReportData) {
         sb.append("🤖 Gemini AI 스타일 분석 (Local Mode)\n")
-        sb.append("=" .repeat(35) + "\n\n")
+        sb.append("=" .repeat(26) + "\n\n")
         
         // 종합 데이터 분석
         val dataCompleteness = calculateInfoCompleteness(clubData)

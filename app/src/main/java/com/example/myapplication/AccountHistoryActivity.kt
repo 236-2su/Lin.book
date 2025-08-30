@@ -111,15 +111,16 @@ class AccountHistoryActivity : AppCompatActivity() {
             finish()
         }
 
-        // 공개 장부 버튼 클릭 시 거래 내역과 함께 이동
+        // 공개 장부 버튼 클릭 시 MainActivity로 이동하여 LedgerContentFragment 표시
         findViewById<TextView>(R.id.btn_public_account)?.setOnClickListener {
-            // 현재 선택된 월의 거래 내역을 TransactionItem 형태로 변환
-            val currentMonthTransactions = getCurrentMonthTransactionsAsTransactionItems()
-
-            // PublicLedgerFragment로 이동 (Fragment는 Activity를 통해 전달)
-            // TODO: PublicLedgerActivity나 적절한 Activity로 이동하도록 구현
-            // 현재는 간단히 로그로 확인
-            Log.d("AccountHistoryActivity", "공개 장부로 이동: ${currentMonthTransactions.size}건의 거래 내역")
+            // MainActivity로 이동하여 LedgerContentFragment 표시 (root_page와 동일한 과정)
+            val intent = Intent(this, MainActivity::class.java)
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            intent.putExtra("show_public_ledger", true)
+            intent.putExtra("club_pk", clubPk)
+            // ledger_pk는 MainActivity에서 동아리 ID를 기반으로 조회하도록 수정
+            startActivity(intent)
+            finish()
         }
 
         // 초기 년/월 세팅 (오늘 기준)
@@ -360,8 +361,6 @@ class AccountHistoryActivity : AppCompatActivity() {
 
     // 재무 요약 표 업데이트
     private fun updateFinancialSummary(transactions: List<Transaction>) {
-        if (allTransactions.isEmpty()) return
-
         // 총 자산 (현재 선택된 월의 거래 내역 기준으로 계산)
         val totalBalance = if (transactions.isNotEmpty()) {
             // 해당 월에 거래가 있으면 가장 최근 거래의 잔액

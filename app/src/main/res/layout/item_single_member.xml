@@ -1,10 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginTop="10dp"
+    android:layout_marginVertical="6dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="2dp"
+    app:cardBackgroundColor="@android:color/white">
+
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:padding="10dp"
+    android:padding="12dp"
     android:gravity="center_vertical">
 
     <!-- 왼쪽 영역: 구성원 정보 -->
@@ -20,7 +28,7 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical"
-            android:layout_marginBottom="8dp">
+            android:layout_marginBottom="12dp">
 
             <!-- 배지들을 담는 LinearLayout -->
             <LinearLayout
@@ -32,22 +40,36 @@
                 <!-- Me 배지 (본인인 경우만 표시) -->
                 <TextView
                     android:id="@+id/meBadge"
-                    style="@style/ReferenceSmallButton.Me"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:text="Me"
+                    android:textSize="10sp"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/white"
+                    android:background="@drawable/badge_me"
+                    android:paddingHorizontal="8dp"
+                    android:paddingVertical="4dp"
                     android:layout_marginEnd="6dp"
                     android:visibility="gone" />
                 
-                <!-- 역할 배지 (회장/일반) -->
+                <!-- 역할 배지 (회장/간부/일반) -->
                 <TextView
                     android:id="@+id/roleBadge"
-                    style="@style/ReferenceSmallButton.General"
-                    android:text="일반" />
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="일반"
+                    android:textSize="10sp"
+                    android:textStyle="bold"
+                    android:textColor="#374151"
+                    android:background="@drawable/badge_general"
+                    android:paddingHorizontal="8dp"
+                    android:paddingVertical="4dp" />
             </LinearLayout>
 
             <View
-                android:layout_width="0dp"
-                android:layout_height="1dp"
-                android:layout_weight="1" />
+                android:layout_width="31dp"
+                android:layout_height="0dp"
+                android:layout_weight="0" />
 
             <!-- 가입일 -->
             <TextView
@@ -55,8 +77,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="가입일: 2025년 03월 27일"
-                android:textSize="12sp"
-                android:textColor="#9CA3AF" />
+                android:textSize="11sp"
+                android:textColor="#9CA3AF"
+                android:fontFamily="sans-serif" />
         </LinearLayout>
 
         <!-- 아랫줄: 이름과 정보 -->
@@ -74,13 +97,14 @@
                 android:text="윤예진"
                 android:textSize="18sp"
                 android:textStyle="bold"
-                android:textColor="#1F2937"
+                android:textColor="#111827"
+                android:fontFamily="sans-serif-medium"
                 android:layout_marginEnd="16dp" />
 
             <View
                 android:layout_width="0dp"
-                android:layout_height="1dp"
-                android:layout_weight="1" />
+                android:layout_height="0dp"
+                android:layout_weight="0" />
 
             <!-- 전공/학번, 전화번호 -->
             <LinearLayout
@@ -96,6 +120,7 @@
                     android:text="인공지능융합학과 / 2023256"
                     android:textSize="12sp"
                     android:textColor="#6B7280"
+                    android:fontFamily="sans-serif"
                     android:gravity="start" />
 
                 <TextView
@@ -105,44 +130,66 @@
                     android:text="010-0000-0000"
                     android:textSize="12sp"
                     android:textColor="#6B7280"
-                    android:layout_marginTop="2dp"
+                    android:fontFamily="sans-serif"
+                    android:layout_marginTop="3dp"
                     android:gravity="start" />
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>
 
-    <!-- 가운데 영역: 권한 변경 (Me가 아닌 경우만 표시) -->
-    <TextView
-        android:id="@+id/roleChangeButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="권한 변경"
-        android:textSize="14sp"
-        android:textColor="#3B82F6"
-        android:layout_marginHorizontal="12dp"
-        android:visibility="visible" />
-
-    <!-- 오른쪽 영역: 액션 버튼들 (Me가 아닌 경우만 표시) -->
+    <!-- 오른쪽 영역: 권한 변경과 액션 버튼들을 세로로 배치 -->
     <LinearLayout
-        android:id="@+id/actionButtons"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:visibility="visible">
+        android:orientation="vertical"
+        android:gravity="center">
+        
+        <!-- 권한 변경 버튼 (위) -->
+        <TextView
+            android:id="@+id/roleChangeButton"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:background="@drawable/button_role_change"
+            android:fontFamily="sans-serif-medium"
+            android:gravity="center"
+            android:paddingHorizontal="14dp"
+            android:text="권한 변경"
+            android:textColor="#3B82F6"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="6dp"
+            android:visibility="visible" />
 
-        <ImageView
-            android:id="@+id/callButton"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:src="@drawable/call"
-            android:layout_marginEnd="8dp"
-            android:padding="8dp" />
+        <!-- 전화/문자 버튼들 (아래) -->
+        <LinearLayout
+            android:id="@+id/actionButtons"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:visibility="visible">
 
-        <ImageView
-            android:id="@+id/messageButton"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:src="@drawable/text"
-            android:padding="8dp" />
+            <ImageView
+                android:id="@+id/callButton"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:src="@drawable/call"
+                android:background="@drawable/button_action"
+                android:padding="9dp"
+                android:layout_marginEnd="6dp"
+                android:contentDescription="전화 걸기"
+                android:scaleType="centerInside" />
+
+            <ImageView
+                android:id="@+id/messageButton"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:src="@drawable/text"
+                android:background="@drawable/button_action"
+                android:padding="9dp"
+                android:contentDescription="문자 보내기"
+                android:scaleType="centerInside" />
+        </LinearLayout>
     </LinearLayout>
+
 </LinearLayout>
+</androidx.cardview.widget.CardView>

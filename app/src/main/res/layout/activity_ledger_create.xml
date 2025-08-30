@@ -1,10 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="@android:color/white"
-    android:paddingTop="24dp">
+    android:fillViewport="true"
+    android:background="@android:color/white">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:paddingTop="24dp">
 
     <!-- 페이지 제목 -->
     <LinearLayout
@@ -213,15 +219,17 @@
         android:inputType="textMultiLine|textCapSentences"
         android:layout_marginBottom="24dp" />
 
-    <!-- 등록하기 버튼 -->
-    <Button
-        android:id="@+id/btn_register"
-        android:layout_width="match_parent"
-        android:layout_height="51dp"
-        android:text="등록하기"
-        android:textSize="16sp"
-        android:textColor="#FFFFFF"
-        android:background="@drawable/btn_register"
-        android:layout_marginBottom="24dp" />
+        <!-- 등록하기 버튼 -->
+        <Button
+            android:id="@+id/btn_register"
+            android:layout_width="match_parent"
+            android:layout_height="51dp"
+            android:text="등록하기"
+            android:textSize="16sp"
+            android:textColor="#FFFFFF"
+            android:background="@drawable/btn_register"
+            android:layout_marginBottom="24dp" />
 
-</LinearLayout>
+    </LinearLayout>
+
+</ScrollView>

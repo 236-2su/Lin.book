@@ -40,4 +40,28 @@ object UserManager {
     fun hasUserPk(context: Context): Boolean {
         return getUserPk(context) != null
     }
+    
+    // 로그아웃 (사용자 정보와 계좌 정보 모두 삭제)
+    fun logout(context: Context) {
+        // 사용자 정보 삭제
+        val prefs = getSharedPreferences(context)
+        prefs.edit()
+            .remove(KEY_USER_PK)
+            .putBoolean(KEY_IS_LOGGED_IN, false)
+            .apply()
+        
+        // 계좌 정보도 함께 삭제
+        clearAccountInfo(context)
+    }
+    
+    // 계좌 정보 삭제 (모든 동아리의 계좌 정보)
+    private fun clearAccountInfo(context: Context) {
+        // 기존 전역 계좌 정보 삭제
+        val accountPrefs = context.getSharedPreferences("account_info", Context.MODE_PRIVATE)
+        accountPrefs.edit().clear().apply()
+        
+        // 동아리별 계좌 정보도 삭제
+        val clubAccountPrefs = context.getSharedPreferences("club_accounts", Context.MODE_PRIVATE)
+        clubAccountPrefs.edit().clear().apply()
+    }
 }

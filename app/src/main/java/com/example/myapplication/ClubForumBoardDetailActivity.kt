@@ -41,7 +41,7 @@ class ClubForumBoardDetailActivity : AppCompatActivity() {
         updateUI()
 
         // 좋아요 아이콘 클릭 리스너 연결
-        findViewById<ImageView>(R.id.iv_like)?.setOnClickListener {
+        findViewById<ImageView>(R.id.iv_like_button)?.setOnClickListener {
             toggleLike()
         }
 
@@ -627,7 +627,7 @@ class ClubForumBoardDetailActivity : AppCompatActivity() {
     }
 
     private fun updateLikeUi() {
-        val likeView = findViewById<ImageView>(R.id.iv_like)
+        val likeView = findViewById<ImageView>(R.id.iv_like_button)
         if (isLiked) {
             likeView?.setImageResource(R.drawable.ic_heart_filled)
         } else {

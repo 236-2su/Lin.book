@@ -5,6 +5,7 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.util.concurrent.TimeUnit
 import javax.net.ssl.*
 import java.util.concurrent.TimeUnit
 
@@ -19,7 +20,7 @@ class ApiClient {
                 val loggingInterceptor = HttpLoggingInterceptor()
                 loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY)
                 
-                // OkHttpClient 설정 (SSL 검증 비활성화 - 개발용)
+                // OkHttpClient 설정 (SSL 검증 비활성화 + 긴 타임아웃 - 개발용)
                 val okHttpClient = OkHttpClient.Builder()
                     .addInterceptor(loggingInterceptor)
                     .hostnameVerifier { _, _ -> true }
