@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@drawable/ledger_report_gradient_background">
+    >
 
     <!-- 헤더 -->
     <LinearLayout
@@ -49,11 +49,12 @@
 
             <!-- 리포트 정보 카드 -->
             <LinearLayout
+
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:background="@drawable/btn_selected"
-                android:backgroundTint="#FFFFFF"
+                android:backgroundTint="#D3EDF1"
                 android:elevation="2dp"
                 android:padding="16dp"
                 android:layout_marginBottom="16dp">
@@ -95,7 +96,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:background="@drawable/btn_selected"
-                android:backgroundTint="#FFFFFF"
+                android:backgroundTint="#E3E3E3"
                 android:elevation="1dp"
                 android:padding="20dp">
 

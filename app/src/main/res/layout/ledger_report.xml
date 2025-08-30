@@ -2,7 +2,9 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F8F9FA">
+    android:background="#ffffff"
+    android:layout_marginTop="1dp">
+
 
     <ScrollView
         android:layout_width="match_parent"
@@ -22,10 +24,8 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/ledger_report_gradient_background"
             android:orientation="vertical"
             android:paddingHorizontal="24dp"
-            android:paddingTop="20dp"
             android:paddingBottom="24dp">
 
             <!-- 제목 섹션 -->
@@ -45,20 +45,24 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Hey-bi "
                         android:textSize="24sp"
                         android:textColor="#1565C0"
                         android:textStyle="bold"
                         android:fontFamily="sans-serif-black"
+                        android:gravity="center"
                         android:layout_marginBottom="6dp" />
 
                     <TextView
-                        android:layout_width="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="동아리 운영 현황을 AI가 스마트하게 분석합니다"
-                        android:textSize="13sp"
+                        android:fontFamily="sans-serif-medium"
+                        android:text='"동아리 운영 현황을 AI가 스마트하게 분석합니다"'
                         android:textColor="#666666"
-                        android:fontFamily="sans-serif-medium" />
+                        android:textSize="13sp"
+
+                        android:padding="12dp"
+                        android:gravity="center" />
 
                 </LinearLayout>
 
@@ -67,10 +71,11 @@
 
             <!-- 통계 카드 -->
             <LinearLayout
+
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:background="#FFFFFF"
+                android:background="@drawable/ledger_report_rounded_card_box"
                 android:elevation="4dp"
                 android:padding="16dp"
                 android:layout_marginTop="8dp">
@@ -106,7 +111,7 @@
                 <View
                     android:layout_width="1dp"
                     android:layout_height="40dp"
-                    android:background="#E0E0E0" />
+                    android:background="#000000" />
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -139,7 +144,7 @@
                 <View
                     android:layout_width="1dp"
                     android:layout_height="40dp"
-                    android:background="#E0E0E0" />
+                    android:background="#000000" />
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -278,7 +283,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="동아리 활동과 재정 현황을 AI가 전문적으로 분석하여\n맞춤형 인사이트와 개선 제안을 제공합니다"
+                    android:text="동아리 활동과 재정 현황을 \n AI가 전문적으로 분석하여\n맞춤형 인사이트와 개선 제안을 제공합니다"
                     android:textSize="14sp"
                     android:textColor="#666666"
                     android:gravity="center"
@@ -295,6 +300,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
+
                 android:scrollbars="none"
                 android:visibility="visible" />
 

@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@drawable/ledger_report_gradient_background">
+    android:layout_marginTop="6sp">
 
     <!-- 헤더 -->
     <LinearLayout
