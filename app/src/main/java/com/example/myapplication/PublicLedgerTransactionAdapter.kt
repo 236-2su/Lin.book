@@ -76,10 +76,16 @@ class PublicLedgerTransactionAdapter(
                 amount.setTextColor(Color.parseColor("#C50000"))
             }
 
-            // 카테고리 설정 - category 필드 사용, 없으면 type 필드 사용
-            category.text = transaction.category ?: transaction.type
-            category.setBackgroundResource(R.drawable.btn_vice_president)
-            category.setTextColor(Color.parseColor("#4F4F4F"))
+            // 카테고리 설정 - category 필드 사용, 없으면 type 필드 사용 (type이 null이면 표시하지 않음)
+            val categoryText = transaction.category ?: transaction.type
+            if (!categoryText.isNullOrEmpty()) {
+                category.visibility = View.VISIBLE
+                category.text = categoryText
+                category.setBackgroundResource(R.drawable.btn_vice_president)
+                category.setTextColor(Color.parseColor("#4F4F4F"))
+            } else {
+                category.visibility = View.GONE
+            }
 
             // 날짜 포맷팅 - dateTime 필드 사용
             try {
