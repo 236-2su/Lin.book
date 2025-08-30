@@ -1019,7 +1019,7 @@ class LedgerReportCreateActivity : BaseActivity(), ReportCreationManager.ReportC
             val categories = (listOf(myClubDetail.clubDetail.majorCategory) + 
                             validSimilarClubs.map { it.second.clubDetail.majorCategory }).distinct()
             
-            categories.forEach { category ->ㅇ
+            categories.forEach { category ->
                 val clubsInCategory = validSimilarClubs.count { it.second.clubDetail.majorCategory == category } + 
                                    if (myClubDetail.clubDetail.majorCategory == category) 1 else 0
                 appendLine("  📂 $category: ${clubsInCategory}개 동아리")
