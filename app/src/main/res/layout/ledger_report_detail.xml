@@ -17,20 +17,20 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="AI 리포트 상세"
-            android:textSize="22sp"
-            android:textColor="#1565C0"
-            android:textStyle="bold"
+            android:layout_marginBottom="6dp"
             android:fontFamily="sans-serif-black"
-            android:layout_marginBottom="6dp" />
+            android:text="AI 리포트 상세"
+            android:textColor="#1565C0"
+            android:textSize="22sp"
+            android:textStyle="bold" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-medium"
             android:text="AI가 분석한 동아리 인사이트를 확인하세요"
-            android:textSize="14sp"
             android:textColor="#666666"
-            android:fontFamily="sans-serif-medium" />
+            android:textSize="14sp" />
 
     </LinearLayout>
 
