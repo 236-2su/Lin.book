@@ -78,7 +78,7 @@ class SimilarClubsById(APIView):
     serializer_class = ClubSerializer
 
     def get(self, request, club_id):
-        data = similar_by_club(club_id, k=10)
+        data = similar_by_club(club_id, k=2)
         return Response({"results": data})
 
 
