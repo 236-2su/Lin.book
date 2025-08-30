@@ -58,16 +58,16 @@
             android:layout_weight="1"/>
 
         <androidx.appcompat.widget.AppCompatImageButton
-            android:id="@+id/btn_member"
+            android:id="@+id/btn_menu"
             android:layout_width="36dp"
             android:layout_height="36dp"
             android:backgroundTint="#FFFFFF"
             android:background="?attr/selectableItemBackgroundBorderless"
-            app:srcCompat="@drawable/ic_person"
+            app:srcCompat="@drawable/ic_menu_hamburger"
             android:scaleType="centerInside"
             android:adjustViewBounds="true"
             android:padding="6dp"
-            android:contentDescription="멤버 관리" />
+            android:contentDescription="메뉴" />
     </LinearLayout>
 
     <LinearLayout

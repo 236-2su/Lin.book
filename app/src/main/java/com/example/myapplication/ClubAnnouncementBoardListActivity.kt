@@ -60,14 +60,33 @@ class ClubAnnouncementBoardListActivity : AppCompatActivity() {
             }
         }
 
-        // 멤버 버튼: 멤버 리스트 화면으로 이동
-        findViewById<androidx.appcompat.widget.AppCompatImageButton>(R.id.btn_member)?.setOnClickListener {
-            val clubPk = intent?.getIntExtra(EXTRA_CLUB_PK, -1) ?: -1
-            val userPk = UserManager.getUserPk(this) ?: -1
-            val intent = Intent(this, ClubMemberManagementActivity::class.java)
-            intent.putExtra(ClubMemberManagementActivity.EXTRA_CLUB_PK, clubPk)
-            intent.putExtra(ClubMemberManagementActivity.EXTRA_USER_PK, userPk)
-            startActivity(intent)
+        // 헤더 메뉴(햄버거): 구성원 관리 / 회비 관리
+        findViewById<androidx.appcompat.widget.AppCompatImageButton>(R.id.btn_menu)?.setOnClickListener { v ->
+            val popup = android.widget.PopupMenu(this, v)
+            popup.menu.add(0, 1, 0, "구성원 관리")
+            popup.menu.add(0, 2, 1, "회비 관리")
+            popup.setOnMenuItemClickListener { item ->
+                when (item.itemId) {
+                    1 -> {
+                        val clubPk = intent?.getIntExtra(EXTRA_CLUB_PK, -1) ?: -1
+                        val userPk = UserManager.getUserPk(this) ?: -1
+                        val intent = Intent(this, ClubMemberManagementActivity::class.java)
+                        intent.putExtra(ClubMemberManagementActivity.EXTRA_CLUB_PK, clubPk)
+                        intent.putExtra(ClubMemberManagementActivity.EXTRA_USER_PK, userPk)
+                        startActivity(intent)
+                        true
+                    }
+                    2 -> {
+                        val clubPk = intent?.getIntExtra(EXTRA_CLUB_PK, -1) ?: -1
+                        val intent = Intent(this, ClubFeeManagementActivity::class.java)
+                        intent.putExtra(ClubFeeManagementActivity.EXTRA_CLUB_PK, clubPk)
+                        startActivity(intent)
+                        true
+                    }
+                    else -> false
+                }
+            }
+            popup.show()
         }
 
         // 설정 버튼: 동아리 정보 수정 화면으로 이동

@@ -63,6 +63,14 @@
             android:exported="false" />
 
         <activity
+            android:name=".ClubFeeManagementActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ClubFeeBatchBillingActivity"
+            android:exported="false" />
+
+        <activity
             android:name=".ClubAnnouncementBoardDetailActivity"
             android:exported="false" />
 

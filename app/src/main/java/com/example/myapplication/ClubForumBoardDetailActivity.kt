@@ -69,7 +69,8 @@ class ClubForumBoardDetailActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.tv_likes_count)?.text = (boardItem.likes ?: "0").toString()
         findViewById<TextView>(R.id.tv_comments_count)?.text = (boardItem.comments ?: "0").toString()
         
-        // 헤더 클럽명
+        // 헤더 텍스트 설정: 상단 굵은 글씨 = 자유게시판, 아래 작은 회색 = 동아리명
+        findViewById<TextView>(R.id.tv_board_type)?.text = "자유게시판"
         val clubPk = intent.getIntExtra("club_pk", -1)
         if (clubPk > 0) {
             com.example.myapplication.api.ApiClient.getApiService().getClubDetail(clubPk)
@@ -79,7 +80,7 @@ class ClubForumBoardDetailActivity : AppCompatActivity() {
                         response: retrofit2.Response<com.example.myapplication.ClubItem>
                     ) {
                         response.body()?.let { club ->
-                            findViewById<TextView>(R.id.tv_club_title)?.text = club.name
+                            findViewById<TextView>(R.id.tv_club_name)?.text = club.name
                         }
                     }
                     override fun onFailure(
@@ -163,12 +164,12 @@ class ClubForumBoardDetailActivity : AppCompatActivity() {
                             layoutParams = android.widget.LinearLayout.LayoutParams(
                                 android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
                                 android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
-                            ).apply { setMargins(0, 0, 0, 16) }
+                            ).apply { setMargins(0, 0, 0, 64) }
                             gravity = android.view.Gravity.TOP
                         }
 
                         val avatar = android.widget.ImageView(this@ClubForumBoardDetailActivity).apply {
-                            val size = dp(44)
+                            val size = dp(36)
                             layoutParams = android.widget.LinearLayout.LayoutParams(size, size)
                             setImageResource(R.drawable.profile_default)
                         }
@@ -177,7 +178,7 @@ class ClubForumBoardDetailActivity : AppCompatActivity() {
                         val right = android.widget.LinearLayout(this@ClubForumBoardDetailActivity).apply {
                             orientation = android.widget.LinearLayout.VERTICAL
                             layoutParams = android.widget.LinearLayout.LayoutParams(0, android.widget.LinearLayout.LayoutParams.WRAP_CONTENT, 1f).apply {
-                                setMargins(12, 0, 0, 0)
+                                setMargins(32, 0, 0, 0)
                             }
                         }
 
@@ -203,13 +204,104 @@ class ClubForumBoardDetailActivity : AppCompatActivity() {
                         metaRow.addView(authorName)
                         metaRow.addView(authorInfo)
 
+                        val isMine = (comment.author == myUserPk) || (myMemberPk != null && comment.author == myMemberPk)
+                        if (isMine) {
+                            // 내 댓글: 작은 빨간 하트 + 숫자만, 클릭 불가 (학과 옆)
+                            val ivSmall = android.widget.ImageView(this@ClubForumBoardDetailActivity).apply {
+                                val size = dp(14)
+                                layoutParams = android.widget.LinearLayout.LayoutParams(size, size).apply {
+                                    setMargins(dp(6), 0, 0, 0)
+                                }
+                                setImageResource(R.drawable.ic_heart_filled)
+                            }
+                            val tvSmall = android.widget.TextView(this@ClubForumBoardDetailActivity).apply {
+                                text = (comment.likes ?: 0).toString()
+                                textSize = 12f
+                                setPadding(dp(4), 0, 0, 0)
+                            }
+                            metaRow.addView(ivSmall)
+                            metaRow.addView(tvSmall)
+                        }
+
                         val spacer = android.view.View(this@ClubForumBoardDetailActivity).apply {
                             layoutParams = android.widget.LinearLayout.LayoutParams(0, 1).apply { weight = 1f }
                         }
                         metaRow.addView(spacer)
 
+                        if (!isMine) {
+                            // 다른 사람 댓글: 우측 끝에 좋아요(중앙정렬) + 숫자, 약간 크게(13sp)
+                            val rightGroup = android.widget.LinearLayout(this@ClubForumBoardDetailActivity).apply {
+                                orientation = android.widget.LinearLayout.HORIZONTAL
+                                gravity = android.view.Gravity.CENTER_VERTICAL
+                            }
+                            val likedInit = isCommentLiked(comment.id)
+                            val ivLike = android.widget.ImageView(this@ClubForumBoardDetailActivity).apply {
+                                val size = dp(20)
+                                layoutParams = android.widget.LinearLayout.LayoutParams(size, size)
+                                setImageResource(if (likedInit) R.drawable.ic_heart_filled else R.drawable.ic_heart_outline)
+                                tag = likedInit
+                            }
+                            val tvLike = android.widget.TextView(this@ClubForumBoardDetailActivity).apply {
+                                text = (comment.likes ?: 0).toString()
+                                textSize = 13f
+                                setPadding(dp(4), 0, 0, 0)
+                            }
+                            // 클릭 시 부분 업데이트 (깜빡임 제거). 실패 시 롤백
+                            ivLike.setOnClickListener {
+                                val wasLiked = (ivLike.tag as? Boolean) ?: false
+                                val newLiked = !wasLiked
+                                ivLike.tag = newLiked
+                                ivLike.setImageResource(if (newLiked) R.drawable.ic_heart_filled else R.drawable.ic_heart_outline)
+                                val current = tvLike.text.toString().toIntOrNull() ?: 0
+                                val next = current + if (newLiked) 1 else -1
+                                tvLike.text = next.coerceAtLeast(0).toString()
+                                setCommentLiked(comment.id, newLiked)
+
+                                val clubPk = intent.getIntExtra("club_pk", -1)
+                                val boardId = boardItem.id
+                                val authorId = UserManager.getUserPk(this@ClubForumBoardDetailActivity) ?: 0
+                                val body = com.example.myapplication.api.ApiService.LikeRequest(authorId)
+                                com.example.myapplication.api.ApiClient.getApiService()
+                                    .likeComment(clubPk, boardId, comment.id, body)
+                                    .enqueue(object : retrofit2.Callback<okhttp3.ResponseBody> {
+                                        override fun onResponse(
+                                            call: retrofit2.Call<okhttp3.ResponseBody>,
+                                            response: retrofit2.Response<okhttp3.ResponseBody>
+                                        ) {
+                                            if (!response.isSuccessful) {
+                                                // 롤백
+                                                val revertLiked = !newLiked
+                                                ivLike.tag = revertLiked
+                                                ivLike.setImageResource(if (revertLiked) R.drawable.ic_heart_filled else R.drawable.ic_heart_outline)
+                                                val cur = tvLike.text.toString().toIntOrNull() ?: 0
+                                                val back = cur + if (revertLiked) 1 else -1
+                                                tvLike.text = back.coerceAtLeast(0).toString()
+                                                setCommentLiked(comment.id, revertLiked)
+                                                android.widget.Toast.makeText(this@ClubForumBoardDetailActivity, "댓글 좋아요 실패", android.widget.Toast.LENGTH_SHORT).show()
+                                            }
+                                        }
+                                        override fun onFailure(
+                                            call: retrofit2.Call<okhttp3.ResponseBody>,
+                                            t: Throwable
+                                        ) {
+                                            // 롤백
+                                            val revertLiked = !newLiked
+                                            ivLike.tag = revertLiked
+                                            ivLike.setImageResource(if (revertLiked) R.drawable.ic_heart_filled else R.drawable.ic_heart_outline)
+                                            val cur = tvLike.text.toString().toIntOrNull() ?: 0
+                                            val back = cur + if (revertLiked) 1 else -1
+                                            tvLike.text = back.coerceAtLeast(0).toString()
+                                            setCommentLiked(comment.id, revertLiked)
+                                        }
+                                    })
+                            }
+
+                            rightGroup.addView(ivLike)
+                            rightGroup.addView(tvLike)
+                            metaRow.addView(rightGroup)
+                        }
+
                         // 작성자일 경우 수정/삭제 버튼 (user_pk 또는 member_pk 매칭)
-                        val isMine = (comment.author == myUserPk) || (myMemberPk != null && comment.author == myMemberPk)
                         if (isMine) {
                             val editBtn = android.widget.TextView(this@ClubForumBoardDetailActivity).apply {
                                 text = "수정"
@@ -232,30 +324,6 @@ class ClubForumBoardDetailActivity : AppCompatActivity() {
                             metaRow.addView(deleteBtn)
                         }
 
-                        val likesRow = android.widget.LinearLayout(this@ClubForumBoardDetailActivity).apply {
-                            orientation = android.widget.LinearLayout.HORIZONTAL
-                            gravity = android.view.Gravity.END or android.view.Gravity.CENTER_VERTICAL
-                        }
-                        val ivLike = android.widget.ImageView(this@ClubForumBoardDetailActivity).apply {
-                            val size = dp(24)
-                            layoutParams = android.widget.LinearLayout.LayoutParams(size, size)
-                            val liked = isCommentLiked(comment.id)
-                            setImageResource(if (liked) R.drawable.ic_heart_filled else R.drawable.ic_heart_outline)
-                            setOnClickListener {
-                                toggleCommentLike(comment)
-                                val nowLiked = !isCommentLiked(comment.id)
-                                setCommentLiked(comment.id, nowLiked)
-                                setImageResource(if (nowLiked) R.drawable.ic_heart_filled else R.drawable.ic_heart_outline)
-                            }
-                        }
-                        val tvLikeCount = android.widget.TextView(this@ClubForumBoardDetailActivity).apply {
-                            text = (comment.likes ?: 0).toString()
-                            textSize = 14f
-                            setPadding(dp(6), 0, 0, 0)
-                        }
-                        likesRow.addView(ivLike)
-                        likesRow.addView(tvLikeCount)
-
                         right.addView(metaRow)
                         val createdAtView = android.widget.TextView(this@ClubForumBoardDetailActivity).apply {
                             text = formatDate(comment.created_at)
@@ -268,7 +336,6 @@ class ClubForumBoardDetailActivity : AppCompatActivity() {
                         }
                         right.addView(createdAtView)
                         right.addView(contentView)
-                        right.addView(likesRow)
                         row.addView(right)
                         container?.addView(row)
                     }
