@@ -49,8 +49,8 @@ class LedgerContentFragment : Fragment() {
 
     private var allTransactions: List<TransactionItem> = listOf() // 전체 거래 내역 저장
 
-    private var clubId: Int = 4  // 하드코딩
-    private var ledgerId: Int = 10  // 하드코딩
+    private var clubId: Int = -1  // arguments에서 받아올 예정
+    private var ledgerId: Int = 0  // 고정값
 
     companion object {
         private const val ARG_CLUB_ID = "club_id"
@@ -452,7 +452,7 @@ class LedgerContentFragment : Fragment() {
                 gravity = android.view.Gravity.BOTTOM or android.view.Gravity.END
                 setMargins(0, 0, 80, 80)
             }
-            setImageResource(R.drawable.pencil)
+            setImageResource(android.R.drawable.ic_input_add)
             backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#2457C5"))
             imageTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.WHITE)
             setOnClickListener {
@@ -552,40 +552,30 @@ class LedgerContentFragment : Fragment() {
     
     // 이전 달로 이동할 수 있는지 확인하는 함수
     private fun canMoveToPreviousMonth(): Boolean {
-        if (allTransactions.isEmpty()) return false
-        
-        val currentMonth = SimpleDateFormat("yyyy-MM", Locale.getDefault()).format(calendar.time)
-        val previousMonth = SimpleDateFormat("yyyy-MM", Locale.getDefault()).apply {
-            calendar.add(Calendar.MONTH, -1)
-            format(calendar.time)
-            calendar.add(Calendar.MONTH, 1) // 원래 위치로 복원
-        }.toString()
-        
-        val hasPreviousMonthTransactions = allTransactions.any {
-            it.dateTime?.startsWith(previousMonth) == true
+        // 현재 달이 너무 과거가 아니면 항상 이동 가능
+        // 예: 2020년 1월 이후로는 항상 이동 가능하도록 설정
+        val minDate = Calendar.getInstance().apply {
+            set(2020, Calendar.JANUARY, 1)
         }
         
-        Log.d("LedgerContentFragment", "이전 달 이동 가능 여부: $hasPreviousMonthTransactions (월: $previousMonth)")
-        return hasPreviousMonthTransactions
+        val canMove = calendar.after(minDate)
+        val currentMonth = SimpleDateFormat("yyyy-MM", Locale.getDefault()).format(calendar.time)
+        
+        Log.d("LedgerContentFragment", "이전 달 이동 가능 여부: $canMove (현재 월: $currentMonth)")
+        return canMove
     }
     
     // 다음 달로 이동할 수 있는지 확인하는 함수
     private fun canMoveToNextMonth(): Boolean {
-        if (allTransactions.isEmpty()) return false
+        // 현재 달이 현재 시점보다 이전이면 이동 가능
+        val currentTime = Calendar.getInstance()
+        val canMove = calendar.before(currentTime) || calendar.get(Calendar.YEAR) == currentTime.get(Calendar.YEAR) && calendar.get(Calendar.MONTH) == currentTime.get(Calendar.MONTH)
         
         val currentMonth = SimpleDateFormat("yyyy-MM", Locale.getDefault()).format(calendar.time)
-        val nextMonth = SimpleDateFormat("yyyy-MM", Locale.getDefault()).apply {
-            calendar.add(Calendar.MONTH, 1)
-            format(calendar.time)
-            calendar.add(Calendar.MONTH, -1) // 원래 위치로 복원
-        }.toString()
+        val thisMonth = SimpleDateFormat("yyyy-MM", Locale.getDefault()).format(currentTime.time)
         
-        val hasNextMonthTransactions = allTransactions.any {
-            it.dateTime?.startsWith(nextMonth) == true
-        }
-        
-        Log.d("LedgerContentFragment", "다음 달 이동 가능 여부: $hasNextMonthTransactions (월: $nextMonth)")
-        return hasNextMonthTransactions
+        Log.d("LedgerContentFragment", "다음 달 이동 가능 여부: $canMove (현재 월: $currentMonth, 오늘: $thisMonth)")
+        return canMove
     }
     
     // 월 이동 버튼들의 상태를 업데이트하는 함수

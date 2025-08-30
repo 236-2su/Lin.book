@@ -19,6 +19,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import com.google.gson.Gson
 import com.example.myapplication.api.ApiClient
+import com.example.myapplication.api.ApiService.AccountResponse
+import com.example.myapplication.api.ApiService.CreateAccountRequest
 import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Call
@@ -77,8 +79,8 @@ class MeetingAccountFragment : Fragment() {
         // 등록하기 버튼 숨기기
         hideRegisterButton()
         
-        // 기존 계좌가 있는지 확인
-        checkExistingAccount()
+        // 모임통장 버튼을 선택된 상태로 설정
+        setMeetingAccountButtonSelected()
         
         // 연동하기 버튼 클릭 이벤트
         val btnLink = view.findViewById<LinearLayout>(R.id.btn_link)
@@ -104,38 +106,30 @@ class MeetingAccountFragment : Fragment() {
         }
     }
     
-    // 기존 계좌가 있는지 확인
-    private fun checkExistingAccount() {
-        // SharedPreferences에서 저장된 계좌 정보 확인
-        val sharedPrefs = requireContext().getSharedPreferences("account_info", android.content.Context.MODE_PRIVATE)
-        val accountNo = sharedPrefs.getString("account_no", null)
-        val userName = sharedPrefs.getString("user_name", null)
-        
-        if (!accountNo.isNullOrEmpty() && !userName.isNullOrEmpty()) {
-            // 기존 계좌가 있으면 바로 AccountHistoryActivity로 이동
-            Log.d("MeetingAccountFragment", "기존 계좌 발견: $accountNo, 사용자: $userName")
-            navigateToAccountHistory(accountNo, userName)
-        } else {
-            Log.d("MeetingAccountFragment", "기존 계좌 없음, 계좌 생성 페이지 표시")
+    // 모임통장 버튼을 선택된 상태로 설정
+    private fun setMeetingAccountButtonSelected() {
+        try {
+            val baseActivity = activity as? com.example.myapplication.BaseActivity
+            val btnMeetingAccount = baseActivity?.findViewById<android.widget.TextView>(R.id.btn_meeting_account)
+            if (btnMeetingAccount != null && baseActivity != null) {
+                baseActivity.selectBoardButton(btnMeetingAccount)
+                Log.d("MeetingAccountFragment", "모임통장 버튼 선택됨")
+            } else {
+                Log.e("MeetingAccountFragment", "모임통장 버튼을 찾을 수 없음")
+            }
+        } catch (e: Exception) {
+            Log.e("MeetingAccountFragment", "모임통장 버튼 선택 오류", e)
         }
     }
     
-    // AccountHistoryActivity로 직접 이동
-    private fun navigateToAccountHistory(accountNo: String, userName: String) {
-        val intent = Intent(requireContext(), AccountHistoryActivity::class.java)
-        intent.putExtra("accountNo", accountNo)
-        intent.putExtra("userName", userName)
-        startActivity(intent)
-    }
-    
-    // 계좌 정보를 SharedPreferences에 저장
+    // 계좌 정보를 동아리별로 SharedPreferences에 저장
     private fun saveAccountInfo(accountNo: String, userName: String) {
-        val sharedPrefs = requireContext().getSharedPreferences("account_info", android.content.Context.MODE_PRIVATE)
+        val sharedPrefs = requireContext().getSharedPreferences("club_accounts", android.content.Context.MODE_PRIVATE)
         sharedPrefs.edit()
-            .putString("account_no", accountNo)
-            .putString("user_name", userName)
+            .putString("account_no_$clubPk", accountNo)
+            .putString("user_name_$clubPk", userName)
             .apply()
-        Log.d("MeetingAccountFragment", "계좌 정보 저장됨: $accountNo, $userName")
+        Log.d("MeetingAccountFragment", "동아리 $clubPk 계좌 정보 저장됨: $accountNo, $userName")
     }
     
     // 통장 정보 팝업 다이얼로그 표시
@@ -171,120 +165,60 @@ class MeetingAccountFragment : Fragment() {
     
     // 계좌 생성 API 호출
     private fun createAccount() {
-        // 현재 날짜와 시간 가져오기 (한국 시간대 명시)
-        val koreaTimeZone = TimeZone.getTimeZone("Asia/Seoul")
-        val dateFormat = SimpleDateFormat("yyyyMMdd", Locale.getDefault()).apply { timeZone = koreaTimeZone }
-        val timeFormat = SimpleDateFormat("HHmmss", Locale.getDefault()).apply { timeZone = koreaTimeZone }
+        // clubPk가 유효한지 확인
+        if (clubPk <= 0) {
+            Log.e("MeetingAccountFragment", "유효하지 않은 clubPk: $clubPk")
+            showErrorDialog("오류", "동아리 정보를 찾을 수 없습니다.")
+            return
+        }
         
-        val currentDate = dateFormat.format(Date())
-        val currentTime = timeFormat.format(Date())
-        
-        // 시스템 시간과 비교를 위한 로그
-        val systemDate = SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(Date())
-        val systemTime = SimpleDateFormat("HHmmss", Locale.getDefault()).format(Date())
-        
-        // 랜덤 난수 생성 (20자리)
-        val randomNumber = generateUnique20DigitNumber()
-        
-        // 디버깅을 위한 로그 출력
-        Log.d("MeetingAccountFragment", "생성된 데이터:")
-        Log.d("MeetingAccountFragment", "한국시간 날짜: $currentDate")
-        Log.d("MeetingAccountFragment", "한국시간 시간: $currentTime")
-        Log.d("MeetingAccountFragment", "시스템시간 날짜: $systemDate")
-        Log.d("MeetingAccountFragment", "시스템시간 시간: $systemTime")
-        Log.d("MeetingAccountFragment", "랜덤번호: $randomNumber (길이: ${randomNumber.length})")
-        
-        // API 요청 데이터 구성
-        val requestData = mapOf(
-            "Header" to mapOf(
-                "apiName" to "createDemandDepositAccount",
-                "transmissionDate" to currentDate,
-                "transmissionTime" to currentTime,
-                "institutionCode" to "00100",
-                "fintechAppNo" to "001",
-                "apiServiceCode" to "createDemandDepositAccount",
-                "institutionTransactionUniqueNo" to randomNumber,
-                "apiKey" to "7f9fc447584741399a5dfab7dd3ea443",
-                "userKey" to "1607a094-72cc-4d4f-9ed3-e7cd1d264e2d"
-            ),
-            "accountTypeUniqueNo" to "088-1-64e152b919e94d"  // Body 제거하고 직접 추가
-        )
-        
-        // 전체 요청 데이터 로그 출력
-        Log.d("MeetingAccountFragment", "API 요청 데이터: ${Gson().toJson(requestData)}")
+        // 사용자 ID 가져오기
+        val userPk = UserManager.getUserPk(requireContext())
+        if (userPk == null) {
+            Log.e("MeetingAccountFragment", "사용자 정보를 찾을 수 없습니다")
+            showErrorDialog("오류", "사용자 정보를 찾을 수 없습니다.")
+            return
+        }
         
         // API 호출
-        callCreateAccountAPI(requestData)
+        callCreateAccountAPI(clubPk, userPk)
     }
     
     // 계좌 생성 API 호출
-    private fun callCreateAccountAPI(requestData: Map<String, Any>) {
-        Log.d("MeetingAccountFragment", "계좌 생성 API 호출 시작")
+    private fun callCreateAccountAPI(clubPk: Int, userPk: Int) {
+        Log.d("MeetingAccountFragment", "계좌 생성 API 호출 시작 - clubPk: $clubPk, userPk: $userPk")
         
-        // 백그라운드 스레드에서 API 호출
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                val url = "https://finopenapi.ssafy.io/ssafy/api/v1/edu/demandDeposit/createDemandDepositAccount"
-                val connection = URL(url).openConnection() as HttpURLConnection
-                
-                // POST 요청 설정
-                connection.requestMethod = "POST"
-                connection.setRequestProperty("Content-Type", "application/json")
-                connection.doOutput = true
-                
-                // JSON 데이터 전송
-                val jsonData = Gson().toJson(requestData)
-                connection.outputStream.use { os ->
-                    os.write(jsonData.toByteArray())
-                }
-                
-                                // 응답 받기
-                val responseCode = connection.responseCode
-                Log.d("MeetingAccountFragment", "API 응답 코드: $responseCode")
-                
-                // HTTP 상태 코드 200 또는 201이면 성공
-                if (responseCode == 200 || responseCode == 201) {
-                    val response = connection.inputStream.bufferedReader().use { it.readText() }
-                    Log.d("MeetingAccountFragment", "API 응답: $response")
-                    
-                    // JSON 응답에서 accountNo 추출 (REC 객체 안에서)
-                    val responseJson = Gson().fromJson(response, Map::class.java)
-                    val rec = responseJson["REC"] as? Map<*, *>
-                    
-                    if (rec != null) {
-                        val accountNo = rec["accountNo"]?.toString()
+        // API 요청 객체 생성
+        val request = CreateAccountRequest(user_id = userPk)
+        
+        // API 호출 (club_pk는 Path 파라미터, user_id는 Body에 포함)
+        ApiClient.getApiService().createClubAccount(clubPk, request).enqueue(object : Callback<AccountResponse> {
+            override fun onResponse(
+                call: Call<AccountResponse>,
+                response: Response<AccountResponse>
+            ) {
+                if (response.isSuccessful) {
+                    val accountResponse = response.body()
+                    if (accountResponse != null && accountResponse.code != null) {
+                        Log.d("MeetingAccountFragment", "계좌 생성 성공 - 계좌번호: ${accountResponse.code}")
                         
-                        if (accountNo != null) {
-                            // 메인 스레드에서 계좌 생성 완료 페이지로 이동
-                            withContext(Dispatchers.Main) {
-                                navigateToAccountCreatedPage(accountNo)
-                            }
-                        } else {
-                            Log.e("MeetingAccountFragment", "REC에서 accountNo를 찾을 수 없음")
-                            withContext(Dispatchers.Main) {
-                                showErrorDialog("계좌 생성 실패", "계좌 번호를 받지 못했습니다.")
-                            }
-                        }
+                        // 계좌번호(code)를 사용하여 다음 페이지로 이동
+                        navigateToAccountCreatedPage(accountResponse.code)
                     } else {
-                        Log.e("MeetingAccountFragment", "REC 객체를 찾을 수 없음")
-                        withContext(Dispatchers.Main) {
-                            showErrorDialog("계좌 생성 실패", "응답 데이터 형식이 올바르지 않습니다.")
-                        }
+                        Log.e("MeetingAccountFragment", "계좌번호를 받지 못했습니다")
+                        showErrorDialog("계좌 생성 실패", "계좌번호를 받지 못했습니다.")
                     }
                 } else {
-                    Log.e("MeetingAccountFragment", "API 호출 실패: $responseCode")
-                    withContext(Dispatchers.Main) {
-                        showErrorDialog("계좌 생성 실패", "서버 오류가 발생했습니다. (코드: $responseCode)")
-                    }
-                }
-                
-            } catch (e: Exception) {
-                Log.e("MeetingAccountFragment", "API 호출 중 오류 발생", e)
-                withContext(Dispatchers.Main) {
-                    showErrorDialog("계좌 생성 실패", "네트워크 오류가 발생했습니다: ${e.message}")
+                    Log.e("MeetingAccountFragment", "API 응답 오류: ${response.code()}")
+                    showErrorDialog("계좌 생성 실패", "서버 오류가 발생했습니다. (코드: ${response.code()})")
                 }
             }
-        }
+            
+            override fun onFailure(call: Call<AccountResponse>, t: Throwable) {
+                Log.e("MeetingAccountFragment", "API 호출 실패", t)
+                showErrorDialog("계좌 생성 실패", "네트워크 오류가 발생했습니다: ${t.message}")
+            }
+        })
     }
     
     // 계좌 생성 완료 페이지로 이동
@@ -349,28 +283,6 @@ class MeetingAccountFragment : Fragment() {
             intent.putExtra("userName", "사용자")
             startActivity(intent)
         }
-    }
-    
-    // 20자리 고유 난수 생성
-    private fun generateUnique20DigitNumber(): String {
-        val timestamp = System.currentTimeMillis()
-        val random = (1..999999L).random()
-        val combined = "$timestamp$random"
-        
-        // 20자리로 맞추기
-        val result = if (combined.length >= 20) {
-            combined.takeLast(20)
-        } else {
-            combined.padStart(20, '0')
-        }
-        
-        Log.d("MeetingAccountFragment", "난수 생성 상세:")
-        Log.d("MeetingAccountFragment", "타임스탬프: $timestamp (${timestamp.toString().length}자리)")
-        Log.d("MeetingAccountFragment", "랜덤: $random (${random.toString().length}자리)")
-        Log.d("MeetingAccountFragment", "결합: $combined (${combined.length}자리)")
-        Log.d("MeetingAccountFragment", "최종결과: $result (${result.length}자리)")
-        
-        return result
     }
     
     // 오류 다이얼로그 표시

@@ -361,8 +361,6 @@ class AccountHistoryActivity : AppCompatActivity() {
 
     // 재무 요약 표 업데이트
     private fun updateFinancialSummary(transactions: List<Transaction>) {
-        if (allTransactions.isEmpty()) return
-
         // 총 자산 (현재 선택된 월의 거래 내역 기준으로 계산)
         val totalBalance = if (transactions.isNotEmpty()) {
             // 해당 월에 거래가 있으면 가장 최근 거래의 잔액
