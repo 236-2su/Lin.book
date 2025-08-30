@@ -126,35 +126,7 @@ python -c "from django.core.management.utils import get_random_secret_key as g; 
 
 ### 2-5. 마이그레이션 & 관리자 계정
 ```bash
-python manage.py migrate
-python manage.py createsuperuser  # 이메일/비번 입력
-```
-
-### 2-6. 개발 서버 실행
-```bash
-python manage.py runserver 0.0.0.0:8000
-```
-- 서버 접속: `http://<서버 IP>:8000/` (로컬이면 `http://127.0.0.1:8000/`)
-
-
-## 공통 유틸 명령어
-
-- 데이터베이스 마이그레이션 생성/적용
-  ```bash
-  python manage.py makemigrations
-  python manage.py migrate
-  ```
-- Django Admin 계정
-  ```bash
-  python manage.py createsuperuser
-  ```
-- 테스트 실행(사용 중이라면)
-  ```bash
-  python manage.py test
-  ```
-
----
-## 사욯가능 계정 ##
+python manage.py용가능 계정 ##
 - 이메일만 있으면 로그인 가능
 1. 동아리 리더 계정
   day2201@naver.com
