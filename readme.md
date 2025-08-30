@@ -20,8 +20,6 @@ Django 백엔드(+ Kotlin 프론트 분리 배포) 기반의 동아리 장부/�
 - **DB:** 기본 SQLite(개발용)
 - **API Docs:** `drf-spectacular`가 생성한 `/api/schema/`(OpenAPI), `/api/docs/`(Swagger UI)
 
-폴더 구조 예시는 프로젝트 상황에 맞게 조정하세요.
-
 ```
 .
 ├─ manage.py
@@ -45,8 +43,6 @@ Django 백엔드(+ Kotlin 프론트 분리 배포) 기반의 동아리 장부/�
   ALLOWED_HOSTS=*
   DJANGO_SETTINGS_MODULE=config.settings  # 프로젝트에 맞게 수정
   ```
-
-- (선택) OpenAPI/Swagger를 쓰는 경우 requirements에 `drf-spectacular`가 포함돼 있어야 합니다.
 
 ### 1-2. Docker 이미지 빌드 (docker build)
 PowerShell에서 프로젝트 루트로 이동 후:
