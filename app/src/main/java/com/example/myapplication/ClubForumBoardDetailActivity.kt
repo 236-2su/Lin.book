@@ -66,8 +66,8 @@ class ClubForumBoardDetailActivity : AppCompatActivity() {
         // 조회수 설정
         findViewById<TextView>(R.id.tv_views).text = "조회수 ${boardItem.views}"
         // 좋아요/댓글 수 (초기 표시)
-        findViewById<TextView>(R.id.tv_likes_count)?.text = (boardItem.likes ?: "0").toString()
-        findViewById<TextView>(R.id.tv_comments_count)?.text = (boardItem.comments ?: "0").toString()
+        findViewById<TextView>(R.id.tv_likes_count_button)?.text = (boardItem.likes ?: "0").toString()
+        findViewById<TextView>(R.id.tv_comments_count_button)?.text = (boardItem.comments ?: "0").toString()
         
         // 헤더 텍스트 설정: 상단 굵은 글씨 = 자유게시판, 아래 작은 회색 = 동아리명
         findViewById<TextView>(R.id.tv_board_type)?.text = "자유게시판"
@@ -114,8 +114,8 @@ class ClubForumBoardDetailActivity : AppCompatActivity() {
                     findViewById<TextView>(R.id.tv_title)?.text = latest.title
                     findViewById<TextView>(R.id.tv_content)?.text = latest.content
                     findViewById<TextView>(R.id.tv_views)?.text = "조회수 ${latest.views}"
-                    findViewById<TextView>(R.id.tv_likes_count)?.text = (latest.likes ?: "0").toString()
-                    findViewById<TextView>(R.id.tv_comments_count)?.text = (latest.comments ?: "0").toString()
+                    findViewById<TextView>(R.id.tv_likes_count_button)?.text = (latest.likes ?: "0").toString()
+                    findViewById<TextView>(R.id.tv_comments_count_button)?.text = (latest.comments ?: "0").toString()
                     // 로컬 상태도 최신으로 유지
                     boardItem = latest
                     // 작성자 표시(이름/학번/학과)
@@ -152,7 +152,7 @@ class ClubForumBoardDetailActivity : AppCompatActivity() {
                     response: retrofit2.Response<List<com.example.myapplication.CommentItem>>
                 ) {
                     val comments = response.body() ?: emptyList()
-                    findViewById<android.widget.TextView>(R.id.tv_comments_count)?.text = comments.size.toString()
+                    findViewById<android.widget.TextView>(R.id.tv_comments_count_button)?.text = comments.size.toString()
                     val container = findViewById<android.widget.LinearLayout>(R.id.comments_container)
                     container?.removeAllViews()
                     val emptyView = findViewById<android.widget.LinearLayout>(R.id.empty_comments_placeholder)
@@ -608,6 +608,13 @@ class ClubForumBoardDetailActivity : AppCompatActivity() {
                     isLiked = !isLiked
                     updateLikeUi()
                     setBoardLiked(boardId, isLiked)
+                    
+                    // 좋아요 수 즉시 업데이트 (화면에만 표시)
+                    val likesCountView = findViewById<TextView>(R.id.tv_likes_count_button)
+                    val currentLikes = (likesCountView?.text?.toString()?.toIntOrNull() ?: 0)
+                    val newLikes = if (isLiked) currentLikes + 1 else currentLikes - 1
+                    likesCountView?.text = newLikes.coerceAtLeast(0).toString()
+                    
                     // 재조회로 카운트 업데이트
                     refreshMeta()
                 } else {
